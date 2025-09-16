@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "proto-app",
-    "slug": "proto-app",
+    "name": "proyecto-des-app",
+    "slug": "proyecto-des-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
