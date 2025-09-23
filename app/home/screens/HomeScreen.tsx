@@ -20,6 +20,22 @@ export default function HomeScreen({ navigation }: Props) {
         title="Ir a Registro"
         onPress={() => navigation.navigate("Register")}
       />
+      <Button
+        title="Entrenar"
+        onPress={() => navigation.navigate("Entrenar")}
+      />
+      <Button
+        title="Chat"
+        onPress={() => navigation.navigate("Chat")}
+      />
+      <Button
+        title="Perfil Usuario"
+        onPress={() => navigation.navigate("PerfilUsuario")}
+      />
+      <Button
+        title="Busqueda Perfiles"
+        onPress={() => navigation.navigate("BusquedaPerfiles")}
+      />
     </View>
   );
 }

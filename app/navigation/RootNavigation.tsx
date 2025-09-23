@@ -6,11 +6,19 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "../home/screens/HomeScreen";
 import LoginScreen from "../auth/screens/LoginScreen";
 import RegisterScreen from "../auth/screens/RegisterScreen";
+import EntrenarScreen from "../entrenar/EntrenarScreen";
+import ChatScreen from "../chat/screens/ChatScreen";
+import PerfilUsuarioScreen from "../perfil-usuario/screens/perfilUsuarioScreen";
+import BusquedaPerfilesScreen from "../BusquedaPerfiles/screens/BusquedaPerfilesScreen";
 
 export type RootStackParamList = {
   Home: undefined;
   Login: undefined;
   Register: undefined;
+  Entrenar: undefined;
+  Chat: undefined;
+  PerfilUsuario: undefined;
+  BusquedaPerfiles: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -22,6 +30,10 @@ export default function RootNavigation() {
         <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Iniciar Sesión' }}  />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ title: 'Registro' }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Inicio' }} />
+        <Stack.Screen name="Entrenar" component={EntrenarScreen} options={{ title: 'Entrenar' }} />
+        <Stack.Screen name="Chat" component={ChatScreen} options={{ title: 'Chat' }} />
+        <Stack.Screen name="PerfilUsuario" component={PerfilUsuarioScreen} options={{ title: 'PerfilUsuario' }} />
+        <Stack.Screen name="BusquedaPerfiles" component={BusquedaPerfilesScreen} options={{ title: 'BusquedaPerfiles' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
