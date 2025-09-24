@@ -11,7 +11,7 @@ export default function BusquedaPerfilesScreen({ navigation }: Props) {
   
   return (
     <View style={styles.container}>
-      <Text style={globalStyles.title}>BUSQUEDA PERFILES</Text>
+      <Text style={globalStyles.title}>BUSQUEDA DE PERFILES</Text>
       <Text style={globalStyles.subtitle}>Pantalla de Busqueda de perfiles</Text>
       <FlatList
         data={ trainers }
@@ -26,11 +26,6 @@ export default function BusquedaPerfilesScreen({ navigation }: Props) {
           </View>
         )}
       />
-              
-      <Button
-        title="Buscar"
-        onPress={() => console.log( trainers )}
-      />
     </View>
   );
 }
@@ -39,7 +34,10 @@ const styles = StyleSheet.create({
   container: { 
     flex: 1, 
     backgroundColor: "#fff", 
-    padding: 20 
+    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 50
   },
   card: {
     backgroundColor: "#f2f2f2",
