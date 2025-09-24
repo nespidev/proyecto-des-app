@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/app/navigation/RootNavigation";
 import Button from "@/components/Button";
 import { globalStyles } from "@/utils/globalStyles";
+import { ScrollView } from "react-native-gesture-handler";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PerfilUsuario">;
 

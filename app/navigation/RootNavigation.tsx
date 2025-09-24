@@ -6,10 +6,10 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "../home/screens/HomeScreen";
 import LoginScreen from "../auth/screens/LoginScreen";
 import RegisterScreen from "../auth/screens/RegisterScreen";
-import EntrenarScreen from "../entrenar/EntrenarScreen";
+import EntrenarScreen from "../entrenar/screens/EntrenarScreen";
 import ChatScreen from "../chat/screens/ChatScreen";
 import PerfilUsuarioScreen from "../perfil-usuario/screens/perfilUsuarioScreen";
-import BusquedaPerfilesScreen from "../BusquedaPerfiles/screens/BusquedaPerfilesScreen";
+import BusquedaPerfilesScreen from "../busqueda-perfiles/screens/BusquedaPerfilesScreen";
 
 export type RootStackParamList = {
   Home: undefined;
