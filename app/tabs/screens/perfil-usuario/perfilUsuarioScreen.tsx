@@ -6,9 +6,8 @@ import Button from "@/components/Button";
 import { globalStyles } from "@/utils/globalStyles";
 import { ScrollView } from "react-native-gesture-handler";
 
-type Props = NativeStackScreenProps<RootStackParamList, "PerfilUsuario">;
 
-export default function ChatScreen({ navigation }: Props) {
+export default function PerfilUsuarioScreen() {
   return (
     <View style={styles.container}>
       <Text style={globalStyles.title}>Perfil</Text>
