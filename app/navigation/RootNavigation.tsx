@@ -3,13 +3,13 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import HomeScreen from "../home/screens/HomeScreen";
-import LoginScreen from "../auth/screens/LoginScreen";
-import RegisterScreen from "../auth/screens/RegisterScreen";
-import EntrenarScreen from "../entrenar/screens/EntrenarScreen";
-import ChatScreen from "../chat/screens/ChatScreen";
-import PerfilUsuarioScreen from "../perfil-usuario/screens/perfilUsuarioScreen";
-import BusquedaPerfilesScreen from "../busqueda-perfiles/screens/BusquedaPerfilesScreen";
+import HomeScreen from "@/app/tabs/screens/home/HomeScreen";
+import LoginScreen from "@/app/auth/screens/LoginScreen";
+import RegisterScreen from "@/app/auth/screens/RegisterScreen";
+import EntrenarScreen from "@/app/tabs/screens/entrenar/EntrenarScreen";
+import ChatScreen from "@/app/tabs/screens/chat/ChatScreen";
+import PerfilUsuarioScreen from "@/app/tabs/screens/perfil-usuario/perfilUsuarioScreen";
+import BusquedaPerfilesScreen from "@/app/tabs/screens/busqueda-perfiles/BusquedaPerfilesScreen";
 
 export type RootStackParamList = {
   Home: undefined;

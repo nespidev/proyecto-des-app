@@ -1,9 +1,9 @@
 import React from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigation";
-import Button from "../../../components/Button";
-import { globalStyles } from "../../../utils/globalStyles";
+import { RootStackParamList } from "@/app/navigation/RootNavigation";
+import Button from "@/components/Button";
+import { globalStyles } from "@/utils/globalStyles";
 import { ScrollView } from "react-native";
 import MockCard from "@/components/MockCard";
 
