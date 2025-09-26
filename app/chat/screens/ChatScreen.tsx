@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Keyboa
  } from "react-native";
 
 export default function ChatScreen() {
-  // mock de mensajes idénticos
   const mensajesMock = [
     { id: "1", text: "Mensaje de ejemplo", fromMe: false },
     { id: "2", text: "Mensaje de ejemplo", fromMe: true },
@@ -13,7 +12,7 @@ export default function ChatScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"} // iOS necesita "padding", Android "height"
+      behavior={Platform.OS === "ios" ? "padding" : "height"} 
       keyboardVerticalOffset={90}>
         <View style={styles.container}>
           <Text style={styles.header}>Chat</Text>

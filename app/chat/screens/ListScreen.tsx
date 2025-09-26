@@ -1,9 +1,7 @@
-// ChatListScreen.tsx
-// ChatListScreen.tsx
 import React from "react";
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/app/navigation/RootNavigation"; // ajustá la ruta si hace falta
+import { RootStackParamList } from "@/app/navigation/RootNavigation";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ChatList">;
 
@@ -24,7 +22,7 @@ export default function ChatListScreen({ navigation }: Props) {
   const renderItem = ({ item }: any) => (
     <TouchableOpacity
       style={styles.chatCard}
-      onPress={() => navigation.navigate("Chat")} // abre la pantalla de Chat general
+      onPress={() => navigation.navigate("Chat")} 
     >
       <Image source={item.avatar} style={styles.avatar} />
       <View style={styles.chatInfo}>
