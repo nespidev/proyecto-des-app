@@ -9,8 +9,10 @@ import RegisterScreen from "../auth/screens/RegisterScreen";
 import EntrenarScreen from "../entrenar/screens/EntrenarScreen";
 import ChatScreen from "../chat/screens/ChatScreen";
 import PerfilUsuarioScreen from "../perfil-usuario/screens/perfilUsuarioScreen";
+import PerfilEntrenadorScreen from "../perfil-usuario/screens/perfilEntrenador";
 import BusquedaPerfilesScreen from "../busqueda-perfiles/screens/BusquedaPerfilesScreen";
 import ChatListScreen from "../chat/screens/ListScreen";
+
 
 export type RootStackParamList = {
   Home: undefined;
@@ -19,6 +21,7 @@ export type RootStackParamList = {
   Entrenar: undefined;
   Chat: undefined;
   PerfilUsuario: undefined;
+  PerfilEntrenador: undefined;
   BusquedaPerfiles: undefined;
   ChatList: undefined;
 };
@@ -36,6 +39,7 @@ export default function RootNavigation() {
         <Stack.Screen name="ChatList" component={ChatListScreen} options={{ title: 'ChatList' }} />
         <Stack.Screen name="Chat" component={ChatScreen} options={{ title: 'Chat' }} />
         <Stack.Screen name="PerfilUsuario" component={PerfilUsuarioScreen} options={{ title: 'PerfilUsuario' }} />
+        <Stack.Screen name="PerfilEntrenador" component={PerfilEntrenadorScreen} options={{ title: 'PerfilEntrenador' }} />
         <Stack.Screen name="BusquedaPerfiles" component={BusquedaPerfilesScreen} options={{ title: 'BusquedaPerfiles' }} />
       </Stack.Navigator>
     </NavigationContainer>

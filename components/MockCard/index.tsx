@@ -5,11 +5,12 @@ import { materialColors } from "@/utils/colors";
 type MockCardProps = {
   titulo?: string;
   style?: ViewStyle;
+   children?: React.ReactNode;
 };
 
 const colors = materialColors.schemes.light;
 
-const MockCard = ({ titulo, style }: MockCardProps) => {
+const MockCard = ({ titulo, style, children }: MockCardProps) => {
   return (
     <View style={[styles.card, style]}>
       <View style={styles.imagePlaceholder} />

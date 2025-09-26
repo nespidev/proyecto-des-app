@@ -4,25 +4,25 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/app/navigation/RootNavigation";
 import { globalStyles } from "@/utils/globalStyles";
 
-type Props = NativeStackScreenProps<RootStackParamList, "PerfilUsuario">;
+type Props = NativeStackScreenProps<RootStackParamList, "PerfilEntrenador">;
 
-const usuarioPrueba = {
-  nombre: "Lucas Coquet",
-  edad: 21,
-  peso: "80kg",
-  objetivo: "Fuerza",
-  correo: "lucasscoquet@gmail.com",
-  tel: "123456789",
+const entrenadorPrueba = {
+  nombre: "Juan Pérez",
+  edad: 35,
+  especialidad: "Entrenador Personal",
+  correo: "juan.perez@gym.com",
+  tel: "987654321",
+  experiencia: "10 años",
 };
 
-export default function PerfilUsuarioScreen({ navigation }: Props) {
+export default function PerfilEntrenadorScreen({ navigation }: Props) {
   return (
     <ScrollView style={styles.container}>
       <Text style={[globalStyles.title, { textAlign: "center", marginVertical: 12 }]}>
-        Perfil Usuario
+        Perfil Entrenador
       </Text>
       <Text style={[globalStyles.subtitle, { textAlign: "center", marginBottom: 16 }]}>
-        Pantalla del Usuario
+        Pantalla del Entrenador
       </Text>
 
       <View style={styles.card}>
@@ -31,32 +31,32 @@ export default function PerfilUsuarioScreen({ navigation }: Props) {
             source={require("../../../assets/user-predetermiando.png")}
             style={styles.avatar}
           />
-          <Text style={styles.nombre}>{usuarioPrueba.nombre}</Text>
+          <Text style={styles.nombre}>{entrenadorPrueba.nombre}</Text>
         </View>
 
         <View style={styles.infoRow}>
           <Text style={styles.label}>Edad:</Text>
-          <Text style={styles.value}>{usuarioPrueba.edad}</Text>
+          <Text style={styles.value}>{entrenadorPrueba.edad}</Text>
         </View>
 
         <View style={styles.infoRow}>
           <Text style={styles.label}>Correo:</Text>
-          <Text style={styles.value}>{usuarioPrueba.correo}</Text>
+          <Text style={styles.value}>{entrenadorPrueba.correo}</Text>
         </View>
 
         <View style={styles.infoRow}>
           <Text style={styles.label}>Tel:</Text>
-          <Text style={styles.value}>{usuarioPrueba.tel}</Text>
+          <Text style={styles.value}>{entrenadorPrueba.tel}</Text>
         </View>
 
         <View style={styles.infoRow}>
-          <Text style={styles.label}>Peso:</Text>
-          <Text style={styles.value}>{usuarioPrueba.peso}</Text>
+          <Text style={styles.label}>Especialidad:</Text>
+          <Text style={styles.value}>{entrenadorPrueba.especialidad}</Text>
         </View>
 
         <View style={styles.infoRow}>
-          <Text style={styles.label}>Objetivo:</Text>
-          <Text style={styles.value}>{usuarioPrueba.objetivo}</Text>
+          <Text style={styles.label}>Experiencia:</Text>
+          <Text style={styles.value}>{entrenadorPrueba.experiencia}</Text>
         </View>
       </View>
     </ScrollView>

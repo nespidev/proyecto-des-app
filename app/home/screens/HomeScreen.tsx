@@ -56,6 +56,10 @@ export default function HomeScreen({ navigation }: Props) {
           onPress={() => navigation.navigate("PerfilUsuario")}
         />
         <Button
+          title="Perfil Entrenador"
+          onPress={() => navigation.navigate("PerfilEntrenador")}
+        />
+        <Button
           title="Busqueda Perfiles"
           onPress={() => navigation.navigate("BusquedaPerfiles")}
         />
