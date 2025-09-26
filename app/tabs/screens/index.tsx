@@ -1,7 +1,10 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-
+import { MaterialIcons } from "@expo/vector-icons";
+import { TouchableOpacity } from "react-native";
+import { materialColors } from "@/utils/colors";
+// import { handleLogout } from "@/utils/auth";
 import HomeScreen from "./home";
 import EntrenarScreen from "./entrenar";
 import ChatScreen from "./chat";
@@ -31,9 +34,26 @@ export default function TabsScreen() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: "tomato",
         tabBarInactiveTintColor: "gray",
-        headerShown: false,
+        headerTitleStyle: {
+          color: materialColors.schemes.light.onPrimaryContainer,
+        },
+        headerStyle: {
+          backgroundColor: materialColors.schemes.light.surfaceContainer,
+        },
+        tabBarStyle: {
+          backgroundColor: materialColors.schemes.light.surfaceContainer,
+        },
+        tabBarActiveTintColor: materialColors.schemes.light.onPrimaryContainer,
+        headerRight: () => (
+          <TouchableOpacity onPress={() => { /* handleLogout(); */ }}>
+            <MaterialIcons
+              name="logout"
+              size={24}
+              color={materialColors.schemes.light.onPrimaryContainer}
+            />
+          </TouchableOpacity>
+        ),
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ title: "Inicio" }} />
