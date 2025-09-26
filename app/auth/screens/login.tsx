@@ -1,4 +1,4 @@
-import React from "react";
+import { useContext } from "react";
 import { View, ScrollView, Text, TextInput, StyleSheet } from "react-native";
 import {useNavigation} from "@react-navigation/native";
 import * as Yup from 'yup';
@@ -8,6 +8,7 @@ import Link from "@/components/Link";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { globalStyles } from "../../../utils/globalStyles";
 import { AUTH_ROUTES } from "@/utils/constants";
+import { AUTH_ACTIONS, AuthContext } from "@/shared/context/auth-context";
 
 const ValidationSchema = Yup.object().shape({
   email: Yup.string().email("Email inválido").required("El email es obligatorio"),
@@ -19,6 +20,7 @@ const ValidationSchema = Yup.object().shape({
 
 export default function Login() {
   const navigation = useNavigation();
+  const {state, dispatch} = useContext<any>(AuthContext);
 
   const handleGoToRegister = () => {
     navigation.navigate(AUTH_ROUTES.REGISTER);
@@ -32,6 +34,18 @@ export default function Login() {
           initialValues={{ email: '', password: '', nombre: '', apellido: '' }}
           validationSchema={ValidationSchema}
           onSubmit={(values) => {
+              dispatch({
+                type: AUTH_ACTIONS.LOGIN, payload: {
+                  token: "TOKEN",
+                  refreshToken: "REFRESH_TOKEN",
+                  user: {
+                    id: "ID",
+                    nombre: "Nombree",
+                    apellido: "Apelidooo",
+                    email: values.email,
+                  }
+                }
+              });
             console.log("Datos enviados:", values);
           }}
         >

@@ -1,25 +1,40 @@
 
-import React from "react";
+import React, { use, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useState } from "react";
 import { ROOT_ROUTES, AUTH_ROUTES } from "@/utils/constants";
 
-import HomeScreen from "@/app/tabs/screens/home/home";
-import LoginScreen from "@/app/auth/screens/login";
-import RegisterScreen from "@/app/auth/screens/register";
-import EntrenarScreen from "@/app/tabs/screens/entrenar/entrenar";
-import ChatScreen from "@/app/tabs/screens/chat/chat";
-import PerfilUsuarioScreen from "@/app/tabs/screens/perfil-usuario/perfil-usuario";
-import BusquedaPerfilesScreen from "@/app/tabs/screens/busqueda-perfiles/busqueda-perfiles";
 import TabsScreen from "@/app/tabs/screens";
 import AuthStackScreen from "@/app/auth";
+import { useContext } from "react";
+import { AuthContext } from "@/shared/context/auth-context";
+import AUTH_ACTIONS from "@/shared/context/auth-context/enums";
+import { getUser } from "@/utils/secure-store";
 
 const Stack = createNativeStackNavigator();
 
 export default function RootNavigation() {
-
+  const {state, dispatch} = useContext(AuthContext)
   const [isSignedIn, setIsSignedIn] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (state?.user) {
+      setIsSignedIn(true)
+    } else {
+      setIsSignedIn(false)
+    }
+  }, [state]);
+
+  useEffect(() => {
+    getUser().then(user => {
+      if (user) {
+        dispatch({type: AUTH_ACTIONS.SET_USER, payload: {user}})
+        setIsSignedIn(true)
+      }
+      // SplashScreen.hideAsync();
+    })
+  }, []);
 
   return (
     <NavigationContainer>
