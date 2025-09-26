@@ -1,7 +1,7 @@
-import ChatScreen from "./ChatScreen"; 
+import Chat from "./chat"; 
 
-export default function chatScreen() {
+export default function ChatScreen() {
   return (
-      <ChatScreen />
+      <Chat />
   )
 }

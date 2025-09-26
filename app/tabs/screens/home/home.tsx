@@ -13,7 +13,7 @@ const dataMockUp = [
   { id: "3", titulo: "Mock 3" },
 ];
 
-export default function HomeScreen() {
+export default function Home() {
   return (
     <ScrollView>
       <View style={styles.container}>

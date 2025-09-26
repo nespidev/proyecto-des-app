@@ -1,7 +1,7 @@
-import EntrenarScreen from "./EntrenarScreen";
+import Entrenar from "./entrenar";
 
-export default function entrenarScreen() {
+export default function EntrenarScreen() {
   return (
-      <EntrenarScreen />
+      <Entrenar />
   )
 }

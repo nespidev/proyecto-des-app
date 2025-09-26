@@ -1,8 +1,8 @@
-import PerfilUsuarioScreen from "./perfilUsuarioScreen";
+import PerfilUsuario from "./perfil-usuario";
 
 
-export default function perfilUsuarioScreen() {
+export default function PerfilUsuarioScreen() {
   return (
-      <PerfilUsuarioScreen />
+      <PerfilUsuario />
   )
 }

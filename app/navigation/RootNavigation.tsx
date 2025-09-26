@@ -3,13 +3,13 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import HomeScreen from "@/app/tabs/screens/home/HomeScreen";
+import HomeScreen from "@/app/tabs/screens/home/home";
 import LoginScreen from "@/app/auth/screens/LoginScreen";
 import RegisterScreen from "@/app/auth/screens/RegisterScreen";
-import EntrenarScreen from "@/app/tabs/screens/entrenar/EntrenarScreen";
-import ChatScreen from "@/app/tabs/screens/chat/ChatScreen";
-import PerfilUsuarioScreen from "@/app/tabs/screens/perfil-usuario/perfilUsuarioScreen";
-import BusquedaPerfilesScreen from "@/app/tabs/screens/busqueda-perfiles/BusquedaPerfilesScreen";
+import EntrenarScreen from "@/app/tabs/screens/entrenar/entrenar";
+import ChatScreen from "@/app/tabs/screens/chat/chat";
+import PerfilUsuarioScreen from "@/app/tabs/screens/perfil-usuario/perfil-usuario";
+import BusquedaPerfilesScreen from "@/app/tabs/screens/busqueda-perfiles/busqueda-perfiles";
 
 import TabsScreen from "@/app/tabs/screens";
 

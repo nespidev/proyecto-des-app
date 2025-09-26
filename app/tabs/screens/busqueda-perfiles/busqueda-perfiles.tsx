@@ -6,7 +6,7 @@ import Button from "@/components/Button";
 import { globalStyles } from "@/utils/globalStyles";
 import trainers from "./trainersDePrueba";
 
-export default function BusquedaPerfilesScreen() {
+export default function BusquedaPerfiles() {
   return (
     <View style={styles.container}>
       <Text style={globalStyles.title}>BUSQUEDA DE PERFILES</Text>

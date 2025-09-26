@@ -5,7 +5,7 @@ import { RootStackParamList } from "@/app/navigation/RootNavigation";
 import Button from "@/components/Button";
 import { globalStyles } from "@/utils/globalStyles";
 
-export default function EntrenarScreen() {
+export default function Entrenar() {
   return (
     <View style={styles.container}>
       <Text style={globalStyles.title}>ENTRENAR</Text>

@@ -1,7 +1,7 @@
-import BusquedaPerfilesScreen from "./BusquedaPerfilesScreen";
+import BusquedaPerfiles from "./busqueda-perfiles";
 
 export default function busquedaPerfilesScreen() {
   return (
-      <BusquedaPerfilesScreen />
+      <BusquedaPerfiles />
   )
 }

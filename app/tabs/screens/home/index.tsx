@@ -1,7 +1,7 @@
-import HomeScreen from "./HomeScreen";
+import Home from "./home";
 
 export default function homeScreen() {
   return (
-      <HomeScreen />
+      <Home />
   )
 }

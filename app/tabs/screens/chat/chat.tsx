@@ -5,9 +5,7 @@ import { RootStackParamList } from "@/app/navigation/RootNavigation";
 import Button from "@/components/Button";
 import { globalStyles } from "@/utils/globalStyles";
 
-type Props = NativeStackScreenProps<RootStackParamList, "Chat">;
-
-export default function ChatScreen({ navigation }: Props) {
+export default function Chat() {
   return (
     <View style={styles.container}>
       <Text style={globalStyles.title}>CHAT</Text>

@@ -7,7 +7,7 @@ import { globalStyles } from "@/utils/globalStyles";
 import { ScrollView } from "react-native-gesture-handler";
 
 
-export default function PerfilUsuarioScreen() {
+export default function PerfilUsuario() {
   return (
     <View style={styles.container}>
       <Text style={globalStyles.title}>Perfil</Text>
