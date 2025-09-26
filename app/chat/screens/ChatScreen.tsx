@@ -39,7 +39,7 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", paddingBottom:2},
+  container: { flex: 1, backgroundColor: "#fff", marginBottom:10},
   header: { fontSize: 20, fontWeight: "bold", textAlign: "center", padding: 12, borderBottomWidth: 1, borderBottomColor: "#ddd" },
   chatContainer: { padding: 16 },
   mensaje: { padding: 10, borderRadius: 8, marginBottom: 10, maxWidth: "70%" },
