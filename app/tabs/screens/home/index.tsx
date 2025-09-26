@@ -1,6 +1,6 @@
 import Home from "./home";
 
-export default function homeScreen() {
+export default function HomeScreen() {
   return (
       <Home />
   )

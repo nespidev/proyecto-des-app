@@ -1,6 +1,6 @@
 import BusquedaPerfiles from "./busqueda-perfiles";
 
-export default function busquedaPerfilesScreen() {
+export default function BusquedaPerfilesScreen() {
   return (
       <BusquedaPerfiles />
   )

@@ -1,10 +1,9 @@
 import React from "react";
 import { View, Text, StyleSheet, FlatList, } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/app/navigation/RootNavigation";
 import Button from "@/components/Button";
 import { globalStyles } from "@/utils/globalStyles";
-import trainers from "./trainersDePrueba";
+import trainers from "./trainers-de-prueba";
 
 export default function BusquedaPerfiles() {
   return (

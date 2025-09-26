@@ -2,41 +2,34 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useState } from "react";
+import { ROOT_ROUTES, AUTH_ROUTES } from "@/utils/constants";
 
 import HomeScreen from "@/app/tabs/screens/home/home";
-import LoginScreen from "@/app/auth/screens/LoginScreen";
-import RegisterScreen from "@/app/auth/screens/RegisterScreen";
+import LoginScreen from "@/app/auth/screens/login";
+import RegisterScreen from "@/app/auth/screens/register";
 import EntrenarScreen from "@/app/tabs/screens/entrenar/entrenar";
 import ChatScreen from "@/app/tabs/screens/chat/chat";
 import PerfilUsuarioScreen from "@/app/tabs/screens/perfil-usuario/perfil-usuario";
 import BusquedaPerfilesScreen from "@/app/tabs/screens/busqueda-perfiles/busqueda-perfiles";
-
 import TabsScreen from "@/app/tabs/screens";
+import AuthStackScreen from "@/app/auth";
 
-export type RootStackParamList = {
-  Home: undefined;
-  Login: undefined;
-  Register: undefined;
-  Entrenar: undefined;
-  Chat: undefined;
-  PerfilUsuario: undefined;
-  BusquedaPerfiles: undefined;
-};
-
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const Stack = createNativeStackNavigator();
 
 export default function RootNavigation() {
+
+  const [isSignedIn, setIsSignedIn] = useState<boolean>(true);
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        {/* <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Iniciar Sesión' }}  />
-        <Stack.Screen name="Register" component={RegisterScreen} options={{ title: 'Registro' }} />
-        <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Inicio' }} />
-        <Stack.Screen name="Entrenar" component={EntrenarScreen} options={{ title: 'Entrenar' }} />
-        <Stack.Screen name="Chat" component={ChatScreen} options={{ title: 'Chat' }} />
-        <Stack.Screen name="PerfilUsuario" component={PerfilUsuarioScreen} options={{ title: 'PerfilUsuario' }} />
-        <Stack.Screen name="BusquedaPerfiles" component={BusquedaPerfilesScreen} options={{ title: 'BusquedaPerfiles' }} /> */}
-        <Stack.Screen name="Home" component={TabsScreen} options={{ title: 'Inicio' }} />
+      <Stack.Navigator initialRouteName={isSignedIn ? ROOT_ROUTES.TABS : ROOT_ROUTES.AUTH} screenOptions={{headerShown: false}}>
+        {
+          isSignedIn ?
+            <Stack.Screen name={ROOT_ROUTES.TABS} component={TabsScreen} options={{headerShown: false}}/>
+            :
+            <Stack.Screen name={ROOT_ROUTES.AUTH} component={AuthStackScreen}/>
+        }
       </Stack.Navigator>
     </NavigationContainer>
   );

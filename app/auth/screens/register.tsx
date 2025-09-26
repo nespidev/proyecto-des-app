@@ -1,16 +1,17 @@
 import React from "react";
 import { View, ScrollView, Text, TextInput, StyleSheet } from "react-native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigation";
 import * as Yup from 'yup';
 import { Formik } from "formik";
 import Button from "../../../components/Button";
+import Link from "@/components/Link";
+import {useNavigation} from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { globalStyles } from "../../../utils/globalStyles";
 
-type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 const ValidationSchema = Yup.object().shape({
+  nombre: Yup.string().required("El nombre es obligatorio"),
+  apellido: Yup.string().required("El apellido es obligatorio"),
   email: Yup.string().email("Email inválido").required("El email es obligatorio"),
   password: Yup.string()
     .min(8, "La contraseña debe tener al menos 8 caracteres")
@@ -18,12 +19,13 @@ const ValidationSchema = Yup.object().shape({
     .required("La contraseña es obligatoria"),
 });
 
-export default function LoginScreen({ navigation }: Props) {
+export default function Register() {
+  const navigation = useNavigation();
   return (
 
     <ScrollView keyboardShouldPersistTaps="handled">
       <SafeAreaView style={styles.container}>
-        <Text style={globalStyles.title}>Ingreso de Usuario</Text>
+        <Text style={styles.title}>Registro de Usuario</Text>
         <Formik
           initialValues={{ email: '', password: '', nombre: '', apellido: '' }}
           validationSchema={ValidationSchema}
@@ -33,6 +35,25 @@ export default function LoginScreen({ navigation }: Props) {
         >
           {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
             <View style={styles.formContainer}>
+              <Text style={styles.label}>Nombre</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={handleChange('nombre')}
+                onBlur={handleBlur('nombre')}
+                value={values.nombre}
+                placeholder="Nombre"
+              />
+              {errors.nombre && touched.nombre && <Text style={styles.error}>{errors.nombre}</Text>}
+
+              <Text style={styles.label}>Apellido</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={handleChange('apellido')}
+                onBlur={handleBlur('apellido')}
+                value={values.apellido}
+                placeholder="Apellido"
+              />
+              {errors.apellido && touched.apellido && <Text style={styles.error}>{errors.apellido}</Text>}
 
               <Text style={styles.label}>Email</Text>
               <TextInput
@@ -44,7 +65,7 @@ export default function LoginScreen({ navigation }: Props) {
                 keyboardType="email-address"
               />
               {errors.email && touched.email && <Text style={styles.error}>{errors.email}</Text>}
-
+              
               <Text style={styles.label}>Password</Text>
               <TextInput
                 style={styles.input}
@@ -56,10 +77,12 @@ export default function LoginScreen({ navigation }: Props) {
               />
               {errors.password && touched.password && <Text style={styles.error}>{errors.password}</Text>}
 
-              <Button title="Ingresar" onPress={handleSubmit as any} disabled={isSubmitting} />
+              <Button title="Registrar" onPress={handleSubmit as any} disabled={isSubmitting} />
             </View>
           )}
         </Formik>
+        <Link link="Volver al Ingreso" onPress={() => navigation.goBack()}/>
+
       </SafeAreaView>
     </ScrollView>
   );
@@ -85,6 +108,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: "100%"
   },
+  title: {
+    fontSize: 24,
+    marginBottom: 16,
+    fontWeight: "bold",
+  },
   error: {
     color: "red",
     marginBottom: 8,
@@ -95,6 +123,4 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     marginLeft: 4,
   },
-
-
 });
