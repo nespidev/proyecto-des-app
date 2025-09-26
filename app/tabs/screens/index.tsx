@@ -1,34 +1,34 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { MaterialIcons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native";
 import { materialColors } from "@/utils/colors";
-// import { handleLogout } from "@/utils/auth";
+import { useNavigation } from "@react-navigation/native";
+import { ROOT_ROUTES, TAB_ROUTES } from "@/utils/constants";
+
 import HomeScreen from "./home";
 import EntrenarScreen from "./entrenar";
 import ChatScreen from "./chat";
-import PerfilUsuarioScreen from "./perfil-usuario";
 import BusquedaPerfilesScreen from "./busqueda-perfiles";
 
 const Tab = createBottomTabNavigator();
 
 export default function TabsScreen() {
+  const navigation = useNavigation();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap = "home";
 
-          if (route.name === "Home") {
+          if (route.name === TAB_ROUTES.HOME) {
             iconName = "home";
-          } else if (route.name === "Entrenar") {
+          } else if (route.name === TAB_ROUTES.ENTRENAR) {
             iconName = "barbell";
-          } else if (route.name === "Chat") {
+          } else if (route.name === TAB_ROUTES.CHAT) {
             iconName = "chatbubbles";
-          } else if (route.name === "PerfilUsuario") {
-            iconName = "person-circle";
-          } else if (route.name === "BusquedaPerfiles") {
+          } else if (route.name === TAB_ROUTES.BUSQUEDA_PERFILES) {
             iconName = "search";
           }
 
@@ -46,26 +46,37 @@ export default function TabsScreen() {
         },
         tabBarActiveTintColor: materialColors.schemes.light.onPrimaryContainer,
         headerRight: () => (
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity onPress={() => navigation.navigate(ROOT_ROUTES.PERFIL as never)}>
             <Ionicons
               name="person-circle"
               size={38}
               color={materialColors.schemes.light.onPrimaryContainer}
-              style={{
-                marginRight: 10,
-                borderColor: materialColors.schemes.light.onPrimaryContainer,
-                padding: 1,
-              }}
+              style={{ marginRight: 10 }}
             />
           </TouchableOpacity>
         ),
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ title: "Inicio" }} />
-      <Tab.Screen name="Entrenar" component={EntrenarScreen} options={{ title: "Entrenar" }} />
-      <Tab.Screen name="Chat" component={ChatScreen} options={{ title: "Chat" }} />
-      <Tab.Screen name="PerfilUsuario" component={PerfilUsuarioScreen} options={{ title: "Perfil" }} />
-      <Tab.Screen name="BusquedaPerfiles" component={BusquedaPerfilesScreen} options={{ title: "Buscar" }} />
+      <Tab.Screen
+        name={TAB_ROUTES.HOME}
+        component={HomeScreen}
+        options={{ title: "Inicio" }}
+      />
+      <Tab.Screen
+        name={TAB_ROUTES.ENTRENAR}
+        component={EntrenarScreen}
+        options={{ title: "Entrenar" }}
+      />
+      <Tab.Screen
+        name={TAB_ROUTES.CHAT}
+        component={ChatScreen}
+        options={{ title: "Chat" }}
+      />
+      <Tab.Screen
+        name={TAB_ROUTES.BUSQUEDA_PERFILES}
+        component={BusquedaPerfilesScreen}
+        options={{ title: "Buscar" }}
+      />
     </Tab.Navigator>
   );
 }

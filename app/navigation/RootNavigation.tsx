@@ -11,6 +11,7 @@ import { useContext } from "react";
 import { AuthContext } from "@/shared/context/auth-context";
 import AUTH_ACTIONS from "@/shared/context/auth-context/enums";
 import { getUser } from "@/utils/secure-store";
+import PerfilUsuario from "../tabs/screens/perfil-usuario/perfil-usuario";
 
 const Stack = createNativeStackNavigator();
 
@@ -37,15 +38,27 @@ export default function RootNavigation() {
   }, []);
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName={isSignedIn ? ROOT_ROUTES.TABS : ROOT_ROUTES.AUTH} screenOptions={{headerShown: false}}>
-        {
-          isSignedIn ?
-            <Stack.Screen name={ROOT_ROUTES.TABS} component={TabsScreen} options={{headerShown: false}}/>
-            :
-            <Stack.Screen name={ROOT_ROUTES.AUTH} component={AuthStackScreen}/>
-        }
-      </Stack.Navigator>
-    </NavigationContainer>
+<NavigationContainer>
+  <Stack.Navigator
+    initialRouteName={isSignedIn ? ROOT_ROUTES.TABS : ROOT_ROUTES.AUTH}
+    screenOptions={{ headerShown: false }}
+  >
+    {isSignedIn ? (
+      <Stack.Screen
+        name={ROOT_ROUTES.TABS}
+        component={TabsScreen}
+        options={{ headerShown: false }}
+      />
+    ) : (
+      <Stack.Screen name={ROOT_ROUTES.AUTH} component={AuthStackScreen} />
+    )}
+    <Stack.Screen 
+      name={ROOT_ROUTES.PERFIL} 
+      component={PerfilUsuario} 
+      options={{ headerShown: true, title: "Perfil" }} 
+    />
+  </Stack.Navigator>
+</NavigationContainer>
+
   );
 }

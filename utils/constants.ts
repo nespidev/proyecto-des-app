@@ -1,6 +1,7 @@
 export const ROOT_ROUTES = {
   AUTH: 'auth',
-  TABS: 'tabs'
+  TABS: 'tabs',
+  PERFIL : 'perfil_usuario',
 }
 
 
@@ -11,5 +12,8 @@ export const AUTH_ROUTES = {
 
 export const TAB_ROUTES = {
   HOME: 'home',
-  MY_NETWORK: 'my_network',
+  PERFIL: 'perfil_usuario',
+  ENTRENAR: 'entrenar',
+  CHAT: 'chat',
+  BUSQUEDA_PERFILES: 'busqueda_perfiles',
 }
