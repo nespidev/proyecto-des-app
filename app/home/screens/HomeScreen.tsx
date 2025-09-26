@@ -49,7 +49,7 @@ export default function HomeScreen({ navigation }: Props) {
         />
         <Button
           title="Chat"
-          onPress={() => navigation.navigate("Chat")}
+          onPress={() => navigation.navigate("ChatList")}
         />
         <Button
           title="Perfil Usuario"
