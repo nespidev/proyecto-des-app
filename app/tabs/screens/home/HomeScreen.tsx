@@ -7,15 +7,13 @@ import { globalStyles } from "@/utils/globalStyles";
 import { ScrollView } from "react-native";
 import MockCard from "@/components/MockCard";
 
-type Props = NativeStackScreenProps<RootStackParamList, "Home">;
-
 const dataMockUp = [
   { id: "1", titulo: "Mock 1" },
   { id: "2", titulo: "Mock 2" },
   { id: "3", titulo: "Mock 3" },
 ];
 
-export default function HomeScreen({ navigation }: Props) {
+export default function HomeScreen() {
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -34,7 +32,7 @@ export default function HomeScreen({ navigation }: Props) {
             nestedScrollEnabled
           />
       </View>
-      <View style={styles.containerButtons}>
+      {/* <View style={styles.containerButtons}>
         <Button
           title="Ir a Login"
           onPress={() => navigation.navigate("Login")}
@@ -59,7 +57,7 @@ export default function HomeScreen({ navigation }: Props) {
           title="Busqueda Perfiles"
           onPress={() => navigation.navigate("BusquedaPerfiles")}
         />
-      </View>
+      </View> */}
     </ScrollView>
   );
 }

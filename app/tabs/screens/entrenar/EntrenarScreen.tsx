@@ -5,9 +5,7 @@ import { RootStackParamList } from "@/app/navigation/RootNavigation";
 import Button from "@/components/Button";
 import { globalStyles } from "@/utils/globalStyles";
 
-type Props = NativeStackScreenProps<RootStackParamList, "Entrenar">;
-
-export default function EntrenarScreen({ navigation }: Props) {
+export default function EntrenarScreen() {
   return (
     <View style={styles.container}>
       <Text style={globalStyles.title}>ENTRENAR</Text>

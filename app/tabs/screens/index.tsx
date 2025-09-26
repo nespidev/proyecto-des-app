@@ -2,11 +2,11 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 
-// import HomeScreen from "./home";
-// import EntrenarScreen from "./entrenar";
-// import ChatScreen from "./chat";
+import HomeScreen from "./home";
+import EntrenarScreen from "./entrenar";
+import ChatScreen from "./chat";
 import PerfilUsuarioScreen from "./perfil-usuario";
-// import BusquedaPerfilesScreen from "./busqueda-perfiles";
+import BusquedaPerfilesScreen from "./busqueda-perfiles";
 
 const Tab = createBottomTabNavigator();
 
@@ -36,11 +36,11 @@ export default function TabsScreen() {
         headerShown: false,
       })}
     >
-      {/* <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Inicio' }} />
-      <Tab.Screen name="Entrenar" component={EntrenarScreen} options={{ title: 'Entrenar' }} />
-      <Tab.Screen name="Chat" component={ChatScreen} options={{ title: 'Chat' }} /> */}
-      <Tab.Screen name="Home" component={PerfilUsuarioScreen} options={{ title: 'Perfil' }} />
-      {/* <Tab.Screen name="BusquedaPerfiles" component={BusquedaPerfilesScreen} options={{ title: 'Buscar' }} /> */}
+      <Tab.Screen name="Home" component={HomeScreen} options={{ title: "Inicio" }} />
+      <Tab.Screen name="Entrenar" component={EntrenarScreen} options={{ title: "Entrenar" }} />
+      <Tab.Screen name="Chat" component={ChatScreen} options={{ title: "Chat" }} />
+      <Tab.Screen name="PerfilUsuario" component={PerfilUsuarioScreen} options={{ title: "Perfil" }} />
+      <Tab.Screen name="BusquedaPerfiles" component={BusquedaPerfilesScreen} options={{ title: "Buscar" }} />
     </Tab.Navigator>
   );
 }

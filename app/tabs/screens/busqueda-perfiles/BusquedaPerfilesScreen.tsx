@@ -5,10 +5,8 @@ import { RootStackParamList } from "@/app/navigation/RootNavigation";
 import Button from "@/components/Button";
 import { globalStyles } from "@/utils/globalStyles";
 import trainers from "./trainersDePrueba";
-type Props = NativeStackScreenProps<RootStackParamList, "BusquedaPerfiles">;
 
-export default function BusquedaPerfilesScreen({ navigation }: Props) {
-  
+export default function BusquedaPerfilesScreen() {
   return (
     <View style={styles.container}>
       <Text style={globalStyles.title}>BUSQUEDA DE PERFILES</Text>
