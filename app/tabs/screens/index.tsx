@@ -46,11 +46,16 @@ export default function TabsScreen() {
         },
         tabBarActiveTintColor: materialColors.schemes.light.onPrimaryContainer,
         headerRight: () => (
-          <TouchableOpacity onPress={() => { /* handleLogout(); */ }}>
-            <MaterialIcons
-              name="logout"
-              size={24}
+          <TouchableOpacity onPress={() => {}}>
+            <Ionicons
+              name="person-circle"
+              size={38}
               color={materialColors.schemes.light.onPrimaryContainer}
+              style={{
+                marginRight: 10,
+                borderColor: materialColors.schemes.light.onPrimaryContainer,
+                padding: 1,
+              }}
             />
           </TouchableOpacity>
         ),
