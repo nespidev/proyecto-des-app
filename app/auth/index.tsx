@@ -10,11 +10,9 @@ const Stack = createNativeStackNavigator()
 
 export default function AuthStackScreen() {
   return (
-    <SafeAreaView style={{flex: 1}}>
-        <Stack.Navigator initialRouteName={AUTH_ROUTES.LOGIN} screenOptions={{headerShown: false}}>
+    <Stack.Navigator initialRouteName={AUTH_ROUTES.LOGIN} screenOptions={{headerShown: false}}>
         <Stack.Screen name={AUTH_ROUTES.LOGIN} component={Login} options={{ title: 'Iniciar Sesión' }}  />
         <Stack.Screen name={AUTH_ROUTES.REGISTER} component={Register}/>
-        </Stack.Navigator>
-    </SafeAreaView>
+    </Stack.Navigator>
   )
 }

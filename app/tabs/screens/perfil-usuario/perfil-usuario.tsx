@@ -1,21 +1,20 @@
 import React from "react";
 import { View, Text, StyleSheet} from "react-native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Button from "@/components/Button";
 import { globalStyles } from "@/utils/globalStyles";
-import { ScrollView } from "react-native-gesture-handler";
 
 
 export default function PerfilUsuario() {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={globalStyles.title}>Perfil</Text>
       <Text style={globalStyles.subtitle}>Pantalla de Perfil</Text>
       <Button
         title="Detalles Perfil"
         onPress={() => console.log("Detalles Perfil presionado")}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

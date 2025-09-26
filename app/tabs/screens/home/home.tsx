@@ -1,11 +1,11 @@
 import React from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/app/navigation/RootNavigation";
 import Button from "@/components/Button";
 import { globalStyles } from "@/utils/globalStyles";
 import { ScrollView } from "react-native";
 import MockCard from "@/components/MockCard";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const dataMockUp = [
   { id: "1", titulo: "Mock 1" },
@@ -15,50 +15,26 @@ const dataMockUp = [
 
 export default function Home() {
   return (
-    <ScrollView>
-      <View style={styles.container}>
-        <Text style={[globalStyles.title, {textAlign: "center"}]}>Bienvenidos a la App</Text>
-        <Text style={[globalStyles.subtitle, {textAlign: "center"}]}>Pantalla de Inicio</Text>
+    <SafeAreaView>
+      <ScrollView>
+        <View style={styles.container}>
+          <Text style={[globalStyles.title, {textAlign: "center"}]}>Bienvenidos a la App</Text>
+          <Text style={[globalStyles.subtitle, {textAlign: "center"}]}>Pantalla de Inicio</Text>
 
-        <MockCard titulo="Card de Ejemplo" />
-          <Text style={styles.sectionTitle}>Novedades</Text>
-          <FlatList
-            data={dataMockUp}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <MockCard style={styles.horizontalCard} titulo={item.titulo} />}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalList}
-            nestedScrollEnabled
-          />
-      </View>
-      {/* <View style={styles.containerButtons}>
-        <Button
-          title="Ir a Login"
-          onPress={() => navigation.navigate("Login")}
-        />
-        <Button
-          title="Ir a Registro"
-          onPress={() => navigation.navigate("Register")}
-        />
-        <Button
-          title="Entrenar"
-          onPress={() => navigation.navigate("Entrenar")}
-        />
-        <Button
-          title="Chat"
-          onPress={() => navigation.navigate("Chat")}
-        />
-        <Button
-          title="Perfil Usuario"
-          onPress={() => navigation.navigate("PerfilUsuario")}
-        />
-        <Button
-          title="Busqueda Perfiles"
-          onPress={() => navigation.navigate("BusquedaPerfiles")}
-        />
-      </View> */}
-    </ScrollView>
+          <MockCard titulo="Card de Ejemplo" />
+            <Text style={styles.sectionTitle}>Novedades</Text>
+            <FlatList
+              data={dataMockUp}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => <MockCard style={styles.horizontalCard} titulo={item.titulo} />}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalList}
+              nestedScrollEnabled
+            />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

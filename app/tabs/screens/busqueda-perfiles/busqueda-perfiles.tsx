@@ -4,26 +4,29 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Button from "@/components/Button";
 import { globalStyles } from "@/utils/globalStyles";
 import trainers from "./trainers-de-prueba";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BusquedaPerfiles() {
   return (
-    <View style={styles.container}>
-      <Text style={globalStyles.title}>BUSQUEDA DE PERFILES</Text>
-      <Text style={globalStyles.subtitle}>Pantalla de Busqueda de perfiles</Text>
-      <FlatList
-        data={ trainers }
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.nombre}>{item.nombre}</Text>
-            <Text style={styles.especialidad}>{item.especialidad}</Text>
-            <Text>{item.descripcion}</Text>
-            <Text>📧 {item.correo}</Text>
-            <Text>📞 {item.telefono}</Text>
-          </View>
-        )}
-      />
-    </View>
+    <SafeAreaView style={{flex: 1}}>
+      <View style={styles.container}>
+        <Text style={globalStyles.title}>BUSQUEDA DE PERFILES</Text>
+        <Text style={globalStyles.subtitle}>Pantalla de Busqueda de perfiles</Text>
+        <FlatList
+          data={ trainers }
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <Text style={styles.nombre}>{item.nombre}</Text>
+              <Text style={styles.especialidad}>{item.especialidad}</Text>
+              <Text>{item.descripcion}</Text>
+              <Text>📧 {item.correo}</Text>
+              <Text>📞 {item.telefono}</Text>
+            </View>
+          )}
+        />
+      </View>
+    </SafeAreaView>
   );
 }
 
