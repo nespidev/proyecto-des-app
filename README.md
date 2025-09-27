@@ -10,8 +10,8 @@
 
 ## Capturas de pantalla
 
-![Inicio](./assets/screenshots/home.png)  
-![Entrenar](./assets/screenshots/entrenar.png)  
-![Chats](./assets/screenshots/chat.png)  
-![Buscar Perfiles](./assets/screenshots/busqueda.png)  
-![Perfil Usuario](./assets/screenshots/perfil_usuario.png) 
+![Inicio](./assets/screenshots/home.jpeg)  
+![Chats](./assets/screenshots/chat.jpeg)
+![ChatList](./assets/screenshots/chatlist.jpeg)  
+![Buscar Perfiles](./assets/screenshots/busqueda.jpeg)  
+![Perfil Usuario](./assets/screenshots/perfil.jpeg) 
