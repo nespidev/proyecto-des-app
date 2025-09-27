@@ -20,58 +20,56 @@ const entrenadorPrueba = {
 export default function PerfilEntrenador() {
 
   return (
-    <SafeAreaView style={{flex: 1}}>
-        <ScrollView style={styles.container}>
-            <Text style={[globalStyles.title, { textAlign: "center", marginVertical: 12 }]}>
-            Perfil Entrenador
-            </Text>
-            <Text style={[globalStyles.subtitle, { textAlign: "center", marginBottom: 16 }]}>
-            Pantalla del Entrenador
-            </Text>
+    <ScrollView style={styles.container}>
+        <Text style={[globalStyles.title, { textAlign: "center", marginVertical: 12 }]}>
+        Perfil Entrenador
+        </Text>
+        <Text style={[globalStyles.subtitle, { textAlign: "center", marginBottom: 16 }]}>
+        Pantalla del Entrenador
+        </Text>
 
-            <View style={styles.card}>
-            <View style={styles.header}>
-                <Image
-                source={require("@/assets/user-predetermiando.png")}
-                style={styles.avatar}
-                />
-                <Text style={styles.nombre}>{entrenadorPrueba.nombre}</Text>
-            </View>
+        <View style={styles.card}>
+        <View style={styles.header}>
+            <Image
+            source={require("@/assets/user-predetermiando.png")}
+            style={styles.avatar}
+            />
+            <Text style={styles.nombre}>{entrenadorPrueba.nombre}</Text>
+        </View>
 
-            <View style={styles.infoRow}>
-                <Text style={styles.label}>Edad:</Text>
-                <Text style={styles.value}>{entrenadorPrueba.edad}</Text>
-            </View>
+        <View style={styles.infoRow}>
+            <Text style={styles.label}>Edad:</Text>
+            <Text style={styles.value}>{entrenadorPrueba.edad}</Text>
+        </View>
 
-            <View style={styles.infoRow}>
-                <Text style={styles.label}>Correo:</Text>
-                <Text style={styles.value}>{entrenadorPrueba.correo}</Text>
-            </View>
+        <View style={styles.infoRow}>
+            <Text style={styles.label}>Correo:</Text>
+            <Text style={styles.value}>{entrenadorPrueba.correo}</Text>
+        </View>
 
-            <View style={styles.infoRow}>
-                <Text style={styles.label}>Tel:</Text>
-                <Text style={styles.value}>{entrenadorPrueba.tel}</Text>
-            </View>
+        <View style={styles.infoRow}>
+            <Text style={styles.label}>Tel:</Text>
+            <Text style={styles.value}>{entrenadorPrueba.tel}</Text>
+        </View>
 
-            <View style={styles.infoRow}>
-                <Text style={styles.label}>Especialidad:</Text>
-                <Text style={styles.value}>{entrenadorPrueba.especialidad}</Text>
-            </View>
+        <View style={styles.infoRow}>
+            <Text style={styles.label}>Especialidad:</Text>
+            <Text style={styles.value}>{entrenadorPrueba.especialidad}</Text>
+        </View>
 
-            <View style={styles.infoRow}>
-                <Text style={styles.label}>Experiencia:</Text>
-                <Text style={styles.value}>{entrenadorPrueba.experiencia}</Text>
-            </View>
-            </View>
-        </ScrollView>
-    </SafeAreaView>
+        <View style={styles.infoRow}>
+            <Text style={styles.label}>Experiencia:</Text>
+            <Text style={styles.value}>{entrenadorPrueba.experiencia}</Text>
+        </View>
+        </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: materialColors.schemes.light.surface,
     padding: 16,
   },
   card: {

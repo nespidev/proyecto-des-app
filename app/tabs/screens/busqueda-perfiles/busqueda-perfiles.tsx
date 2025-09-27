@@ -5,35 +5,34 @@ import Button from "@/components/Button";
 import { globalStyles } from "@/utils/globalStyles";
 import trainers from "./trainers-de-prueba";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { materialColors } from "@/utils/colors";
 
 export default function BusquedaPerfiles() {
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <View style={styles.container}>
-        <Text style={globalStyles.title}>BUSQUEDA DE PERFILES</Text>
-        <Text style={globalStyles.subtitle}>  Esta pantalla estará disponible en la pantalla de chats si un usuario no cuenta con entrenador, mockup en proceso</Text>
-        <FlatList
-          data={ trainers }
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Text style={styles.nombre}>{item.nombre}</Text>
-              <Text style={styles.especialidad}>{item.especialidad}</Text>
-              <Text>{item.descripcion}</Text>
-              <Text>📧 {item.correo}</Text>
-              <Text>📞 {item.telefono}</Text>
-            </View>
-          )}
-        />
-      </View>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Text style={globalStyles.title}>BUSQUEDA DE PERFILES</Text>
+      <Text style={globalStyles.subtitle}>  Esta pantalla estará disponible en la pantalla de chats si un usuario no cuenta con entrenador, mockup en proceso</Text>
+      <FlatList
+        data={ trainers }
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.card}>
+            <Text style={styles.nombre}>{item.nombre}</Text>
+            <Text style={styles.especialidad}>{item.especialidad}</Text>
+            <Text>{item.descripcion}</Text>
+            <Text>📧 {item.correo}</Text>
+            <Text>📞 {item.telefono}</Text>
+          </View>
+        )}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    backgroundColor: "#fff", 
+    backgroundColor: materialColors.schemes.light.surface, 
     padding: 20,
     justifyContent: 'center',
     alignItems: 'center',

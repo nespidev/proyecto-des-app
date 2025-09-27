@@ -23,63 +23,61 @@ export default function PerfilUsuario() {
     dispatch({type: AUTH_ACTIONS.LOGOUT})
   }
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <ScrollView style={styles.container}>
-        <Text style={[globalStyles.title, { textAlign: "center", marginVertical: 12 }]}>
-          Perfil Usuario
-        </Text>
-        <Text style={[globalStyles.subtitle, { textAlign: "center", marginBottom: 16 }]}>
-          Pantalla del Usuario
-        </Text>
+    <ScrollView style={styles.container}>
+      <Text style={[globalStyles.title, { textAlign: "center", marginVertical: 12 }]}>
+        Perfil Usuario
+      </Text>
+      <Text style={[globalStyles.subtitle, { textAlign: "center", marginBottom: 16 }]}>
+        Pantalla del Usuario
+      </Text>
 
-        <View style={styles.card}>
-          <View style={styles.header}>
-            <Image
-              source={require("@/assets/user-predetermiando.png")}
-              style={styles.avatar}
-            />
-            <Text style={styles.nombre}>{usuarioPrueba.nombre}</Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Edad:</Text>
-            <Text style={styles.value}>{usuarioPrueba.edad}</Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Correo:</Text>
-            <Text style={styles.value}>{usuarioPrueba.correo}</Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Tel:</Text>
-            <Text style={styles.value}>{usuarioPrueba.tel}</Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Peso:</Text>
-            <Text style={styles.value}>{usuarioPrueba.peso}</Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Objetivo:</Text>
-            <Text style={styles.value}>{usuarioPrueba.objetivo}</Text>
-          </View>
+      <View style={styles.card}>
+        <View style={styles.header}>
+          <Image
+            source={require("@/assets/user-predetermiando.png")}
+            style={styles.avatar}
+          />
+          <Text style={styles.nombre}>{usuarioPrueba.nombre}</Text>
         </View>
-        <Button
-          title="Salir de la cuenta"
-          style={styles.exitButton}
-          onPress={handleLogout}
-        />
-      </ScrollView>
-    </SafeAreaView>
+
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Edad:</Text>
+          <Text style={styles.value}>{usuarioPrueba.edad}</Text>
+        </View>
+
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Correo:</Text>
+          <Text style={styles.value}>{usuarioPrueba.correo}</Text>
+        </View>
+
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Tel:</Text>
+          <Text style={styles.value}>{usuarioPrueba.tel}</Text>
+        </View>
+
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Peso:</Text>
+          <Text style={styles.value}>{usuarioPrueba.peso}</Text>
+        </View>
+
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Objetivo:</Text>
+          <Text style={styles.value}>{usuarioPrueba.objetivo}</Text>
+        </View>
+      </View>
+      <Button
+        title="Salir de la cuenta"
+        style={styles.exitButton}
+        onPress={handleLogout}
+      />
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
     container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: materialColors.schemes.light.surface,
     padding: 16,
   },
   card: {

@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform
  } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { materialColors } from "@/utils/colors";
 
 
 
@@ -13,37 +14,35 @@ export default function Chat() {
     { id: "4", text: "Mensaje de ejemplo", fromMe: true },
   ];
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <KeyboardAvoidingView style={styles.container}
-        behavior={Platform.OS === "ios" ? "padding" : "height"} 
-        keyboardVerticalOffset={90}>
-          <View style={styles.container}>
-            <Text style={styles.header}>Chat</Text>
-            <ScrollView contentContainerStyle={styles.chatContainer}>
-              {mensajesMock.map((msg) => (
-                <View
-                  key={msg.id}
-                  style={[styles.mensaje, msg.fromMe ? styles.mensajeYo : styles.mensajeOtro]}
-                >
-                  <Text style={styles.mensajeTexto}>{msg.text}</Text>
-                </View>
-              ))}
-            </ScrollView>
+    <KeyboardAvoidingView style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"} 
+      keyboardVerticalOffset={90}>
+        <View style={styles.container}>
+          <Text style={styles.header}>Estas hablando con tu entrenador</Text>
+          <ScrollView contentContainerStyle={styles.chatContainer}>
+            {mensajesMock.map((msg) => (
+              <View
+                key={msg.id}
+                style={[styles.mensaje, msg.fromMe ? styles.mensajeYo : styles.mensajeOtro]}
+              >
+                <Text style={styles.mensajeTexto}>{msg.text}</Text>
+              </View>
+            ))}
+          </ScrollView>
 
-            <View style={styles.inputContainer}>
-              <TextInput style={styles.input} placeholder="Escribí un mensaje..." />
-              <TouchableOpacity style={styles.botonEnviar}>
-                <Text style={styles.textoBoton}>Enviar</Text>
-              </TouchableOpacity>
-            </View>
+          <View style={styles.inputContainer}>
+            <TextInput style={styles.input} placeholder="Escribí un mensaje..." />
+            <TouchableOpacity style={styles.botonEnviar}>
+              <Text style={styles.textoBoton}>Enviar</Text>
+            </TouchableOpacity>
           </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-container: { flex: 1, backgroundColor: "#fff", marginBottom:10},
+container: { flex: 1, backgroundColor: materialColors.schemes.light.surface, marginBottom:10},
 header: { fontSize: 20, fontWeight: "bold", textAlign: "center", padding: 12, borderBottomWidth: 1, borderBottomColor: "#ddd" },
 chatContainer: { padding: 16 },
 mensaje: { padding: 10, borderRadius: 8, marginBottom: 10, maxWidth: "70%" },

@@ -15,6 +15,7 @@ export default function TabsScreen() {
 
   return (
     <Tab.Navigator
+      initialRouteName={TAB_ROUTES.HOME}
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap = "home";
@@ -55,14 +56,14 @@ export default function TabsScreen() {
       })}
     >
       <Tab.Screen
-        name={TAB_ROUTES.HOME}
-        component={HomeScreen}
-        options={{ title: "Inicio" }}
-      />
-      <Tab.Screen
         name={TAB_ROUTES.ENTRENAR}
         component={EntrenarScreen}
         options={{ title: "Entrenar" }}
+      />
+      <Tab.Screen
+        name={TAB_ROUTES.HOME}
+        component={HomeScreen}
+        options={{ title: "Inicio" }}
       />
       <Tab.Screen
         name={TAB_ROUTES.CHAT}

@@ -6,6 +6,7 @@ import { globalStyles } from "@/utils/globalStyles";
 import { ScrollView } from "react-native";
 import MockCard from "@/components/MockCard";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { materialColors } from "@/utils/colors";
 
 const dataMockUp = [
   { id: "1", titulo: "Mock 1" },
@@ -15,7 +16,6 @@ const dataMockUp = [
 
 export default function Home() {
   return (
-    <SafeAreaView>
       <ScrollView>
         <View style={styles.container}>
           <Text style={[globalStyles.title, {textAlign: "center"}]}>Bienvenidos a la App</Text>
@@ -34,13 +34,14 @@ export default function Home() {
             />
         </View>
       </ScrollView>
-    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
     container: {
+    flex: 1,
     padding: 16,
+    backgroundColor: materialColors.schemes.light.surface,
   },
   sectionTitle: {
     fontSize: 18,

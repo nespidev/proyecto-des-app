@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from "react-native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { materialColors } from "@/utils/colors";
 
 const mockImage = require("@/assets/user-predetermiando.png")
 const mockChats = [
@@ -51,7 +51,7 @@ export default function ChatList() {
 
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
+  container: { flex: 1, padding: 16,     backgroundColor: materialColors.schemes.light.surface },
   title: { fontSize: 24, fontWeight: "bold", marginBottom: 12, textAlign: "center" },
   chatCard: {
     flexDirection: "row",
