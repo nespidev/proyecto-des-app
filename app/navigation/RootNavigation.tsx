@@ -12,6 +12,9 @@ import { AuthContext } from "@/shared/context/auth-context";
 import AUTH_ACTIONS from "@/shared/context/auth-context/enums";
 import { getUser } from "@/utils/secure-store";
 import PerfilUsuario from "../tabs/screens/perfil-usuario/perfil-usuario";
+import PerfilEntrenador from "../tabs/screens/perfil-usuario/perfil-entrenador";
+import ChatList from "../tabs/screens/chat-list";
+import Chat from "../tabs/screens/chat";
 
 const Stack = createNativeStackNavigator();
 
@@ -57,6 +60,18 @@ export default function RootNavigation() {
       ) : (
         <Stack.Screen name={ROOT_ROUTES.AUTH} component={AuthStackScreen} />
       )}
+      <>
+        <Stack.Screen 
+          name={ROOT_ROUTES.PERFIL_ENTRENADOR} 
+          component={PerfilEntrenador} 
+          options={{ headerShown: true, title: "Perfil" }} 
+        />
+        <Stack.Screen 
+          name={ROOT_ROUTES.CHAT}
+          component={Chat} 
+          options={{ headerShown: true, title: "Chat" }} 
+        />
+      </>
     </Stack.Navigator>
 
   </NavigationContainer>
