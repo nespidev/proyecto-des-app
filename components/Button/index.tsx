@@ -1,10 +1,12 @@
 import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
 import { materialColors } from "../../utils/colors";
+import { ViewStyle } from "react-native";
 
 interface IProps {
   onPress: () => void;
   disabled?: boolean;
   title: string;
+  style?: ViewStyle;
 }
 
 export default function Button(props: IProps) {
@@ -16,7 +18,7 @@ export default function Button(props: IProps) {
       disabled={disabled}
       activeOpacity={0.7} // feedback visual al presionar
     >
-      <View style={[styles.container, disabled && styles.disabledContainer]}>
+      <View style={[styles.container, disabled && styles.disabledContainer, props.style]}>
         <Text style={[styles.text, disabled && styles.disabledText]}>{title}</Text>
       </View>
     </TouchableOpacity>

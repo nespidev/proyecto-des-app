@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useState } from "react";
 import { ROOT_ROUTES, AUTH_ROUTES } from "@/utils/constants";
 
-import TabsScreen from "@/app/tabs/screens";
+import TabsScreen from "@/app/tabs";
 import AuthStackScreen from "@/app/auth";
 import { useContext } from "react";
 import { AuthContext } from "@/shared/context/auth-context";
@@ -17,9 +17,10 @@ const Stack = createNativeStackNavigator();
 
 export default function RootNavigation() {
   const {state, dispatch} = useContext(AuthContext)
-  const [isSignedIn, setIsSignedIn] = useState<boolean>(true);
+  const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
 
   useEffect(() => {
+    console.log("Auth state cambió:", state);
     if (state?.user) {
       setIsSignedIn(true)
     } else {
@@ -38,27 +39,27 @@ export default function RootNavigation() {
   }, []);
 
   return (
-<NavigationContainer>
-  <Stack.Navigator
-    initialRouteName={isSignedIn ? ROOT_ROUTES.TABS : ROOT_ROUTES.AUTH}
-    screenOptions={{ headerShown: false }}
-  >
+  <NavigationContainer>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
     {isSignedIn ? (
-      <Stack.Screen
-        name={ROOT_ROUTES.TABS}
-        component={TabsScreen}
-        options={{ headerShown: false }}
-      />
-    ) : (
-      <Stack.Screen name={ROOT_ROUTES.AUTH} component={AuthStackScreen} />
-    )}
-    <Stack.Screen 
-      name={ROOT_ROUTES.PERFIL} 
-      component={PerfilUsuario} 
-      options={{ headerShown: true, title: "Perfil" }} 
-    />
-  </Stack.Navigator>
-</NavigationContainer>
+      <>
+        <Stack.Screen
+          name={ROOT_ROUTES.TABS}
+          component={TabsScreen}
+        />
+        {/* Perfil SOLO si estás logueado */}
+        <Stack.Screen 
+          name={ROOT_ROUTES.PERFIL} 
+          component={PerfilUsuario} 
+          options={{ headerShown: true, title: "Perfil" }} 
+        />
+      </>
+      ) : (
+        <Stack.Screen name={ROOT_ROUTES.AUTH} component={AuthStackScreen} />
+      )}
+    </Stack.Navigator>
+
+  </NavigationContainer>
 
   );
 }
