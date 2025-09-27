@@ -11,7 +11,7 @@ export default function BusquedaPerfiles() {
     <SafeAreaView style={{flex: 1}}>
       <View style={styles.container}>
         <Text style={globalStyles.title}>BUSQUEDA DE PERFILES</Text>
-        <Text style={globalStyles.subtitle}>Pantalla de Busqueda de perfiles</Text>
+        <Text style={globalStyles.subtitle}>  Esta pantalla estará disponible en la pantalla de chats si un usuario no cuenta con entrenador, mockup en proceso</Text>
         <FlatList
           data={ trainers }
           keyExtractor={(item) => item.id.toString()}

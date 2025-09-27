@@ -43,7 +43,7 @@ export default function TabsScreen() {
         },
         tabBarActiveTintColor: materialColors.schemes.light.onPrimaryContainer,
         headerRight: () => (
-          <TouchableOpacity onPress={() => navigation.navigate(ROOT_ROUTES.PERFIL_ENTRENADOR as never)}>
+          <TouchableOpacity onPress={() => navigation.navigate(ROOT_ROUTES.PERFIL as never)}>
             <Ionicons
               name="person-circle"
               size={38}
