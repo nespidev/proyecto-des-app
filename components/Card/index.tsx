@@ -1,28 +1,22 @@
 import React from "react";
 import { View, Text, StyleSheet, ViewStyle, StyleProp } from "react-native";
-import Card from "../Card";
 import { materialColors } from "@/utils/colors";
 
-type MockCardProps = {
+type CardProps = {
   titulo?: string;
   style?: StyleProp<ViewStyle>;
-  
+  children?: React.ReactNode;
+  imagePlaceholder?: boolean;
 };
 
 const colors = materialColors.schemes.light;
 
-const MockCard = ({ titulo, style }: MockCardProps) => {
+const Card = ({ titulo, style, children}: CardProps) => {
   return (
-    <Card style={[styles.card, style]}>
-      <View style={styles.imagePlaceholder} />
-      {titulo ? (
-        <Text style={styles.title}>{titulo}</Text>
-      ) : (
-        <View style={[styles.textPlaceholder, { width: "70%" }]} />
-      )}
-      <View style={styles.textPlaceholder} />
-      <View style={[styles.textPlaceholder, { width: "60%" }]} />
-    </Card>
+    <View style={[styles.card, style]}>
+      { titulo && <Text style={styles.title}>{titulo}</Text>}
+      {children}
+    </View>
   );
 };
 
@@ -50,12 +44,6 @@ const styles = StyleSheet.create({
     color: colors.onSurface,
     marginBottom: 8,
   },
-  textPlaceholder: {
-    height: 20,
-    backgroundColor: colors.surfaceDim,
-    borderRadius: 4,
-    marginBottom: 8,
-  },
 });
 
-export default MockCard;
+export default Card;

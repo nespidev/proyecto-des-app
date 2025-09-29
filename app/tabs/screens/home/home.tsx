@@ -5,6 +5,7 @@ import Button from "@/components/Button";
 import { globalStyles } from "@/utils/globalStyles";
 import { ScrollView } from "react-native";
 import MockCard from "@/components/MockCard";
+import Card from "@/components/Card";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { materialColors } from "@/utils/colors";
 
