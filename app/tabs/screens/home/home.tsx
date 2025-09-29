@@ -18,31 +18,41 @@ const dataMockUp = [
 export default function Home() {
   return (
       <ScrollView>
-        <View style={styles.container}>
-          <Text style={[globalStyles.title, {textAlign: "center"}]}>Bienvenidos a la App</Text>
-          <Text style={[globalStyles.subtitle, {textAlign: "center"}]}>Pantalla de Inicio</Text>
+        <View style={styles.mainContainer}>
+          <View style={styles.container}>
+            <Text style={[globalStyles.title, {textAlign: "center"}]}>Bienvenidos a la App</Text>
+            <Text style={[globalStyles.subtitle, {textAlign: "center"}]}>Pantalla de Inicio</Text>
+          </View>
 
-          <MockCard titulo="Card de Ejemplo" />
+          <View style={styles.container}>
+            <MockCard titulo="Card de Ejemplo" />
             <Text style={styles.sectionTitle}>Novedades</Text>
-            <FlatList
-              data={dataMockUp}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => <MockCard style={styles.horizontalCard} titulo={item.titulo} />}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.horizontalList}
-              nestedScrollEnabled
-            />
+          </View>
+
+          <View>
+              <FlatList
+                data={dataMockUp}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => <MockCard style={styles.horizontalCard} titulo={item.titulo} />}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.horizontalList}
+                nestedScrollEnabled
+              />
+          </View>
         </View>
       </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+    mainContainer: {
+    flex: 1,
+    backgroundColor: materialColors.schemes.light.surface,
+  },
     container: {
     flex: 1,
     padding: 16,
-    backgroundColor: materialColors.schemes.light.surface,
   },
   sectionTitle: {
     fontSize: 18,
