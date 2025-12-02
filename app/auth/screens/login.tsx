@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { View, ScrollView, Text, TextInput, StyleSheet } from "react-native";
 import {useNavigation} from "@react-navigation/native";
 import * as Yup from 'yup';
@@ -7,6 +7,8 @@ import Button from "../../../components/Button";
 import Link from "@/components/Link";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { globalStyles } from "../../../utils/globalStyles";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { TouchableOpacity } from "react-native";
 import { AUTH_ROUTES } from "@/utils/constants";
 import { AUTH_ACTIONS, AuthContext } from "@/shared/context/auth-context";
 
@@ -21,6 +23,7 @@ const ValidationSchema = Yup.object().shape({
 export default function Login() {
   const navigation = useNavigation();
   const {state, dispatch} = useContext<any>(AuthContext);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleGoToRegister = () => {
     navigation.navigate(AUTH_ROUTES.REGISTER);
@@ -64,14 +67,23 @@ export default function Login() {
               {errors.email && touched.email && <Text style={styles.error}>{errors.email}</Text>}
 
               <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={styles.input}
-                onChangeText={handleChange('password')}
-                onBlur={handleBlur('password')}
-                value={values.password}
-                placeholder="Password"
-                secureTextEntry
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={handleChange("password")}
+                  onBlur={handleBlur("password")}
+                  value={values.password}
+                  placeholder="Password"
+                  secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <MaterialIcons
+                    name={showPassword ? "visibility" : "visibility-off"}
+                    size={24}
+                    color="gray"
+                  />
+                </TouchableOpacity>
+              </View>
               {errors.password && touched.password && <Text style={styles.error}>{errors.password}</Text>}
 
               <Button title="Ingresar" onPress={handleSubmit as any} disabled={isSubmitting} />
@@ -97,6 +109,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   input: {
+    flex: 1,
     borderWidth: 1,
     borderColor: "#ccc",
     padding: 10,
@@ -114,6 +127,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     marginLeft: 4,
   },
+  passwordContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 10,
+  width: "100%",
+},
+
 
 
 });
