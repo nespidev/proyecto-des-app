@@ -1,6 +1,5 @@
 import {colors} from "./colors";
 import {sizes} from "./sizes";
-import {setUser, getUser, deleteUser} from "./secure-store";
+import { supabase } from "./supabase";
 
-
-export {colors, sizes, setUser, getUser, deleteUser};
+export {colors, sizes, supabase};
