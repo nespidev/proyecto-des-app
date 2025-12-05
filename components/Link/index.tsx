@@ -1,6 +1,6 @@
 import {Pressable, Text, StyleSheet} from "react-native";
-import {colors} from "../../utils";
-import {materialColors} from "../../utils/colors";
+import {colors} from "@/utils";
+import {materialColors} from "@/utils/colors";
 
 interface IProps {
   link: string,

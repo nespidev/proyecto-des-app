@@ -1,5 +1,5 @@
 import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
-import { materialColors } from "../../utils/colors";
+import { materialColors } from "@/utils/colors";
 import { ViewStyle } from "react-native";
 
 interface IProps {

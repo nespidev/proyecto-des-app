@@ -7,9 +7,9 @@ import { View, ActivityIndicator } from "react-native";
 import TabsScreen from "@/app/tabs";
 import AuthStackScreen from "@/app/auth";
 import { AuthContext } from "@/shared/context/auth-context";
-import PerfilUsuario from "../tabs/screens/perfil-usuario/perfil-usuario";
-import PerfilEntrenador from "../tabs/screens/perfil-usuario/perfil-entrenador";
-import Chat from "../tabs/screens/chat";
+import PerfilUsuario from "@/app/tabs/screens/perfil-usuario/perfil-usuario";
+import PerfilEntrenador from "@/app/tabs/screens/perfil-usuario/perfil-entrenador";
+import Chat from "@/app/tabs/screens/chat";
 import { materialColors } from "@/utils/colors";
 
 const Stack = createNativeStackNavigator();

@@ -3,11 +3,11 @@ import { View, ScrollView, Text, TextInput, StyleSheet, Switch, Alert, Platform,
 import * as Yup from 'yup';
 import { Formik } from "formik";
 import { Picker } from '@react-native-picker/picker';
-import Button from "../../../components/Button";
+import Button from "@/components/Button";
 import Link from "@/components/Link";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { globalStyles } from "../../../utils/globalStyles";
+import { globalStyles } from "@/utils/globalStyles";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { TouchableOpacity } from "react-native";
 import { supabase } from "@/utils/supabase";

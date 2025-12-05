@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, ViewStyle, StyleProp } from "react-native";
-import Card from "../Card";
+import Card from "@/components/Card";
 import { materialColors } from "@/utils/colors";
 
 type MockCardProps = {

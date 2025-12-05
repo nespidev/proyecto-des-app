@@ -3,10 +3,10 @@ import { View, ScrollView, Text, TextInput, StyleSheet, Alert, ActivityIndicator
 import { useNavigation } from "@react-navigation/native";
 import * as Yup from 'yup';
 import { Formik } from "formik";
-import Button from "../../../components/Button";
+import Button from "@/components/Button";
 import Link from "@/components/Link";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { globalStyles } from "../../../utils/globalStyles";
+import { globalStyles } from "@/utils/globalStyles";
 import { AUTH_ROUTES } from "@/utils/constants";
 import { supabase } from "@/utils/supabase";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
