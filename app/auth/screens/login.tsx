@@ -62,7 +62,17 @@ export default function Login() {
                     .single();
 
                   if (profileError) throw new Error("Error al cargar perfil de usuario");
-
+                  // Si es PROFESIONAL buscamos sus datos especificos
+                  let professionalData = null;
+                  if (profile.rol === 'professional') {
+                      const { data: pro, error: proError } = await supabase
+                          .from('professionals')
+                          .select('titulo, especialidad')
+                          .eq('id', profile.id)
+                          .single();
+                      
+                      if (!proError) professionalData = pro;
+                  }
                   // Guardar en Contexto
                   dispatch({
                     type: AUTH_ACTIONS.LOGIN, 
@@ -75,7 +85,11 @@ export default function Login() {
                         apellido: profile.apellido,
                         email: profile.email,
                         rol: profile.rol,
-                        avatar_url: profile.avatar_url
+                        avatar_url: profile.avatar_url,
+                        telefono: profile.telefono,
+                        // Guardamos datos profesionales si existen
+                        titulo: professionalData?.titulo,
+                        especialidad: professionalData?.especialidad
                       }
                     }
                   });
