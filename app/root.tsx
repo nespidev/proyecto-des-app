@@ -14,7 +14,7 @@ import { materialColors } from "@/utils/colors";
 
 const Stack = createNativeStackNavigator();
 
-export default function RootNavigation() {
+export default function Root() {
   const { state } = useContext(AuthContext);
 
   // Pantalla de carga mientras Supabase verifica si hay usuario guardado

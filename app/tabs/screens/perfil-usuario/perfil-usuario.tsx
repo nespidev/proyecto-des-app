@@ -1,15 +1,17 @@
 import React, { useState, useContext } from "react";
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from "react-native";
 import * as ImagePicker from 'expo-image-picker'; 
+import { decode } from 'base64-arraybuffer';
 import Button from "@/components/Button";
 import { materialColors } from "@/utils/colors";
 import { AuthContext } from "@/shared/context/auth-context";
+import AUTH_ACTIONS from "@/shared/context/auth-context/enums";
 import { supabase } from "@/utils/supabase";
 
 const defaultImage = require("@/assets/user-predetermiando.png");
 
 export default function PerfilUsuario() {
-  const { state } = useContext<any>(AuthContext);
+  const { state, dispatch } = useContext<any>(AuthContext);
   const [image, setImage] = useState<string | null>(null);
 
   // Obtenemos el usuario del estado global
@@ -31,12 +33,70 @@ export default function PerfilUsuario() {
       mediaTypes: ['images'], 
       allowsEditing: true, 
       aspect: [1, 1],
-      quality: 1,
+      quality: 0.4,
+      base64: true,
     });
 
-    if (!result.canceled) {
+    if (!result.canceled && result.assets[0].base64) {
+      //  mostrar preview inmediata en la UI
       setImage(result.assets[0].uri);
-      // TODO: Aquí iría la lógica para subir a Supabase Storage
+      
+      // subir a supabase
+      const fileExt = result.assets[0].uri.split('.').pop() || 'jpg';
+      await uploadToSupabase(result.assets[0].base64, fileExt);
+    }
+  };
+
+const uploadToSupabase = async (base64Image: string, fileExtension: string) => {
+    try {
+      if (!user) return;
+
+      const fileName = `${user.id}/avatar.${fileExtension}`;
+
+      // Subir imagen
+      const { error: uploadError } = await supabase.storage
+        .from('profile-images')
+        .upload(fileName, decode(base64Image), {
+          contentType: `image/${fileExtension}`,
+          upsert: true,
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Obtener url
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-images')
+        .getPublicUrl(fileName);
+
+      // Agregamos timestamp para romper la cache
+      const publicUrlWithTimestamp = `${publicUrl}?t=${Date.now()}`;
+
+      // Actualizar en base de Datos
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrlWithTimestamp })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      // ACTUALIZAR EL ESTADO GLOBAL (AUTH CONTEXT)
+      // Creamos un nuevo objeto usuario con la URL actualizada
+      const updatedUser = { ...user, avatar_url: publicUrlWithTimestamp };
+      
+      // Despachamos la accion LOGIN para actualizar el user en el context
+      dispatch({
+        type: AUTH_ACTIONS.LOGIN,
+        payload: {
+          user: updatedUser,
+          token: state.token,
+        }
+      });
+
+      Alert.alert("EXITO", "Foto de perfil actualizada correctamente");
+      
+    } catch (error: any) {
+      Alert.alert("Error subiendo imagen", error.message);
+      console.log("Upload error:", error);
     }
   };
 
@@ -48,7 +108,6 @@ export default function PerfilUsuario() {
       </View>
     );
   }
-
 
   const rolLabel = user.rol === 'professional' ? 'Profesional' : 'Usuario';
 
