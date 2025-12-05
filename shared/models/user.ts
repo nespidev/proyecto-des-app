@@ -3,6 +3,8 @@ export interface IUser {
   nombre: string;
   apellido: string;
   email: string;
+  rol: 'client' | 'professional';
+  avatar_url?: string;
 }
 
 export class User implements IUser {
@@ -10,11 +12,15 @@ export class User implements IUser {
   nombre: string;
   apellido: string;
   email: string;
+  rol: 'client' | 'professional';
+  avatar_url?: string;
 
-  constructor(id: string, nombre: string, apellido: string, email: string) {
+  constructor(id: string, nombre: string, apellido: string, email: string, rol: 'client' | 'professional', avatar_url?: string) {
     this.id = id;
     this.nombre = nombre;
     this.apellido = apellido;
     this.email = email;
+    this.rol = rol;
+    this.avatar_url = avatar_url;
   }
 }
