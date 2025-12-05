@@ -1,14 +1,12 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useContext } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ROOT_ROUTES } from "@/utils/constants";
-import { View, StyleSheet } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 
 import TabsScreen from "@/app/tabs";
 import AuthStackScreen from "@/app/auth";
 import { AuthContext } from "@/shared/context/auth-context";
-import AUTH_ACTIONS from "@/shared/context/auth-context/enums";
-import { getUser } from "@/utils/secure-store";
 import PerfilUsuario from "../tabs/screens/perfil-usuario/perfil-usuario";
 import PerfilEntrenador from "../tabs/screens/perfil-usuario/perfil-entrenador";
 import Chat from "../tabs/screens/chat";
@@ -17,25 +15,16 @@ import { materialColors } from "@/utils/colors";
 const Stack = createNativeStackNavigator();
 
 export default function RootNavigation() {
-  const { state, dispatch } = useContext(AuthContext);
-  const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
+  const { state } = useContext(AuthContext);
 
-  useEffect(() => {
-    if (state?.user) {
-      setIsSignedIn(true);
-    } else {
-      setIsSignedIn(false);
-    }
-  }, [state]);
-
-  useEffect(() => {
-    getUser().then(user => {
-      if (user) {
-        dispatch({ type: AUTH_ACTIONS.SET_USER, payload: { user } });
-        setIsSignedIn(true);
-      }
-    });
-  }, []);
+  // Pantalla de carga mientras Supabase verifica si hay usuario guardado
+  if (state.isLoading) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" color={materialColors.schemes.light.primary} />
+      </View>
+    );
+  }
 
   return (
     <NavigationContainer>
@@ -51,12 +40,12 @@ export default function RootNavigation() {
           headerTintColor: materialColors.schemes.light.onPrimaryContainer,
         }}
       >
-        {isSignedIn ? (
+        {state.user ? (
           <>
             <Stack.Screen
               name={ROOT_ROUTES.TABS}
               component={TabsScreen}
-              options={{ headerShown: false }} // el header de tabs maneja su propio estilo
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name={ROOT_ROUTES.PERFIL}
@@ -85,10 +74,3 @@ export default function RootNavigation() {
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  backgroundContainer: {
-    backgroundColor: materialColors.schemes.light.surface,
-    flex: 1,
-  },
-});

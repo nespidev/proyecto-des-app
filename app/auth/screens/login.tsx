@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { View, ScrollView, Text, TextInput, StyleSheet, Alert, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import * as Yup from 'yup';
@@ -8,7 +8,6 @@ import Link from "@/components/Link";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { globalStyles } from "../../../utils/globalStyles";
 import { AUTH_ROUTES } from "@/utils/constants";
-import { AUTH_ACTIONS, AuthContext } from "@/shared/context/auth-context";
 import { supabase } from "@/utils/supabase";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
@@ -19,7 +18,6 @@ const ValidationSchema = Yup.object().shape({
 
 export default function Login() {
   const navigation = useNavigation();
-  const { dispatch } = useContext<any>(AuthContext);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -29,14 +27,8 @@ export default function Login() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <Text style={globalStyles.title}>Ingreso de Usuario</Text>
           
           <Formik
@@ -45,65 +37,21 @@ export default function Login() {
             onSubmit={async (values) => {
               setLoading(true);
               try {
-                //Autenticar con Supabase
-                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                // El AuthProvider escuchara el cambio de sesion
+                const { error } = await supabase.auth.signInWithPassword({
                   email: values.email,
                   password: values.password,
                 });
 
-                if (authError) throw new Error("Credenciales incorrectas o email no verificado");
-
-                if (authData.session) {
-                  // Obtener datos del perfil
-                  const { data: profile, error: profileError } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', authData.session.user.id)
-                    .single();
-
-                  if (profileError) throw new Error("Error al cargar perfil de usuario");
-                  // Si es PROFESIONAL buscamos sus datos especificos
-                  let professionalData = null;
-                  if (profile.rol === 'professional') {
-                      const { data: pro, error: proError } = await supabase
-                          .from('professionals')
-                          .select('titulo, especialidad')
-                          .eq('id', profile.id)
-                          .single();
-                      
-                      if (!proError) professionalData = pro;
-                  }
-                  // Guardar en Contexto
-                  dispatch({
-                    type: AUTH_ACTIONS.LOGIN, 
-                    payload: {
-                      token: authData.session.access_token,
-                      refreshToken: authData.session.refresh_token,
-                      user: {
-                        id: profile.id,
-                        nombre: profile.nombre,
-                        apellido: profile.apellido,
-                        email: profile.email,
-                        rol: profile.rol,
-                        avatar_url: profile.avatar_url,
-                        telefono: profile.telefono,
-                        // Guardamos datos profesionales si existen
-                        titulo: professionalData?.titulo,
-                        especialidad: professionalData?.especialidad
-                      }
-                    }
-                  });
-                }
+                if (error) throw error;
               } catch (error: any) {
-                Alert.alert("Error", error.message);
-              } finally {
-                setLoading(false);
+                Alert.alert("Error", error.message || "Credenciales incorrectas");
+                setLoading(false); // Solo quitamos loading si hubo error
               }
             }}
           >
             {({ values, errors, touched, handleChange, handleBlur, handleSubmit }) => (
               <View style={styles.formContainer}>
-
                 <Text style={styles.label}>Email</Text>
                 <TextInput
                   style={styles.input}

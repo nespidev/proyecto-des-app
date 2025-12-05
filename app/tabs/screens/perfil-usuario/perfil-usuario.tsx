@@ -4,19 +4,20 @@ import * as ImagePicker from 'expo-image-picker';
 import Button from "@/components/Button";
 import { materialColors } from "@/utils/colors";
 import { AuthContext } from "@/shared/context/auth-context";
-import AUTH_ACTIONS from "@/shared/context/auth-context/enums";
+import { supabase } from "@/utils/supabase";
 
 const defaultImage = require("@/assets/user-predetermiando.png");
 
 export default function PerfilUsuario() {
-  const { state, dispatch } = useContext<any>(AuthContext);
+  const { state } = useContext<any>(AuthContext);
   const [image, setImage] = useState<string | null>(null);
 
   // Obtenemos el usuario del estado global
   const user = state.user;
 
-  const handleLogout = () => {
-    dispatch({ type: AUTH_ACTIONS.LOGOUT });
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) Alert.alert("Error al salir", error.message);
   };
 
   const pickImage = async () => {
