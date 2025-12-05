@@ -80,7 +80,7 @@ export default function Login() {
                 </View>
                 {errors.password && touched.password && <Text style={styles.error}>{errors.password}</Text>}
 
-                <View style={{ marginTop: 20 }}>
+                <View style={{ marginTop: 20 , alignItems: 'center' }}>
                   {loading ? (
                     <ActivityIndicator size="large" color="#F87018" />
                   ) : (
