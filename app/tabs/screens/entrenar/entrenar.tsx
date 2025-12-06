@@ -15,7 +15,7 @@ export default function Entrenar() {
   const [peso, setPeso] = useState(user?.peso?.toString() || "");
   const [altura, setAltura] = useState(user?.altura?.toString() || "");
   const [loading, setLoading] = useState(false);
-  const [isEditing, setIsEditing] = useState(false); // Para habilitar/deshabilitar edición
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -65,7 +65,7 @@ export default function Entrenar() {
       });
 
       Alert.alert("¡Actualizado!", "Tus datos físicos se han guardado correctamente.");
-      setIsEditing(false); // Salir del modo edición
+      setIsEditing(false);
 
     } catch (error: any) {
       console.error(error);
@@ -93,7 +93,7 @@ export default function Entrenar() {
           <Text style={globalStyles.subtitle}>Gestiona tu progreso físico</Text>
         </View>
 
-        {/* TARJETA DE DATOS FÍSICOS */}
+        {/* TARJETA DE DATOS FISICOS */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>Mis Métricas</Text>
