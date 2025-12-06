@@ -2,7 +2,6 @@ import * as ImagePicker from 'expo-image-picker';
 import { Alert } from 'react-native';
 import { supabase } from './supabase';
 
-// Tipos de medios que aceptaremos en nuestra función
 export type MediaType = 'Images' | 'Videos' | 'All';
 
 interface PickOptions {
@@ -11,9 +10,7 @@ interface PickOptions {
   quality?: number;
 }
 
-/**
- * Abre la galería para seleccionar fotos o videos
- */
+ // Abre la galeria para seleccionar fotos o videos 
 export const selectMediaFromGallery = async (options: PickOptions = {}) => {
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (status !== 'granted') {
@@ -21,7 +18,6 @@ export const selectMediaFromGallery = async (options: PickOptions = {}) => {
     return null;
   }
 
-  // CORRECCIÓN: Mapeamos a array de strings ['images', 'videos']
   let mediaTypes: ImagePicker.MediaType[] = ['images'];
   
   if (options.mediaType === 'Videos') {
@@ -31,21 +27,19 @@ export const selectMediaFromGallery = async (options: PickOptions = {}) => {
   }
 
   const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: mediaTypes, // Pasamos el array
+    mediaTypes: mediaTypes,
     allowsEditing: options.allowsEditing ?? true,
     quality: options.quality ?? 0.5,
-    // Importante: NO pedimos base64 aquí para soportar videos grandes
+    // NO pedimos base64 aca para soportar videos grandes
   });
 
   if (!result.canceled) {
-    return result.assets[0]; // Retornamos el asset completo (uri, type, etc)
+    return result.assets[0]; // Retornamos el asset completo uri, type, etc
   }
   return null;
 };
 
-/**
- * Toma una foto con la cámara
- */
+// Sacar foto con camara
 export const takePhoto = async () => {
   const { status } = await ImagePicker.requestCameraPermissionsAsync();
   if (status !== 'granted') {
@@ -56,7 +50,6 @@ export const takePhoto = async () => {
   const result = await ImagePicker.launchCameraAsync({
     allowsEditing: true,
     quality: 0.5,
-    // Por defecto la cámara captura imágenes
   });
 
   if (!result.canceled) {
@@ -65,10 +58,8 @@ export const takePhoto = async () => {
   return null;
 };
 
-/**
- * Sube cualquier archivo (foto o video) a Supabase usando FormData
- * Esta forma es más robusta para archivos grandes que el base64.
- */
+
+ // Sube cualquier archivo (foto o video) a Supabase usando FormData
 export const uploadFileToSupabase = async (
   bucketName: string,
   path: string,
@@ -76,7 +67,7 @@ export const uploadFileToSupabase = async (
   fileType: string = 'image/jpeg' // ej: 'video/mp4'
 ): Promise<string | null> => {
   try {
-    // 1. Crear un objeto FormData (como si fuera un formulario web)
+    // Crear un objeto FormData (como si fuera un formulario web)
     const formData = new FormData();
     
     // @ts-ignore: React Native espera estos campos específicos para subir archivos
@@ -86,7 +77,7 @@ export const uploadFileToSupabase = async (
       type: fileType,
     });
 
-    // 2. Subir usando el método estándar (más eficiente para videos)
+    // Subir usando el metodo estandar (mas eficiente para videos)
     const { data, error } = await supabase.storage
       .from(bucketName)
       .upload(path, formData, {
@@ -96,7 +87,7 @@ export const uploadFileToSupabase = async (
 
     if (error) throw error;
 
-    // 3. Obtener URL Pública
+    // Obtener url publica
     const { data: urlData } = supabase.storage
       .from(bucketName)
       .getPublicUrl(path);
