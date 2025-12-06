@@ -1,21 +1,20 @@
 import React, { useState, useContext } from "react";
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from "react-native";
-import * as ImagePicker from 'expo-image-picker'; 
-import { decode } from 'base64-arraybuffer';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import Button from "@/components/Button";
 import { materialColors } from "@/utils/colors";
 import { AuthContext } from "@/shared/context/auth-context";
 import AUTH_ACTIONS from "@/shared/context/auth-context/enums";
 import { supabase } from "@/utils/supabase";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { selectMediaFromGallery, takePhoto, uploadFileToSupabase } from "@/utils/media-helper";
 
 const defaultImage = require("@/assets/user-predetermiando.png");
 
 export default function PerfilUsuario() {
   const { state, dispatch } = useContext<any>(AuthContext);
   const [image, setImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  // Obtenemos el usuario del estado global
   const user = state.user;
 
   const handleLogout = async () => {
@@ -23,106 +22,70 @@ export default function PerfilUsuario() {
     if (error) Alert.alert("Error al salir", error.message);
   };
 
-  // Funcion para elegir de la galeria
-  const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert("Permiso denegado", "Necesitamos acceso a tu galería.");
-      return;
-    }
-
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'], 
-      allowsEditing: true, 
-      aspect: [1, 1],
-      quality: 0.4,
-      base64: true,
-    });
-
-    if (!result.canceled && result.assets[0].base64) {
-      setImage(result.assets[0].uri);
-      const fileExt = result.assets[0].uri.split('.').pop() || 'jpg';
-      await uploadToSupabase(result.assets[0].base64, fileExt);
-    }
-  };
-
-  // Funcion para sacar foto con camara
-  const takePhoto = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert("Permiso denegado", "Necesitamos acceso a tu cámara.");
-      return;
-    }
-
-    let result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.4,
-      base64: true,
-    });
-
-    if (!result.canceled && result.assets[0].base64) {
-      setImage(result.assets[0].uri);
-      const fileExt = result.assets[0].uri.split('.').pop() || 'jpg';
-      await uploadToSupabase(result.assets[0].base64, fileExt);
-    }
-  };
-
-  const uploadToSupabase = async (base64Image: string, fileExtension: string) => {
+  const handleUpdateAvatar = async (source: 'camera' | 'gallery') => {
     try {
-      if (!user) return;
+      setLoading(true);
 
-      const fileName = `${user.id}/avatar.${fileExtension}`;
+      // Obtener asset (camara o galeria)
+      const asset = source === 'camera' 
+        ? await takePhoto() 
+        : await selectMediaFromGallery({ mediaType: 'Images', quality: 0.4 });
 
-      // Subir imagen
-      const { error: uploadError } = await supabase.storage
-        .from('profile-images')
-        .upload(fileName, decode(base64Image), {
-          contentType: `image/${fileExtension}`,
-          upsert: true,
-        });
+      if (!asset) {
+        setLoading(false);
+        return; // Usuario cancela
+      }
 
-      if (uploadError) throw uploadError;
+      // Feedback visual inmediato
+      setImage(asset.uri); 
 
-      // Obtener url
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-images')
-        .getPublicUrl(fileName);
+      // Preparar datos
+      const fileExt = asset.uri.split('.').pop()?.toLowerCase() || 'jpg';
+      const path = `${user.id}/avatar.${fileExt}`; // Nombre fijo para sobrescribir
+      
+      // Subir usando el helper (FormData)
+      const publicUrl = await uploadFileToSupabase(
+        'profile-images', // Bucket
+        path,
+        asset.uri,
+        'image/jpeg' // jpg/png para perfil
+      );
 
-      // Agregamos timestamp para romper la cache
-      const publicUrlWithTimestamp = `${publicUrl}?t=${Date.now()}`;
+      if (!publicUrl) throw new Error("Error al obtener URL de imagen");
 
-      // Actualizar en base de Datos
+      // Actualizar base de datos
+      const urlWithTimestamp = `${publicUrl}?t=${Date.now()}`;
+      
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ avatar_url: publicUrlWithTimestamp })
+        .update({ avatar_url: urlWithTimestamp })
         .eq('id', user.id);
 
       if (updateError) throw updateError;
 
       // ACTUALIZAR EL ESTADO GLOBAL (AUTH CONTEXT)
-      const updatedUser = { ...user, avatar_url: publicUrlWithTimestamp };
-      
       dispatch({
         type: AUTH_ACTIONS.LOGIN,
         payload: {
-          user: updatedUser,
+          user: { ...user, avatar_url: urlWithTimestamp },
           token: state.token,
         }
       });
 
       Alert.alert("EXITO", "Foto actualizada correctamente");
-      
+
     } catch (error: any) {
-      Alert.alert("Error subiendo imagen", error.message);
-      console.log("Upload error:", error);
+      Alert.alert("Error", error.message);
+      setImage(null); // Revertir si falla
+    } finally {
+      setLoading(false);
     }
   };
 
   if (!user) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text>Cargando perfil...</Text>
+        <ActivityIndicator size="large" color={materialColors.schemes.light.primary} />
         <Button title="Cerrar Sesión (Forzado)" onPress={handleLogout} />
       </View>
     );
@@ -135,7 +98,6 @@ export default function PerfilUsuario() {
       <View style={styles.card}>
         <View style={styles.header}>
           
-          {/* Contenedor relativo para posicionar los botones */}
           <View>
             <Image
               source={
@@ -144,10 +106,26 @@ export default function PerfilUsuario() {
               }
               style={styles.avatar}
             />
-            <TouchableOpacity style={styles.cameraIconBadge} onPress={takePhoto}>
+            
+            {loading && (
+              <View style={styles.loadingOverlay}>
+                <ActivityIndicator color="#fff" />
+              </View>
+            )}
+
+            <TouchableOpacity 
+              style={styles.cameraIconBadge} 
+              onPress={() => handleUpdateAvatar('camera')}
+              disabled={loading}
+            >
                <MaterialIcons name="photo-camera" size={20} color={materialColors.schemes.light.primary} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.editIconBadge} onPress={pickImage}>
+
+            <TouchableOpacity 
+              style={styles.editIconBadge} 
+              onPress={() => handleUpdateAvatar('gallery')}
+              disabled={loading}
+            >
                <MaterialIcons name="edit" size={20} color={materialColors.schemes.light.primary} />
             </TouchableOpacity>
           </View>
@@ -156,14 +134,12 @@ export default function PerfilUsuario() {
           <Text style={styles.rol}>{rolLabel}</Text>
         </View>
 
-        {/* --- SECCION PARA PROFESIONALES --- */}
         {user.rol === 'professional' && (
           <View style={styles.proSection}>          
             <View style={styles.infoRow}>
               <Text style={styles.label}>Profesión:</Text>
               <Text style={styles.value}>{user.titulo || "No especificado"}</Text>
             </View>
-
             <View style={[styles.infoRow, {borderBottomWidth: 0}]}>
               <Text style={styles.label}>Especialidad:</Text>
               <Text style={styles.value}>{user.especialidad || "General"}</Text>
@@ -171,7 +147,6 @@ export default function PerfilUsuario() {
           </View>
         )}
 
-        {/* --- DATOS GENERALES --- */}
         <View style={styles.infoRow}>
           <Text style={styles.label}>Email:</Text>
           <Text style={styles.value}>{user.email}</Text>
@@ -226,7 +201,15 @@ const styles = StyleSheet.create({
     borderColor: materialColors.schemes.light.primary,
     backgroundColor: '#e1e1e1'
   },
-  // Boton editar (derecha)
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 12,
+    borderRadius: 140,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1
+  },
   editIconBadge: {
     position: 'absolute',
     right: 20,
@@ -238,9 +221,9 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 3,
-    shadowOffset: {width: 0, height: 2}
+    shadowOffset: {width: 0, height: 2},
+    zIndex: 2
   },
-  // Boton camara (izquierda)
   cameraIconBadge: {
     position: 'absolute',
     left: 20,
@@ -252,7 +235,8 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 3,
-    shadowOffset: {width: 0, height: 2}
+    shadowOffset: {width: 0, height: 2},
+    zIndex: 2
   },
   nombre: {
     fontSize: 22,
