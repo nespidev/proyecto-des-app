@@ -7,6 +7,7 @@ import AUTH_ACTIONS from "@/shared/context/auth-context/enums";
 import { supabase } from "@/utils/supabase";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { selectMediaFromGallery, takePhoto, uploadFileToSupabase } from "@/utils/media-helper";
+import CircleIconButton from "@/components/CircleIconButton";
 
 const defaultImage = require("@/assets/user-predetermiando.png");
 
@@ -113,21 +114,18 @@ export default function PerfilUsuario() {
               </View>
             )}
 
-            <TouchableOpacity 
-              style={styles.cameraIconBadge} 
-              onPress={() => handleUpdateAvatar('camera')}
-              disabled={loading}
-            >
-               <MaterialIcons name="photo-camera" size={20} color={materialColors.schemes.light.primary} />
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.editIconBadge} 
-              onPress={() => handleUpdateAvatar('gallery')}
-              disabled={loading}
-            >
-               <MaterialIcons name="edit" size={20} color={materialColors.schemes.light.primary} />
-            </TouchableOpacity>
+            <CircleIconButton 
+                  icon="photo-camera" 
+                  onPress={() => handleUpdateAvatar('camera')} 
+                  disabled={loading}
+                  style={styles.cameraButton} // Solo pasamos la posición
+                />
+            <CircleIconButton 
+                  icon="edit" 
+                  onPress={() => handleUpdateAvatar('gallery')} 
+                  disabled={loading}
+                  style={styles.editButton} // Solo pasamos la posición
+                />
           </View>
           
           <Text style={styles.nombre}>{user.nombre} {user.apellido}</Text>
@@ -210,33 +208,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 1
   },
-  editIconBadge: {
+  editButton: {
     position: 'absolute',
     right: 20,
     bottom: 10,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 8,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    shadowOffset: {width: 0, height: 2},
-    zIndex: 2
   },
-  cameraIconBadge: {
+  cameraButton: {
     position: 'absolute',
     left: 20,
     bottom: 10,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 8,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    shadowOffset: {width: 0, height: 2},
-    zIndex: 2
   },
   nombre: {
     fontSize: 22,
