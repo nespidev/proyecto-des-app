@@ -7,6 +7,7 @@ import { materialColors } from "@/utils/colors";
 import { AuthContext } from "@/shared/context/auth-context";
 import AUTH_ACTIONS from "@/shared/context/auth-context/enums";
 import { supabase } from "@/utils/supabase";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const defaultImage = require("@/assets/user-predetermiando.png");
 
@@ -22,10 +23,11 @@ export default function PerfilUsuario() {
     if (error) Alert.alert("Error al salir", error.message);
   };
 
+  // Funcion para elegir de la galeria
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert("Permiso denegado", "Necesitamos acceso a tu galería para cambiar la foto.");
+      Alert.alert("Permiso denegado", "Necesitamos acceso a tu galería.");
       return;
     }
 
@@ -38,16 +40,35 @@ export default function PerfilUsuario() {
     });
 
     if (!result.canceled && result.assets[0].base64) {
-      //  mostrar preview inmediata en la UI
       setImage(result.assets[0].uri);
-      
-      // subir a supabase
       const fileExt = result.assets[0].uri.split('.').pop() || 'jpg';
       await uploadToSupabase(result.assets[0].base64, fileExt);
     }
   };
 
-const uploadToSupabase = async (base64Image: string, fileExtension: string) => {
+  // Funcion para sacar foto con camara
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert("Permiso denegado", "Necesitamos acceso a tu cámara.");
+      return;
+    }
+
+    let result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.4,
+      base64: true,
+    });
+
+    if (!result.canceled && result.assets[0].base64) {
+      setImage(result.assets[0].uri);
+      const fileExt = result.assets[0].uri.split('.').pop() || 'jpg';
+      await uploadToSupabase(result.assets[0].base64, fileExt);
+    }
+  };
+
+  const uploadToSupabase = async (base64Image: string, fileExtension: string) => {
     try {
       if (!user) return;
 
@@ -80,10 +101,8 @@ const uploadToSupabase = async (base64Image: string, fileExtension: string) => {
       if (updateError) throw updateError;
 
       // ACTUALIZAR EL ESTADO GLOBAL (AUTH CONTEXT)
-      // Creamos un nuevo objeto usuario con la URL actualizada
       const updatedUser = { ...user, avatar_url: publicUrlWithTimestamp };
       
-      // Despachamos la accion LOGIN para actualizar el user en el context
       dispatch({
         type: AUTH_ACTIONS.LOGIN,
         payload: {
@@ -92,7 +111,7 @@ const uploadToSupabase = async (base64Image: string, fileExtension: string) => {
         }
       });
 
-      Alert.alert("EXITO", "Foto de perfil actualizada correctamente");
+      Alert.alert("EXITO", "Foto actualizada correctamente");
       
     } catch (error: any) {
       Alert.alert("Error subiendo imagen", error.message);
@@ -115,7 +134,9 @@ const uploadToSupabase = async (base64Image: string, fileExtension: string) => {
     <ScrollView style={styles.container}>
       <View style={styles.card}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={pickImage}>
+          
+          {/* Contenedor relativo para posicionar los botones */}
+          <View>
             <Image
               source={
                 image ? { uri: image } 
@@ -123,10 +144,13 @@ const uploadToSupabase = async (base64Image: string, fileExtension: string) => {
               }
               style={styles.avatar}
             />
-            <View style={styles.editIconBadge}>
-               <Text style={{fontSize: 12}}>✏️</Text>
-            </View>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.cameraIconBadge} onPress={takePhoto}>
+               <MaterialIcons name="photo-camera" size={20} color={materialColors.schemes.light.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.editIconBadge} onPress={pickImage}>
+               <MaterialIcons name="edit" size={20} color={materialColors.schemes.light.primary} />
+            </TouchableOpacity>
+          </View>
           
           <Text style={styles.nombre}>{user.nombre} {user.apellido}</Text>
           <Text style={styles.rol}>{rolLabel}</Text>
@@ -194,22 +218,41 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   avatar: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    width: 240,
+    height: 240,
+    borderRadius: 140,
     marginBottom: 12,
     borderWidth: 2,
     borderColor: materialColors.schemes.light.primary,
     backgroundColor: '#e1e1e1'
   },
+  // Boton editar (derecha)
   editIconBadge: {
     position: 'absolute',
-    right: 10,
+    right: 20,
     bottom: 10,
     backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 6,
-    elevation: 4
+    borderRadius: 20,
+    padding: 8,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    shadowOffset: {width: 0, height: 2}
+  },
+  // Boton camara (izquierda)
+  cameraIconBadge: {
+    position: 'absolute',
+    left: 20,
+    bottom: 10,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 8,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    shadowOffset: {width: 0, height: 2}
   },
   nombre: {
     fontSize: 22,
