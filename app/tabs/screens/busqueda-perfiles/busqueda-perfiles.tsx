@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TextInput, TouchableOpacity, Keyboard } from "react-native";
 import { globalStyles } from "@/utils/globalStyles";
 import { materialColors } from "@/utils/colors";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,8 +7,10 @@ import { useProfessionals } from "@/app/tabs/screens/busqueda-perfiles/hooks/use
 import ProfessionalCardItem from "@/components/ProfessionalCard";
 import SearchFilterModal from "@/components/SearchFilterModal";
 import { FilterState } from "@/app/tabs/screens/busqueda-perfiles/types";
+
 export default function BusquedaPerfiles() {
-  const { filteredList, loading, applyFilters, userLocationAvailable } = useProfessionals();
+  // Destructuramos las funcionalidades del hook
+  const { list, loading, loadingMore, isInitialState, search, loadMore, userLocationAvailable } = useProfessionals();
   
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilterModal, setShowFilterModal] = useState(false);
@@ -20,9 +22,16 @@ export default function BusquedaPerfiles() {
     profesion: ""
   });
 
+  // Debounce: Esperamos 500ms después de que el usuario deja de escribir para buscar
+  // Esto evita hacer un monton de peticiones a Supabase
   useEffect(() => {
-    applyFilters(searchQuery, filters);
-  }, [searchQuery, filters]);
+    const timer = setTimeout(() => {
+      // Disparamos la búsqueda (Reset de página a 0)
+      search(searchQuery, filters);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, filters]); // Se ejecuta cuando cambia texto o filtros
 
   return (
     <View style={styles.container}>
@@ -33,11 +42,13 @@ export default function BusquedaPerfiles() {
           <View style={styles.searchBar}>
             <Ionicons name="search" size={20} color="gray" style={{marginRight: 8}} />
             <TextInput 
-              placeholder="Buscar..."
+              placeholder="Buscar por nombre, especialidad..."
               style={styles.searchInput}
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholderTextColor="#999"
+              returnKeyType="search"
+              onSubmitEditing={Keyboard.dismiss}
             />
             {searchQuery !== "" && (
               <TouchableOpacity onPress={() => setSearchQuery("")}>
@@ -46,7 +57,7 @@ export default function BusquedaPerfiles() {
             )}
           </View>
           <TouchableOpacity 
-            style={[styles.filterButton, (filters.modalidad || filters.maxDistancia || filters.maxPrecio || filters.minRating > 0 || filters.profesion) && styles.filterButtonActive]} 
+            style={[styles.filterButton, (filters.modalidad.length > 0 || filters.maxDistancia || filters.maxPrecio || filters.minRating > 0 || filters.profesion) && styles.filterButtonActive]} 
             onPress={() => setShowFilterModal(true)}
           >
             <Ionicons name="options-outline" size={24} color={materialColors.schemes.light.onSurface} />
@@ -65,22 +76,47 @@ export default function BusquedaPerfiles() {
         userLocationAvailable={userLocationAvailable}
       />
 
-      {/* LISTA */}
-      {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={materialColors.schemes.light.primary} />
+      {/* CONTENIDO PRINCIPAL */}
+      {isInitialState ? (
+        // 1. ESTADO INICIAL (Vacío)
+        <View style={styles.emptyState}>
+          <Ionicons name="search-outline" size={64} color="#ddd" />
+          <Text style={styles.emptyTitle}>Empieza a buscar</Text>
+          <Text style={styles.emptyText}>Escribe una especialidad o usa los filtros para encontrar a tu profesional ideal.</Text>
         </View>
       ) : (
+        // 2. LISTA DE RESULTADOS
         <FlatList
-          data={filteredList}
+          data={list}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <ProfessionalCardItem item={item} />}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          
+          // Scroll infinito
+          onEndReached={() => loadMore(searchQuery, filters)}
+          onEndReachedThreshold={0.5} // Cargar cuando estemos a mitad de la ultima card
+          
+          // Spinner inferior al cargar más
+          ListFooterComponent={
+            loadingMore ? (
+              <View style={{padding: 20}}>
+                <ActivityIndicator color={materialColors.schemes.light.primary} />
+              </View>
+            ) : null
+          }
+
+          // Spinner central inicial o Vacío
           ListEmptyComponent={
-            <View style={styles.center}>
-              <Text style={{color: 'gray', marginTop: 20}}>No se encontraron profesionales.</Text>
-            </View>
+            loading ? (
+              <View style={styles.center}>
+                <ActivityIndicator size="large" color={materialColors.schemes.light.primary} />
+              </View>
+            ) : (
+              <View style={styles.center}>
+                <Text style={{color: 'gray', marginTop: 20}}>No se encontraron resultados.</Text>
+              </View>
+            )
           }
         />
       )}
@@ -97,5 +133,10 @@ const styles = StyleSheet.create({
   filterButton: { padding: 10, backgroundColor: '#f0f0f0', borderRadius: 12 },
   filterButtonActive: { backgroundColor: materialColors.schemes.light.primaryContainer, borderWidth: 1, borderColor: materialColors.schemes.light.primary },
   listContent: { padding: 16 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 50 }
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 50 },
+  
+  // Estilos para el estado vacío inicial
+  emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40, opacity: 0.7 },
+  emptyTitle: { fontSize: 20, fontWeight: 'bold', color: '#888', marginTop: 16 },
+  emptyText: { textAlign: 'center', color: '#999', marginTop: 8, lineHeight: 22 }
 });
