@@ -13,11 +13,11 @@ export function useProfessionals() {
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(0);
   const [isInitialState, setIsInitialState] = useState(true);
 
   const fetchPro = async (pageNumber: number, query: string, filters: FilterState, isNewSearch: boolean = false) => {
     const hasFilters = filters.modalidad.length > 0 || filters.maxPrecio !== "" || filters.minRating > 0 || filters.profesion !== "" || filters.maxDistancia !== "";
+    
     if (query.trim() === "" && !hasFilters) {
       setList([]);
       setIsInitialState(true);
@@ -27,7 +27,9 @@ export function useProfessionals() {
     setIsInitialState(false);
     
     if (isNewSearch) {
+      setList([]); // Limpiamos la lista visualmente para evitar datos viejos
       setLoading(true);
+      setLoadingMore(false); // Apagamos el spinner de abajo
       setHasMore(true);
     } else {
       setLoadingMore(true);
@@ -86,9 +88,7 @@ export function useProfessionals() {
           setList(formatted);
         } else {
           setList(prevList => {
-            // Creamos un Set con los IDs que ya tenemos para revisar rápido
             const existingIds = new Set(prevList.map(p => p.id));
-            // Solo agregamos los nuevos si su ID no está en el Set
             const uniqueNewItems = formatted.filter(p => !existingIds.has(p.id));
             return [...prevList, ...uniqueNewItems];
           });
@@ -103,14 +103,12 @@ export function useProfessionals() {
   };
 
   const search = (query: string, filters: FilterState) => {
-    setPage(0);
     fetchPro(0, query, filters, true);
   };
 
   const loadMore = (query: string, filters: FilterState) => {
     if (!hasMore || loadingMore || isInitialState) return;
-    const nextPage = page + 1;
-    setPage(nextPage);
+    const nextPage = Math.ceil(list.length / PAGE_SIZE);
     fetchPro(nextPage, query, filters, false);
   };
 

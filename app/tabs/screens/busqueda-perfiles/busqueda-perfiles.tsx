@@ -22,8 +22,7 @@ export default function BusquedaPerfiles() {
     profesion: ""
   });
 
-  // Debounce: Esperamos 500ms después de que el usuario deja de escribir para buscar
-  // Esto evita hacer un monton de peticiones a Supabase
+  // Debounce: Esperamos 500ms después de que el usuario deja de escribir
   useEffect(() => {
     const timer = setTimeout(() => {
       // Disparamos la búsqueda (Reset de página a 0)
@@ -31,7 +30,7 @@ export default function BusquedaPerfiles() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, filters]); // Se ejecuta cuando cambia texto o filtros
+  }, [searchQuery, filters]); 
 
   return (
     <View style={styles.container}>
@@ -95,18 +94,19 @@ export default function BusquedaPerfiles() {
           
           // Scroll infinito
           onEndReached={() => loadMore(searchQuery, filters)}
-          onEndReachedThreshold={0.5} // Cargar cuando estemos a mitad de la ultima card
+          onEndReachedThreshold={0.5} 
           
           // Spinner inferior al cargar más
+          // Solo se muestra si estamos cargando mas y la lista YA tiene items
           ListFooterComponent={
-            loadingMore ? (
+            (loadingMore && list.length > 0) ? (
               <View style={{padding: 20}}>
                 <ActivityIndicator color={materialColors.schemes.light.primary} />
               </View>
             ) : null
           }
 
-          // Spinner central inicial o Vacío
+          // Spinner central inicial o Mensaje de "No encontrado"
           ListEmptyComponent={
             loading ? (
               <View style={styles.center}>
