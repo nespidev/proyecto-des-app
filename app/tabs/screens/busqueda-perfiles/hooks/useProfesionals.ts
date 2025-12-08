@@ -75,7 +75,7 @@ export function useProfessionals() {
           precio: item.precio || 0,
           puntuacion: item.puntuacion || 5.0,
           modalidad: item.modalidad || "Remoto",
-          ubicacion: item.ubicacion || "Sin ubicación",
+          ubicacion: item.direccion_legible || "Sin ubicación",
           latitud: item.latitud,
           longitud: item.longitud,
         }));

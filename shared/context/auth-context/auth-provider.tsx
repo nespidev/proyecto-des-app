@@ -77,6 +77,7 @@ const AuthProvider = (props: any) => {
                   nombre: profile.nombre,
                   apellido: profile.apellido,
                   email: profile.email,
+                  direccion_legible: profile.direccion_legible,
                   rol: profile.rol,
                   avatar_url: profile.avatar_url,
                   telefono: profile.telefono,

@@ -156,6 +156,12 @@ export default function PerfilUsuario() {
             {user.telefono ? user.telefono : "No registrado"}
           </Text>
         </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Ubicación:</Text>
+          <Text style={[styles.value, !user.direccion_legible && styles.placeholderText]}>
+            {user.direccion_legible ? user.direccion_legible : "No definida"}
+          </Text>
+        </View>
 
       </View>
       
