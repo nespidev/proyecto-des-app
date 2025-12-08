@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
   // GRAFICO
   chartSection: { flex: 1 },
   sectionTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 16, color: '#333' },
-  chartContainer: { alignItems: 'center', paddingVertical: 10, backgroundColor: '#fff', borderRadius: 16, padding: 10 },
+  chartContainer: { alignItems: 'center', paddingVertical: 10, backgroundColor: '#fff', borderRadius: 16, padding: 10, overflow: 'hidden'},
   emptyChart: { alignItems: 'center', padding: 30, backgroundColor: '#f9f9f9', borderRadius: 12 },
   emptyText: { color: '#888' }
 });
