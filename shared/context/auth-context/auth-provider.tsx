@@ -76,11 +76,14 @@ const AuthProvider = (props: any) => {
                   id: profile.id,
                   nombre: profile.nombre,
                   apellido: profile.apellido,
-                  email: profile.email,
-                  direccion_legible: profile.direccion_legible,
-                  rol: profile.rol,
                   avatar_url: profile.avatar_url,
                   telefono: profile.telefono,
+                  email: profile.email,
+                  direccion_legible: profile.direccion_legible,
+                  peso: profile.peso,
+                  altura: profile.altura,
+                  fecha_actualizacion_peso: profile.fecha_actualizacion_peso,
+                  rol: profile.rol,
                   titulo: professionalData?.titulo,
                   especialidad: professionalData?.especialidad
                 }
