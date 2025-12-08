@@ -11,6 +11,9 @@ import { LineChart } from "react-native-gifted-charts";
 
 const screenWidth = Dimensions.get("window").width;
 
+const MIN_WEIGHT = 20;
+const MAX_WEIGHT = 300;
+
 export default function Entrenar() {
   const { state, dispatch } = useContext<any>(AuthContext);
   const user = state.user;
@@ -72,17 +75,24 @@ export default function Entrenar() {
   };
 
   const changeWeight = (amount: number) => {
-    const current = parseFloat(peso) || 0;
-    const newVal = (current + amount).toFixed(1);
-    setPeso(newVal);
+    let current = parseFloat(peso);
+    if (isNaN(current)) current = MIN_WEIGHT; // Vacio empezamos desde el minimo
+
+    let newVal = current + amount;
+
+    // Restringir valor dentro de los limites
+    if (newVal < MIN_WEIGHT) newVal = MIN_WEIGHT;
+    if (newVal > MAX_WEIGHT) newVal = MAX_WEIGHT;
+
+    setPeso(newVal.toFixed(1));
   };
 
   const handleSaveWeight = async () => {
     if (!user) return;
     
     const pesoNum = parseFloat(peso);
-    if (isNaN(pesoNum)) {
-      Alert.alert("Error", "Ingresa un peso válido");
+    if (isNaN(pesoNum) || pesoNum < MIN_WEIGHT || pesoNum > MAX_WEIGHT) {
+      Alert.alert("Peso inválido", `Por favor ingresa un peso entre ${MIN_WEIGHT}kg y ${MAX_WEIGHT}kg.`);
       return;
     }
 
