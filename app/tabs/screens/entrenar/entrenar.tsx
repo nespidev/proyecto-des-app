@@ -277,7 +277,8 @@ const formatDate = (dateString: string | null | undefined) => {
                 spacing={40}
                 initialSpacing={20}
                 hideRules
-                yAxisOffset={Math.min(...weightHistory.map(d => d.value)) - 5}
+                // yAxisOffset={Math.min(...weightHistory.map(d => d.value)) - 5}
+                yAxisOffset={10}
                 curved
                 isAnimated
                 scrollToEnd
