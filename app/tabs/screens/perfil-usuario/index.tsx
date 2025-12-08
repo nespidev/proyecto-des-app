@@ -1,5 +1,5 @@
 import PerfilUsuario from "./perfil-usuario";
-import PerfilEntrenador from "./perfil-entrenador";
+import PerfilEntrenador from "./perfil-profesional";
 
 
 export default function PerfilUsuarioScreen() {

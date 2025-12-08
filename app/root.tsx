@@ -8,7 +8,7 @@ import TabsScreen from "@/app/tabs";
 import AuthStackScreen from "@/app/auth";
 import { AuthContext } from "@/shared/context/auth-context";
 import PerfilUsuario from "@/app/tabs/screens/perfil-usuario/perfil-usuario";
-import PerfilEntrenador from "@/app/tabs/screens/perfil-usuario/perfil-entrenador";
+import PerfilEntrenador from "@/app/tabs/screens/perfil-usuario/perfil-profesional";
 import Chat from "@/app/tabs/screens/chat";
 import { materialColors } from "@/utils/colors";
 

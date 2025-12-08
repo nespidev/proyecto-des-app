@@ -5,10 +5,10 @@ import { globalStyles } from "@/utils/globalStyles";
 import { materialColors } from "@/utils/colors";
 // import { RootStackParamList } from "@/app/navigation/RootNavigation";
 
-// type Props = NativeStackScreenProps<RootStackParamList, "PerfilEntrenador">;
+// type Props = NativeStackScreenProps<RootStackParamList, "PerfilProfesional">;
 
 
-const entrenadorPrueba = {
+const profesionalPrueba = {
   nombre: "Juan Pérez",
   edad: 35,
   especialidad: "Entrenador Personal",
@@ -17,15 +17,15 @@ const entrenadorPrueba = {
   experiencia: "10 años",
 };
 
-export default function PerfilEntrenador() {
+export default function PerfilProfesional() {
 
   return (
     <ScrollView style={styles.container}>
         <Text style={[globalStyles.title, { textAlign: "center", marginVertical: 12 }]}>
-        Perfil Entrenador
+        Perfil Profesional
         </Text>
         <Text style={[globalStyles.subtitle, { textAlign: "center", marginBottom: 16 }]}>
-        Pantalla del Entrenador
+        Pantalla del Profesional
         </Text>
 
         <View style={styles.card}>
@@ -34,32 +34,32 @@ export default function PerfilEntrenador() {
             source={require("@/assets/user-predetermiando.png")}
             style={styles.avatar}
             />
-            <Text style={styles.nombre}>{entrenadorPrueba.nombre}</Text>
+            <Text style={styles.nombre}>{profesionalPrueba.nombre}</Text>
         </View>
 
         <View style={styles.infoRow}>
             <Text style={styles.label}>Edad:</Text>
-            <Text style={styles.value}>{entrenadorPrueba.edad}</Text>
+            <Text style={styles.value}>{profesionalPrueba.edad}</Text>
         </View>
 
         <View style={styles.infoRow}>
             <Text style={styles.label}>Correo:</Text>
-            <Text style={styles.value}>{entrenadorPrueba.correo}</Text>
+            <Text style={styles.value}>{profesionalPrueba.correo}</Text>
         </View>
 
         <View style={styles.infoRow}>
             <Text style={styles.label}>Tel:</Text>
-            <Text style={styles.value}>{entrenadorPrueba.tel}</Text>
+            <Text style={styles.value}>{profesionalPrueba.tel}</Text>
         </View>
 
         <View style={styles.infoRow}>
             <Text style={styles.label}>Especialidad:</Text>
-            <Text style={styles.value}>{entrenadorPrueba.especialidad}</Text>
+            <Text style={styles.value}>{profesionalPrueba.especialidad}</Text>
         </View>
 
         <View style={styles.infoRow}>
             <Text style={styles.label}>Experiencia:</Text>
-            <Text style={styles.value}>{entrenadorPrueba.experiencia}</Text>
+            <Text style={styles.value}>{profesionalPrueba.experiencia}</Text>
         </View>
         </View>
     </ScrollView>
