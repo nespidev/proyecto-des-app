@@ -3,7 +3,7 @@ export const ROOT_ROUTES = {
   TABS: 'tabs',
   PERFIL : 'perfil_usuario',
   PERFIL_PUBLICO: 'perfil_publico',
-  CHAT: 'chat',
+  CHAT_ROOM: 'chat_room',
   CALENDAR_SCREEN: 'calendar_screen',
 }
 
@@ -17,6 +17,6 @@ export const TAB_ROUTES = {
   HOME: 'home',
   PERFIL: 'perfil_usuario',
   ENTRENAR: 'entrenar',
-  CHAT: 'chat_list',
+  CHAT_LIST: 'chat_list',
   BUSQUEDA_PERFILES: 'busqueda_perfiles',
 }

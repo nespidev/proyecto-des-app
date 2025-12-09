@@ -6,8 +6,8 @@ import { materialColors } from "@/utils/colors";
 import { useNavigation } from "@react-navigation/native";
 import { ROOT_ROUTES, TAB_ROUTES } from "@/utils/constants";
 
-import {HomeScreen, EntrenarScreen, BusquedaPerfilesScreen, ChatScreen} from "./screens";
-import ChatListScreen from "./screens/chat-list";
+import {HomeScreen, EntrenarScreen, BusquedaPerfilesScreen, ChatListScreen} from "./screens";
+
 const Tab = createBottomTabNavigator();
 
 export default function TabsScreen() {
@@ -24,7 +24,7 @@ export default function TabsScreen() {
             iconName = "home";
           } else if (route.name === TAB_ROUTES.ENTRENAR) {
             iconName = "barbell";
-          } else if (route.name === TAB_ROUTES.CHAT) {
+          } else if (route.name === TAB_ROUTES.CHAT_LIST) {
             iconName = "chatbubbles";
           } else if (route.name === TAB_ROUTES.BUSQUEDA_PERFILES) {
             iconName = "search";
@@ -66,7 +66,7 @@ export default function TabsScreen() {
         options={{ title: "Inicio" }}
       />
       <Tab.Screen
-        name={TAB_ROUTES.CHAT}
+        name={TAB_ROUTES.CHAT_LIST}
         component={ChatListScreen}
         options={{ title: "Chats" }}
       />

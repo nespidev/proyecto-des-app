@@ -9,8 +9,8 @@ import AuthStackScreen from "@/app/auth";
 import { AuthContext } from "@/shared/context/auth-context";
 import PerfilUsuario from "@/app/tabs/screens/perfil-usuario/perfil-usuario";
 import PerfilPublico from "@/app/tabs/screens/perfil-publico/perfil-publico";
-import CalendarScreen from "./tabs/screens/calendar";
-import Chat from "@/app/tabs/screens/chat";
+import CalendarScreen from "@/app/tabs/screens/calendar";
+import ChatRoomScreen from "@/app/tabs/screens/chat-room";
 import { materialColors } from "@/utils/colors";
 
 const Stack = createNativeStackNavigator();
@@ -59,9 +59,9 @@ export default function Root() {
               options={{ title: "PerfilPublico" }}
             />
             <Stack.Screen
-              name={ROOT_ROUTES.CHAT}
-              component={Chat}
-              options={{ title: "Chat" }}
+              name={ROOT_ROUTES.CHAT_ROOM}
+              component={ChatRoomScreen}
+              options={{ title: "Chat Room" }}
             />
             <Stack.Screen 
               name={ROOT_ROUTES.CALENDAR_SCREEN} 

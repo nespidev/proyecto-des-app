@@ -1,68 +1,114 @@
 import React from "react";
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from "react-native";
-import { materialColors } from "@/utils/colors";
-
-const mockImage = require("@/assets/user-predetermiando.png")
-const mockChats = [
-  { id: "1", nombre: "Entrenador Juan", ultimoMensaje: "Nos vemos mañana 💪", hora: "10:30", avatar: mockImage },
-  { id: "2", nombre: "Sofi", ultimoMensaje: "Dale, nos hablamos!", hora: "Ayer", avatar: mockImage },
-  { id: "3", nombre: "Camila Yoga", ultimoMensaje: "La clase es a las 18hs", hora: "Domingo", avatar: mockImage },
-  { id: "4", nombre: "Profe Ana", ultimoMensaje: "Recuerda tu rutina de hoy", hora: "09:15", avatar: mockImage },
-  { id: "5", nombre: "Carlos", ultimoMensaje: "Voy a llegar tarde al gym", hora: "08:50", avatar: mockImage },
-  { id: "6", nombre: "Grupo Crossfit", ultimoMensaje: "Nueva clase a las 19hs", hora: "Sábado", avatar: mockImage },
-  { id: "7", nombre: "María", ultimoMensaje: "Gracias por el consejo!", hora: "Viernes", avatar: mockImage },
-  { id: "8", nombre: "Entrenador Luis", ultimoMensaje: "¡Buen progreso esta semana!", hora: "07:30", avatar: mockImage },
-  { id: "9", nombre: "Light-weight Gym", ultimoMensaje: "El primer día es gratis!", hora: "Jueves", avatar: mockImage },
-  { id: "10", nombre: "Santiago", ultimoMensaje: "Voy por el suplemento", hora: "Miércoles", avatar: mockImage },
-];
-
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { globalStyles } from "@/utils/globalStyles";
+import { materialColors } from "@/utils/colors";
+import { useChatList } from "./hooks/useChatList";
 import { ROOT_ROUTES } from "@/utils/constants";
+import { format } from "date-fns";
+
+const defaultAvatar = require("@/assets/user-predetermiando.png");
 
 export default function ChatList() {
+  const { chats, loading, refreshChats } = useChatList();
   const navigation = useNavigation<any>();
 
-  const renderItem = ({ item }: any) => (
-    <TouchableOpacity
-      style={styles.chatCard}
-      onPress={() => navigation.navigate(ROOT_ROUTES.CHAT as never)} 
+  const handlePress = (chat: any) => {
+    navigation.navigate(ROOT_ROUTES.CHAT, { 
+      conversationId: chat.id,
+      otherUserId: chat.other_user_id,
+      userName: `${chat.other_user_nombre} ${chat.other_user_apellido}`,
+      isActive: chat.is_chat_active // Pasamos el estado al chat
+    });
+  };
+
+  const renderItem = ({ item }: { item: any }) => (
+    <TouchableOpacity 
+      style={[styles.card, !item.is_chat_active && styles.cardInactive]} 
+      onPress={() => handlePress(item)}
     >
-      <Image source={item.avatar} style={styles.avatar} />
-      <View style={styles.chatInfo}>
-        <Text style={styles.nombre}>{item.nombre}</Text>
-        <Text style={styles.mensaje}>{item.ultimoMensaje}</Text>
+      <Image 
+        source={item.other_user_avatar ? { uri: item.other_user_avatar } : defaultAvatar} 
+        style={[styles.avatar, !item.is_chat_active && styles.avatarInactive]} 
+      />
+      <View style={styles.info}>
+        <View style={styles.row}>
+          <Text style={styles.name}>{item.other_user_nombre} {item.other_user_apellido}</Text>
+          <Text style={styles.date}>
+            {item.last_message_at ? format(new Date(item.last_message_at), 'dd/MM') : ''}
+          </Text>
+        </View>
+        
+        <View style={styles.row}>
+          <Text style={styles.lastMsg} numberOfLines={1}>
+            {item.last_message || "Iniciar conversación..."}
+          </Text>
+          {!item.is_chat_active && (
+            <View style={styles.inactiveBadge}>
+              <Text style={styles.inactiveText}>Finalizado</Text>
+            </View>
+          )}
+        </View>
       </View>
-      <Text style={styles.hora}>{item.hora}</Text>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Chats</Text>
-      <FlatList
-        data={mockChats}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
+      <Text style={[globalStyles.title, {margin: 16}]}>Mensajes</Text>
+      
+      {loading ? (
+        <ActivityIndicator size="large" color={materialColors.schemes.light.primary} style={{marginTop: 50}} />
+      ) : (
+        <FlatList
+          data={chats}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ padding: 16 }}
+          ListEmptyComponent={
+            <Text style={{textAlign: 'center', color: '#888', marginTop: 40}}>
+              No tienes conversaciones activas.
+            </Text>
+          }
+        />
+      )}
     </View>
   );
 }
 
-
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16,     backgroundColor: materialColors.schemes.light.surface },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 12, textAlign: "center" },
-  chatCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+  container: { flex: 1, backgroundColor: '#F5F5F5' },
+  card: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 12,
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2
   },
-  avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 12 },
-  chatInfo: { flex: 1 },
-  nombre: { fontSize: 16, fontWeight: "bold" },
-  mensaje: { fontSize: 14, color: "gray" },
-  hora: { fontSize: 12, color: "gray" },
+  cardInactive: {
+    backgroundColor: '#f9f9f9', // Un poco más gris
+    opacity: 0.8
+  },
+  avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 15 },
+  avatarInactive: { opacity: 0.5 },
+  info: { flex: 1 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  name: { fontSize: 16, fontWeight: 'bold', color: '#333' },
+  date: { fontSize: 12, color: '#999' },
+  lastMsg: { fontSize: 14, color: '#666', marginTop: 4, flex: 1 },
+  
+  // Badge de "Finalizado"
+  inactiveBadge: {
+    backgroundColor: '#eee',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginLeft: 8
+  },
+  inactiveText: { fontSize: 10, color: '#666', fontWeight: 'bold', textTransform: 'uppercase' }
 });
