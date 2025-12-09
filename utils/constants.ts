@@ -4,6 +4,7 @@ export const ROOT_ROUTES = {
   PERFIL : 'perfil_usuario',
   PERFIL_PUBLICO: 'perfil_publico',
   CHAT: 'chat',
+  CALENDAR_SCREEN: 'calendar_screen',
 }
 
 

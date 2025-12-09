@@ -9,6 +9,7 @@ import AuthStackScreen from "@/app/auth";
 import { AuthContext } from "@/shared/context/auth-context";
 import PerfilUsuario from "@/app/tabs/screens/perfil-usuario/perfil-usuario";
 import PerfilPublico from "@/app/tabs/screens/perfil-publico/perfil-publico";
+import CalendarScreen from "./tabs/screens/calendar";
 import Chat from "@/app/tabs/screens/chat";
 import { materialColors } from "@/utils/colors";
 
@@ -61,6 +62,11 @@ export default function Root() {
               name={ROOT_ROUTES.CHAT}
               component={Chat}
               options={{ title: "Chat" }}
+            />
+            <Stack.Screen 
+              name={ROOT_ROUTES.CALENDAR_SCREEN} 
+              component={CalendarScreen} 
+              options={{ title: 'Mi Calendario' }} 
             />
           </>
         ) : (

@@ -6,6 +6,7 @@ import MockCard from "@/components/MockCard";
 import { materialColors } from "@/utils/colors";
 import { TAB_ROUTES } from "@/utils/constants";
 import SearchEntryCard from "@/components/SearchEntryCard";
+import AppointmentWidget from "@/components/AppointmentWidget";
 
 const dataMockUp = [
   { id: "1", titulo: "Rutina de Fuerza" },
@@ -28,8 +29,10 @@ export default function Home() {
           <Text style={globalStyles.title}>Hola de nuevo 👋</Text>
           <Text style={globalStyles.subtitle}>¿Listo para entrenar hoy?</Text>
         </View>
-
+        
         <SearchEntryCard onPress={handleNavigateToSearch} />
+
+        <AppointmentWidget />
 
         <Text style={styles.sectionTitle}>Tus accesos rápidos</Text>
         <MockCard titulo="Ver mi Rutina actual" />
