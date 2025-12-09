@@ -16,7 +16,7 @@ export default function ContactsList() {
     const conversationId = await startConversation(contact.id);
     if (conversationId) {
       // Reemplazamos la pantalla actual por el chat para que al volver vaya a la lista de chats
-      navigation.replace(ROOT_ROUTES.CHAT, { 
+      navigation.replace(ROOT_ROUTES.CHAT_ROOM, { 
         conversationId,
         otherUserId: contact.id,
         userName: `${contact.nombre} ${contact.apellido}`

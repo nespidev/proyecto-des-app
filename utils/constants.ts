@@ -5,6 +5,7 @@ export const ROOT_ROUTES = {
   PERFIL_PUBLICO: 'perfil_publico',
   CHAT_ROOM: 'chat_room',
   CALENDAR_SCREEN: 'calendar_screen',
+  CONTACTS_LIST: 'contacts_list',
 }
 
 
