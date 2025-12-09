@@ -3,15 +3,16 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { materialColors } from "@/utils/colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Ionicons } from "@expo/vector-icons";
-import { ProfesionalCard } from "@/app/tabs/screens/busqueda-perfiles/types"
+import { ProfesionalCard } from "@/app/tabs/screens/busqueda-perfiles/types";
 
 interface Props {
   item: ProfesionalCard;
+  onPress: () => void;
 }
 
-export default function ProfessionalCardItem({ item }: Props) {
+export default function ProfessionalCardItem({ item, onPress }: Props) {
   
-const renderModalityTags = (modalidad: string) => (
+  const renderModalityTags = (modalidad: string) => (
     <View style={styles.tagsContainer}>
       {(modalidad === 'Remoto' || modalidad === 'Híbrido') && (
         <View style={[styles.tag, styles.tagRemoto]}>
@@ -27,7 +28,7 @@ const renderModalityTags = (modalidad: string) => (
   );
 
   return (
-    <TouchableOpacity style={styles.card} activeOpacity={0.9}>
+    <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={onPress}>
       <View style={styles.cardHeader}>
         <Image 
           source={item.avatar_url ? { uri: item.avatar_url } : require("@/assets/user-predetermiando.png")} 

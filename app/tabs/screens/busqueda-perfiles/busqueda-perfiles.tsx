@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, TextInput, TouchableOpacity, Keyboard } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { globalStyles } from "@/utils/globalStyles";
 import { materialColors } from "@/utils/colors";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,10 +8,12 @@ import { useProfessionals } from "@/app/tabs/screens/busqueda-perfiles/hooks/use
 import ProfessionalCardItem from "@/components/ProfessionalCard";
 import SearchFilterModal from "@/components/SearchFilterModal";
 import { FilterState } from "@/app/tabs/screens/busqueda-perfiles/types";
-
+import { ROOT_ROUTES } from "@/utils/constants";
 export default function BusquedaPerfiles() {
   // Destructuramos las funcionalidades del hook
   const { list, loading, loadingMore, isInitialState, search, loadMore, userLocationAvailable } = useProfessionals();
+
+  const navigation = useNavigation<any>();
   
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilterModal, setShowFilterModal] = useState(false);
@@ -30,7 +33,15 @@ export default function BusquedaPerfiles() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, filters]); 
+  }, [searchQuery, filters]);
+
+  const handlePressProfessional = (id: string) => {
+    // Navegamos a la pantalla de Perfil Publico pasando el ID
+    navigation.navigate(ROOT_ROUTES.PERFIL_PUBLICO, { 
+        userId: id,
+        hideContactButton: false // Queremos ver el botón de contactar
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -88,7 +99,11 @@ export default function BusquedaPerfiles() {
         <FlatList
           data={list}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <ProfessionalCardItem item={item} />}
+          renderItem={({ item }) => (
+              <ProfessionalCardItem 
+              item={item} 
+              onPress={() => handlePressProfessional(item.id)} 
+            />)}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           

@@ -2,7 +2,7 @@ export const ROOT_ROUTES = {
   AUTH: 'auth',
   TABS: 'tabs',
   PERFIL : 'perfil_usuario',
-  PERFIL_ENTRENADOR: 'perfil_entrenador',
+  PERFIL_PUBLICO: 'perfil_publico',
   CHAT: 'chat',
 }
 

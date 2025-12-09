@@ -8,7 +8,7 @@ import TabsScreen from "@/app/tabs";
 import AuthStackScreen from "@/app/auth";
 import { AuthContext } from "@/shared/context/auth-context";
 import PerfilUsuario from "@/app/tabs/screens/perfil-usuario/perfil-usuario";
-import PerfilEntrenador from "@/app/tabs/screens/perfil-usuario/perfil-profesional";
+import PerfilPublico from "@/app/tabs/screens/perfil-publico/perfil-publico";
 import Chat from "@/app/tabs/screens/chat";
 import { materialColors } from "@/utils/colors";
 
@@ -53,9 +53,9 @@ export default function Root() {
               options={{ title: "Perfil" }}
             />
             <Stack.Screen
-              name={ROOT_ROUTES.PERFIL_ENTRENADOR}
-              component={PerfilEntrenador}
-              options={{ title: "Perfil Entrenador" }}
+              name={ROOT_ROUTES.PERFIL_PUBLICO}
+              component={PerfilPublico}
+              options={{ title: "PerfilPublico" }}
             />
             <Stack.Screen
               name={ROOT_ROUTES.CHAT}
