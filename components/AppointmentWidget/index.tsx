@@ -62,7 +62,7 @@ export default function AppointmentWidget() {
   return (
     <TouchableOpacity style={styles.container} onPress={handlePress} activeOpacity={0.9}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>Próximo Turno ({viewMode === 'professional' ? 'Como Pro' : 'Como Alumno'})</Text>
+        <Text style={styles.title}>Próximo Turno ({viewMode === 'professional' ? 'Como Pro' : 'Como User'})</Text>
         <Ionicons name="calendar" size={20} color={materialColors.schemes.light.primary} />
       </View>
 
