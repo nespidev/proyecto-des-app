@@ -21,6 +21,7 @@ LocaleConfig.defaultLocale = 'es';
 export default function Calendar() {
   const { state } = useContext<any>(AuthContext);
   const user = state.user;
+  const viewMode = state.viewMode;
 
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [appointments, setAppointments] = useState<any[]>([]);
@@ -28,14 +29,14 @@ export default function Calendar() {
 
   useEffect(() => {
     fetchMonthAvailability();
-  }, [user]);
+  }, [user, viewMode]);
 
   useEffect(() => {
     fetchAppointmentsForDay(selectedDate);
   }, [selectedDate]);
 
   const fetchMonthAvailability = async () => {
-    const column = user.rol === 'professional' ? 'professional_id' : 'client_id';
+    const column = viewMode === 'professional' ? 'professional_id' : 'client_id';
     const { data } = await supabase
       .from('appointments')
       .select('start_time')
@@ -53,7 +54,7 @@ export default function Calendar() {
   };
 
   const fetchAppointmentsForDay = async (date: string) => {
-    const column = user.rol === 'professional' ? 'professional_id' : 'client_id';
+    const column = viewMode === 'professional' ? 'professional_id' : 'client_id';
     const startOfDay = `${date}T00:00:00`;
     const endOfDay = `${date}T23:59:59`;
 
@@ -62,7 +63,7 @@ export default function Calendar() {
       .select(`
         *,
         contracts ( services ( title ) ),
-        other_user:profiles!${user.rol === 'professional' ? 'client_id' : 'professional_id'}(nombre, apellido)
+        other_user:profiles!${viewMode === 'professional' ? 'client_id' : 'professional_id'}(nombre, apellido)
       `)
       .eq(column, user.id)
       .eq('status', 'scheduled')

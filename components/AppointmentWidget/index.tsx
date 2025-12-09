@@ -10,25 +10,26 @@ import { useNavigation } from "@react-navigation/native";
 import { ROOT_ROUTES } from "@/utils/constants";
 
 export default function AppointmentWidget() {
-  const { state } = useContext(AuthContext);
-  const viewMode = state.viewMode;
-
-  const column = viewMode === 'professional' ? 'professional_id' : 'client_id';
+  const { state } = useContext<any>(AuthContext);
+  const viewMode = state.viewMode; // 'client' o 'professional'
   const user = state.user;
   const navigation = useNavigation<any>();
   
   const [nextAppointment, setNextAppointment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  
-
   useEffect(() => {
     if (user?.id) fetchNextAppointment();
-  }, [user]);
+  }, [user, viewMode]);
 
   const fetchNextAppointment = async () => {
+    setLoading(true); // loading true al cambiar de modo
     try {
       const now = new Date().toISOString();
+      
+      // Si soy pro busco donde yo soy el professional_id
+      // Si soy cliente busco donde yo soy el client_id
+      const column = viewMode === 'professional' ? 'professional_id' : 'client_id';
       
       const { data, error } = await supabase
         .from('appointments')
@@ -46,23 +47,22 @@ export default function AppointmentWidget() {
       if (error && error.code !== 'PGRST116') throw error;
       setNextAppointment(data);
     } catch (err) {
-      // Sin turno proximo
+      setNextAppointment(null); // Limpiamos si no hay turno
     } finally {
       setLoading(false);
     }
   };
 
   const handlePress = () => {
-    // Ahora navegamos a la ruta "Calendar"
     navigation.navigate(ROOT_ROUTES.CALENDAR_SCREEN); 
   };
 
-  if (loading) return <ActivityIndicator color={materialColors.schemes.light.primary} />;
+  if (loading) return <ActivityIndicator color={materialColors.schemes.light.primary} style={{marginVertical: 20}} />;
 
   return (
     <TouchableOpacity style={styles.container} onPress={handlePress} activeOpacity={0.9}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>Próximo Turno</Text>
+        <Text style={styles.title}>Próximo Turno ({viewMode === 'professional' ? 'Como Pro' : 'Como Alumno'})</Text>
         <Ionicons name="calendar" size={20} color={materialColors.schemes.light.primary} />
       </View>
 
