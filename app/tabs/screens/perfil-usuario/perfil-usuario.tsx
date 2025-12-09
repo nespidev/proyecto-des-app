@@ -1,22 +1,52 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useLayoutEffect} from "react";
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import Button from "@/components/Button";
 import { materialColors } from "@/utils/colors";
 import { AuthContext } from "@/shared/context/auth-context";
 import AUTH_ACTIONS from "@/shared/context/auth-context/enums";
 import { supabase } from "@/utils/supabase";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { selectMediaFromGallery, takePhoto, uploadFileToSupabase } from "@/utils/media-helper";
 import CircleIconButton from "@/components/CircleIconButton";
 
 const defaultImage = require("@/assets/user-predetermiando.png");
 
 export default function PerfilUsuario() {
+  const navigation = useNavigation();
   const { state, dispatch } = useContext<any>(AuthContext);
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const user = state.user;
+
+  const isProfessional = user?.rol === 'professional'; // Rol real
+  const currentMode = state.viewMode; // Modo de vista actual
+
+  const toggleMode = () => {
+    dispatch({ type: 'TOGGLE_VIEW_MODE' });
+    Alert.alert("Modo cambiado", `Ahora estás viendo la app como ${currentMode === 'client' ? 'Profesional' : 'Usuario'}`);
+  };
+
+  // --- CONFIGURACION DE HEADER ---
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        isProfessional ? (
+          <TouchableOpacity onPress={toggleMode} style={styles.headerSwitchButton}>
+             <MaterialCommunityIcons 
+                name={currentMode === 'client' ? "account-tie" : "account"} 
+                size={24} 
+                color={materialColors.schemes.light.primary} 
+             />
+             <Text style={styles.headerSwitchText}>
+               {currentMode === 'client' ? 'Ver como Pro' : 'Ver como Usuario'}
+             </Text>
+          </TouchableOpacity>
+        ) : null
+      ),
+    });
+  }, [navigation, isProfessional, currentMode]); // Se actualiza si cambia el modo
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -98,7 +128,6 @@ export default function PerfilUsuario() {
     <ScrollView style={styles.container}>
       <View style={styles.card}>
         <View style={styles.header}>
-          
           <View>
             <Image
               source={
@@ -118,13 +147,13 @@ export default function PerfilUsuario() {
                   icon="photo-camera" 
                   onPress={() => handleUpdateAvatar('camera')} 
                   disabled={loading}
-                  style={styles.cameraButton} // Solo pasamos la posición
+                  style={styles.cameraButton}
                 />
             <CircleIconButton 
                   icon="edit" 
                   onPress={() => handleUpdateAvatar('gallery')} 
                   disabled={loading}
-                  style={styles.editButton} // Solo pasamos la posición
+                  style={styles.editButton}
                 />
           </View>
           
@@ -175,7 +204,7 @@ export default function PerfilUsuario() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+container: {
     flex: 1,
     backgroundColor: materialColors.schemes.light.surface,
     padding: 16,
@@ -276,5 +305,34 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     alignSelf: "center",
     width: "100%"
+  },
+  // ESTILOS NUEVOS PARA EL HEADER
+  headerSwitchButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 16,
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: materialColors.schemes.light.outlineVariant
+  },
+  headerSwitchText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: materialColors.schemes.light.primary,
+    marginLeft: 6
+  },
+  modeBadge: {
+    marginTop: 8,
+    backgroundColor: '#eee',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 4
+  },
+  modeText: {
+    fontSize: 12,
+    color: '#666'
   }
 });

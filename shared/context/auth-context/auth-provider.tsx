@@ -13,6 +13,7 @@ interface State {
     isLoading: boolean;
     token: string | null;
     user: IUser | null;
+    viewMode: 'client' | 'professional';
     refreshToken: string | null;
 }
 
@@ -21,17 +22,25 @@ const initialState: State = {
   token: null,
   user: null,
   refreshToken: null,
+  viewMode: 'client',
 }
 
 const AuthProvider = (props: any) => {
-  const [state, dispatch] = useReducer((prevState: State, action: Action) => {
+  const [state, dispatch] = useReducer((prevState: State, action: Action): State => { // <--- Tipamos explícitamente el retorno
     switch (action.type) {
       case AUTH_ACTIONS.LOGIN:
         return {
           ...prevState,
           user: action.payload.user,
+          // SOLUCIÓN AQUÍ: Forzamos el tipo con 'as'
+          viewMode: (action.payload.user.rol === 'professional' ? 'professional' : 'client') as 'client' | 'professional',
           token: action.payload.token,
           isLoading: false,
+        };
+      case 'TOGGLE_VIEW_MODE':
+        return {
+          ...prevState,
+          viewMode: prevState.viewMode === 'client' ? 'professional' : 'client'
         };
       case AUTH_ACTIONS.LOGOUT:
         return { ...initialState, isLoading: false };
@@ -42,11 +51,11 @@ const AuthProvider = (props: any) => {
     }
   }, initialState);
 
+  // ... (El resto del useEffect queda igual)
   useEffect(() => {
     const handleSession = async (session: any) => {
       if (session) {
         try {
-          // Buscar datos del perfil base
           const { data: profile, error } = await supabase
             .from('profiles')
             .select('*')
@@ -55,7 +64,6 @@ const AuthProvider = (props: any) => {
           
           if (error) throw error;
 
-          // Si es profesional buscar datos extra
           let professionalData = null;
           if (profile && profile.rol === 'professional') {
              const { data } = await supabase
@@ -67,7 +75,6 @@ const AuthProvider = (props: any) => {
           }
 
           if (profile) {
-            // Actualizar estado global
             dispatch({
               type: AUTH_ACTIONS.LOGIN,
               payload: {
@@ -95,17 +102,14 @@ const AuthProvider = (props: any) => {
           dispatch({ type: AUTH_ACTIONS.LOGOUT });
         }
       } else {
-        // Si no hay sesion limpiamos estado
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
       }
     };
 
-    // Verificar sesion inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       handleSession(session);
     });
 
-    // Suscribirse a cambios (login, logout, etc)
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       handleSession(session);
     });

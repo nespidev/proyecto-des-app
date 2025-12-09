@@ -10,12 +10,17 @@ import { useNavigation } from "@react-navigation/native";
 import { ROOT_ROUTES } from "@/utils/constants";
 
 export default function AppointmentWidget() {
-  const { state } = useContext<any>(AuthContext);
+  const { state } = useContext(AuthContext);
+  const viewMode = state.viewMode;
+
+  const column = viewMode === 'professional' ? 'professional_id' : 'client_id';
   const user = state.user;
   const navigation = useNavigation<any>();
   
   const [nextAppointment, setNextAppointment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  
 
   useEffect(() => {
     if (user?.id) fetchNextAppointment();
@@ -24,7 +29,6 @@ export default function AppointmentWidget() {
   const fetchNextAppointment = async () => {
     try {
       const now = new Date().toISOString();
-      const column = user.rol === 'professional' ? 'professional_id' : 'client_id';
       
       const { data, error } = await supabase
         .from('appointments')
