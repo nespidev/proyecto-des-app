@@ -5,33 +5,49 @@ import { AuthContext } from "@/shared/context/auth-context";
 export function useContacts() {
   const { state } = useContext<any>(AuthContext);
   const user = state.user;
+  const viewMode = state.viewMode; // Usamos el modo de vista actual
+
   const [contacts, setContacts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) fetchContacts();
-  }, [user]);
+  }, [user, viewMode]); // Recargamos si cambia el modo
 
   const fetchContacts = async () => {
     try {
       setLoading(true);
-      // Determinamos qué columna buscar según el rol
-      // Si soy Pro, busco mis clientes. Si soy Cliente, busco mis profesionales.
-      const myColumn = user.rol === 'professional' ? 'professional_id' : 'client_id';
-      const theirColumn = user.rol === 'professional' ? 'client_id' : 'professional_id';
+      
+      // Logica dinamica basada en el MODO, no solo el rol
+      const amIProfessional = viewMode === 'professional';
+      
+      const myColumn = amIProfessional ? 'professional_id' : 'client_id';
+      const theirColumn = amIProfessional ? 'client_id' : 'professional_id';
 
-      // 1. Buscamos IDs únicos en la tabla de contratos
-      const { data: contracts, error } = await supabase
-        .from('plans') // O 'contracts' si usas esa tabla
-        .select(`${theirColumn}, profiles!${theirColumn}(*)`)
+      //  Consultamos la tabla 'contracts' (donde están las relaciones comerciales)
+      // Usamos la sintaxis de Supabase para hacer JOIN con la columna especifica
+      const { data: rawData, error } = await supabase
+        .from('contracts') 
+        .select(`
+          ${theirColumn}, 
+          other_user:profiles!${theirColumn} (
+            id,
+            nombre, 
+            apellido, 
+            avatar_url, 
+            rol
+          )
+        `)
         .eq(myColumn, user.id);
 
       if (error) throw error;
 
-      // 2. Filtramos duplicados (por si tienes varios planes con la misma persona)
+      //  Filtramos duplicados (puedes tener varios contratos con la misma persona)
       const uniqueContactsMap = new Map();
-      contracts?.forEach((c: any) => {
-        const profile = c.profiles; // Los datos del otro
+      
+      rawData?.forEach((item: any) => {
+        const profile = item.other_user;
+        // Solo agregamos si tenemos datos del perfil y no está repetido
         if (profile && !uniqueContactsMap.has(profile.id)) {
           uniqueContactsMap.set(profile.id, profile);
         }
@@ -48,16 +64,16 @@ export function useContacts() {
 
   const startConversation = async (otherUserId: string) => {
     try {
-      // 1. Verificar si ya existe chat
+      // Verificar si ya existe chat (Misma logica que antes)
       const { data: existing } = await supabase
         .from('conversations')
         .select('id')
         .or(`and(participant_a.eq.${user.id},participant_b.eq.${otherUserId}),and(participant_a.eq.${otherUserId},participant_b.eq.${user.id})`)
-        .single();
+        .maybeSingle(); // Usamos maybeSingle para no lanzar error si no existe
 
       if (existing) return existing.id;
 
-      // 2. Si no existe, crear
+      // Si no existe, crear
       const { data: newChat, error } = await supabase
         .from('conversations')
         .insert({
