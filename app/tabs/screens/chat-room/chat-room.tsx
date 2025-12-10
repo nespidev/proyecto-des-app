@@ -1,5 +1,12 @@
-import React from "react";
-import { View, StyleSheet, Platform, KeyboardAvoidingView, StatusBar } from "react-native";
+import React, { useState } from "react";
+import { 
+  View, 
+  StyleSheet, 
+  Platform, 
+  Modal, 
+  Image, 
+  TouchableOpacity, 
+} from "react-native";
 import { 
   GiftedChat, 
   Send, 
@@ -10,7 +17,8 @@ import {
   InputToolbar,
   InputToolbarProps,
   Time,
-  TimeProps
+  TimeProps,
+  MessageImageProps
 } from "react-native-gifted-chat";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -25,6 +33,9 @@ export default function ChatRoom() {
   const { conversationId, userName } = route.params; 
   
   const { messages, onSend, onSendMedia, user } = useChatRoom(conversationId);
+  
+  // para el visor de imagenes
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({ title: userName || "Chat" });
@@ -36,6 +47,30 @@ export default function ChatRoom() {
   };
 
   // --- RENDERIZADORES ---
+
+  // renderizador de imagen (tocable)
+  const renderMessageImage = (props: MessageImageProps<IMessage>) => {
+    if (!props.currentMessage?.image) return null;
+
+    return (
+      <TouchableOpacity 
+        onPress={() => setSelectedImage(props.currentMessage!.image!)}
+        style={{ padding: 2 }}
+      >
+        <Image
+          source={{ uri: props.currentMessage.image }}
+          style={{ 
+            width: 200, 
+            height: 150, 
+            borderRadius: 13, 
+            margin: 3,
+            resizeMode: 'cover'
+          }}
+        />
+      </TouchableOpacity>
+    );
+  };
+
   const renderActions = (props: any) => (
     <Actions
       {...props}
@@ -53,19 +88,21 @@ export default function ChatRoom() {
     </Send>
   );
 
-  const renderBubble = (props: BubbleProps<IMessage>) => (
-    <Bubble
-      {...props}
-      wrapperStyle={{
-        right: { backgroundColor: materialColors.schemes.light.primary },
-        left: { backgroundColor: '#fff' },
-      }}
-      textStyle={{
-        right: { color: '#fff' },
-        left: { color: '#000' },
-      }}
-    />
-  );
+  const renderBubble = (props: BubbleProps<IMessage>) => {
+    return (
+      <Bubble
+        {...props}
+        wrapperStyle={{
+          right: { backgroundColor: materialColors.schemes.light.primary },
+          left: { backgroundColor: '#fff' },
+        }}
+        textStyle={{
+          right: { color: '#fff' },
+          left: { color: '#000' },
+        }}
+      />
+    );
+  };
 
   const renderTime = (props: TimeProps<IMessage>) => (
     <Time
@@ -85,13 +122,13 @@ export default function ChatRoom() {
     />
   );
 
-  // --- ESTRUCTURA CORREGIDA ---
   return (
     <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right']}>
       <GiftedChat
         keyboardAvoidingViewProps={{
           keyboardVerticalOffset: Platform.OS === "ios" ? 0 : 100,
-          behavior: Platform.OS === "ios" ? "padding" : "height", style: { flex: 1 }
+          behavior: Platform.OS === "ios" ? "padding" : "height", 
+          style: { flex: 1 }
         }}
         messages={messages}
         onSend={(messages) => onSend(messages)}
@@ -101,21 +138,48 @@ export default function ChatRoom() {
         renderSend={renderSend}
         renderBubble={renderBubble}
         renderInputToolbar={renderInputToolbar}
-        renderTime={renderTime} 
+        renderTime={renderTime}
+        renderMessageImage={renderMessageImage}
         
         textInputProps={{
             style: styles.textInput,
             placeholderTextColor: '#aaa',
             placeholder: "Escribe un mensaje...", 
-            selectionColor: materialColors.schemes.light.primary
+            selectionColor: materialColors.schemes.light.primary,
+            blurOnSubmit: false
         }}
         
         isScrollToBottomEnabled={true} 
         scrollToBottomComponent={() => (
             <Ionicons name="chevron-down" size={24} color="#666" />
         )}
-        
       />
+
+      {/* MODAL DE PANTALLA COMPLETA */}
+      <Modal
+        visible={selectedImage !== null}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setSelectedImage(null)}
+      >
+        <View style={styles.modalContainer}>
+          <TouchableOpacity 
+            style={styles.closeButton} 
+            onPress={() => setSelectedImage(null)}
+          >
+            <Ionicons name="close" size={30} color="#fff" />
+          </TouchableOpacity>
+          
+          {selectedImage && (
+            <Image
+              source={{ uri: selectedImage }}
+              style={styles.fullImage}
+              resizeMode="contain"
+            />
+          )}
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
@@ -164,5 +228,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 4
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.9)', 
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  fullImage: {
+    width: '100%',
+    height: '90%',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 1,
+    padding: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20
   }
 });

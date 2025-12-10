@@ -25,7 +25,7 @@ export function useChatRoom(conversationId: string) {
         setMessages(
           data.map((msg: any) => ({
             _id: msg.id,
-            text: msg.content,
+            text: msg.media_type === 'text' ? msg.content : '',
             createdAt: new Date(msg.created_at),
             user: { _id: msg.sender_id },
             image: msg.media_type === 'image' ? msg.content : undefined,
