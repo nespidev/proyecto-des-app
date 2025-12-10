@@ -1,4 +1,4 @@
-import ChatRoom from "./ChatRoom"; 
+import ChatRoom from "./chat-room"; 
 
 export default function ChatRoomScreen() {
   return (
