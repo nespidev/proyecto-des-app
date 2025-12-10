@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Platform, KeyboardAvoidingView, StatusBar } from "react-native";
 import { 
   GiftedChat, 
   Send, 
@@ -13,10 +13,11 @@ import {
   TimeProps
 } from "react-native-gifted-chat";
 import { useRoute, useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { materialColors } from "@/utils/colors";
 import { useChatRoom } from "./hooks/useChatRoom";
 import { Ionicons } from "@expo/vector-icons";
-import { selectMediaFromGallery, takePhoto } from "@/utils/media-helper";
+import { selectMediaFromGallery } from "@/utils/media-helper";
 
 export default function ChatRoom() {
   const route = useRoute<any>();
@@ -34,8 +35,7 @@ export default function ChatRoom() {
     if (asset) onSendMedia(asset);
   };
 
-  // --- RENDERIZADORES PERSONALIZADOS ---
-
+  // --- RENDERIZADORES ---
   const renderActions = (props: any) => (
     <Actions
       {...props}
@@ -53,38 +53,29 @@ export default function ChatRoom() {
     </Send>
   );
 
-  const renderBubble = (props: BubbleProps<IMessage>) => {
-    return (
-      <Bubble
-        {...props}
-        wrapperStyle={{
-          right: {
-            backgroundColor: materialColors.schemes.light.primary,
-          },
-          left: {
-            backgroundColor: '#fff',
-          },
-        }}
-        textStyle={{
-          right: { color: '#fff' },
-          left: { color: '#000' },
-        }}
-      />
-    );
-  };
+  const renderBubble = (props: BubbleProps<IMessage>) => (
+    <Bubble
+      {...props}
+      wrapperStyle={{
+        right: { backgroundColor: materialColors.schemes.light.primary },
+        left: { backgroundColor: '#fff' },
+      }}
+      textStyle={{
+        right: { color: '#fff' },
+        left: { color: '#000' },
+      }}
+    />
+  );
 
-  // Renderizador de Hora (Aquí es donde se cambian los colores de la hora)
-  const renderTime = (props: TimeProps<IMessage>) => {
-    return (
-      <Time
-        {...props}
-        timeTextStyle={{
-          right: { color: '#eee' }, // Hora en mensajes propios (claro)
-          left: { color: '#aaa' },  // Hora en mensajes recibidos (gris)
-        }}
-      />
-    );
-  };
+  const renderTime = (props: TimeProps<IMessage>) => (
+    <Time
+      {...props}
+      timeTextStyle={{
+        right: { color: '#eee' }, 
+        left: { color: '#aaa' },  
+      }}
+    />
+  );
 
   const renderInputToolbar = (props: InputToolbarProps<IMessage>) => (
     <InputToolbar 
@@ -94,48 +85,55 @@ export default function ChatRoom() {
     />
   );
 
+  // --- ESTRUCTURA CORREGIDA ---
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right']}>
       <GiftedChat
+        keyboardAvoidingViewProps={{
+          keyboardVerticalOffset: Platform.OS === "ios" ? 0 : 100,
+          behavior: Platform.OS === "ios" ? "padding" : "height", style: { flex: 1 }
+        }}
         messages={messages}
         onSend={(messages) => onSend(messages)}
         user={{ _id: user.id }}
         
-        // Componentes personalizados
         renderActions={renderActions}
         renderSend={renderSend}
         renderBubble={renderBubble}
         renderInputToolbar={renderInputToolbar}
         renderTime={renderTime} 
         
-        // Configuración del Input (Placeholder va aquí dentro)
         textInputProps={{
             style: styles.textInput,
             placeholderTextColor: '#aaa',
-            placeholder: "Escribe un mensaje...", // <--- SOLUCIÓN: Placeholder aquí
+            placeholder: "Escribe un mensaje...", 
             selectionColor: materialColors.schemes.light.primary
         }}
         
-        // Comportamiento
-        // scrollToBottom
+        isScrollToBottomEnabled={true} 
         scrollToBottomComponent={() => (
             <Ionicons name="chevron-down" size={24} color="#666" />
         )}
+        
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2F2F2' },
-  
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F2F2F2'
+  },
+  keyboardContainer: {
+    flex: 1
+  },
   inputToolbar: {
     backgroundColor: '#F2F2F2',
     borderTopWidth: 0,
     paddingVertical: 6,
-    paddingHorizontal: 6
+    paddingHorizontal: 6,
   },
-  
   textInput: {
     backgroundColor: '#fff',
     borderRadius: 20,
@@ -150,7 +148,6 @@ const styles = StyleSheet.create({
     height: 40,
     lineHeight: 20
   },
-  
   actionsContainer: {
     marginBottom: 0,
     marginLeft: 0,
@@ -159,7 +156,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 40
   },
-  
   sendButton: {
     backgroundColor: materialColors.schemes.light.primary,
     borderRadius: 20,
