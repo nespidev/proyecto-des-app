@@ -1,5 +1,5 @@
-import React, { useState, useLayoutEffect } from "react";
-import { View, Platform, KeyboardAvoidingView, StatusBar } from "react-native";
+import React, { useState, useMemo, useLayoutEffect } from "react";
+import { View, Platform, KeyboardAvoidingView } from "react-native";
 import { GiftedChat } from "react-native-gifted-chat";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { useHeaderHeight } from "@react-navigation/elements"; 
@@ -8,10 +8,10 @@ import { materialColors } from "@/utils/colors";
 import { useChatRoom } from "./hooks/useChatRoom";
 import { selectMediaFromGallery } from "@/utils/media-helper";
 import { Ionicons } from "@expo/vector-icons";
-import MediaViewerModal from "@/components/MediaVieweModal";
+import MediaViewerModal from "@/components/MediaViewerModal";
 import { 
-  renderBubble, renderTime, renderInputToolbar, renderSend, renderMessageAudio,
-  createRenderActions, createRenderMessageImage, createRenderMessageVideo,
+  renderBubble, renderTime, renderInputToolbar, renderSend, 
+  createRenderActions, createRenderMessageImage, createRenderMessageVideo, createRenderMessageAudio,
   chatStyles 
 } from "@/utils/chatConfig";
 
@@ -22,20 +22,39 @@ export default function ChatRoom() {
   const { conversationId, userName } = route.params; 
   
   const { messages, onSend, onSendMedia, user } = useChatRoom(conversationId);
-  const [mediaViewer, setMediaViewer] = useState<{ uri: string, type: 'image' | 'video' } | null>(null);
+  
+  // Estado: ID del mensaje seleccionado para el visor
+  const [selectedMsgId, setSelectedMsgId] = useState<string | null>(null);
+
+  //  GENERAR PLAYLIST (Logica de negocio)
+  const mediaPlaylist = useMemo(() => {
+    return messages
+      .filter(m => m.image || m.video || m.audio)
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  }, [messages]);
+
+  const currentIndex = mediaPlaylist.findIndex(m => m._id === selectedMsgId);
+  const currentMediaMsg = mediaPlaylist[currentIndex];
 
   useLayoutEffect(() => {
     navigation.setOptions({ title: userName || "Chat" });
   }, [navigation, userName]);
+
+
+  const handleNext = () => {
+    if (currentIndex < mediaPlaylist.length - 1) setSelectedMsgId(mediaPlaylist[currentIndex + 1]._id as string);
+  };
+
+  const handlePrev = () => {
+    if (currentIndex > 0) setSelectedMsgId(mediaPlaylist[currentIndex - 1]._id as string);
+  };
 
   const handleAttachment = async () => {
     const asset = await selectMediaFromGallery({ mediaType: 'All', quality: 0.5 });
     if (asset) onSendMedia(asset);
   };
 
-  // Callbacks para abrir el visor
-  const onImagePress = (uri: string) => setMediaViewer({ uri, type: 'image' });
-  const onVideoPress = (uri: string) => setMediaViewer({ uri, type: 'video' });
+  const openViewer = (id: string) => setSelectedMsgId(id);
 
   return (
     <SafeAreaView style={chatStyles.container} edges={['bottom', 'left', 'right']}>
@@ -50,17 +69,15 @@ export default function ChatRoom() {
           onSend={(messages) => onSend(messages)}
           user={{ _id: user.id }}
           
-          // Renderizadores estaticos
           renderBubble={renderBubble}
           renderTime={renderTime}
           renderInputToolbar={renderInputToolbar}
           renderSend={renderSend}
-          renderMessageAudio={renderMessageAudio}
           
-          // Renderizadores dinamicos (Fabricas)
           renderActions={createRenderActions(handleAttachment)}
-          renderMessageImage={createRenderMessageImage(onImagePress)}
-          renderMessageVideo={createRenderMessageVideo(onVideoPress)}
+          renderMessageImage={createRenderMessageImage(openViewer)}
+          renderMessageVideo={createRenderMessageVideo(openViewer)}
+          renderMessageAudio={createRenderMessageAudio(openViewer)}
           
           textInputProps={{
               style: chatStyles.textInput,
@@ -69,16 +86,20 @@ export default function ChatRoom() {
               selectionColor: materialColors.schemes.light.primary,
               blurOnSubmit: false
           }}
-          
           isScrollToBottomEnabled={true} 
           scrollToBottomComponent={() => <Ionicons name="chevron-down" size={24} color="#666" />}
         />
       </KeyboardAvoidingView>
 
       <MediaViewerModal 
-        visible={mediaViewer !== null} 
-        media={mediaViewer} 
-        onClose={() => setMediaViewer(null)} 
+        visible={selectedMsgId !== null} 
+        currentMessage={currentMediaMsg}
+        onClose={() => setSelectedMsgId(null)}
+        onNext={handleNext}
+        onPrev={handlePrev}
+        hasNext={currentIndex < mediaPlaylist.length - 1}
+        hasPrev={currentIndex > 0}
+        positionInfo={`${currentIndex + 1} / ${mediaPlaylist.length}`}
       />
     </SafeAreaView>
   );

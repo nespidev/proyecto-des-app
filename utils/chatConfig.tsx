@@ -8,10 +8,9 @@ import {
 import { Video, ResizeMode } from 'expo-av';
 import { Ionicons } from "@expo/vector-icons";
 import { materialColors } from "@/utils/colors";
-import AudioPlayer from "@/components/AudioPlayer";
+import AudioPlayer from "../components/AudioPlayer";
 
-// Renderizadores estaticos
-
+// ... (Tus renderizadores estáticos: renderBubble, renderTime, etc. se mantienen igual) ...
 export const renderBubble = (props: BubbleProps<IMessage>) => (
   <Bubble
     {...props}
@@ -42,26 +41,24 @@ export const renderSend = (props: any) => (
   </Send>
 );
 
-export const renderMessageAudio = (props: MessageAudioProps<IMessage>) => {
+// --- MODIFICACIÓN AQUÍ: Audio con botón de expansión ---
+export const createRenderMessageAudio = (onExpand: (id: string) => void) => (props: MessageAudioProps<IMessage>) => {
     if (!props.currentMessage?.audio) return null;
-    return <AudioPlayer uri={props.currentMessage.audio} />;
+    return (
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <AudioPlayer uri={props.currentMessage.audio} />
+            <TouchableOpacity onPress={() => onExpand(props.currentMessage!._id as string)} style={{padding: 10}}>
+                <Ionicons name="expand-outline" size={20} color="#666" />
+            </TouchableOpacity>
+        </View>
+    );
 };
 
-// Fabricas de renderizadores (necesitan callbacks) 
-
-export const createRenderActions = (onAttachment: () => void) => (props: any) => (
-  <Actions
-    {...props}
-    containerStyle={styles.actionsContainer}
-    icon={() => <Ionicons name="add" size={28} color={materialColors.schemes.light.primary} />}
-    onPressActionButton={onAttachment}
-  />
-);
-
-export const createRenderMessageImage = (onPress: (uri: string) => void) => (props: MessageImageProps<IMessage>) => {
+// --- MODIFICACIÓN AQUÍ: Pasamos el ID en lugar de la URI ---
+export const createRenderMessageImage = (onPress: (id: string) => void) => (props: MessageImageProps<IMessage>) => {
   if (!props.currentMessage?.image) return null;
   return (
-    <TouchableOpacity onPress={() => onPress(props.currentMessage!.image!)} style={{ padding: 2 }}>
+    <TouchableOpacity onPress={() => onPress(props.currentMessage!._id as string)} style={{ padding: 2 }}>
       <Image
         source={{ uri: props.currentMessage.image }}
         style={styles.mediaThumb}
@@ -70,10 +67,10 @@ export const createRenderMessageImage = (onPress: (uri: string) => void) => (pro
   );
 };
 
-export const createRenderMessageVideo = (onPress: (uri: string) => void) => (props: MessageVideoProps<IMessage>) => {
+export const createRenderMessageVideo = (onPress: (id: string) => void) => (props: MessageVideoProps<IMessage>) => {
   if (!props.currentMessage?.video) return null;
   return (
-    <TouchableOpacity style={{ position: 'relative', padding: 5 }} onPress={() => onPress(props.currentMessage!.video!)}>
+    <TouchableOpacity style={{ position: 'relative', padding: 5 }} onPress={() => onPress(props.currentMessage!._id as string)}>
       <Video
         style={[styles.mediaThumb, { backgroundColor: '#000' }]}
         source={{ uri: props.currentMessage.video }}
@@ -87,6 +84,15 @@ export const createRenderMessageVideo = (onPress: (uri: string) => void) => (pro
     </TouchableOpacity>
   );
 };
+
+export const createRenderActions = (onAttachment: () => void) => (props: any) => (
+    <Actions
+      {...props}
+      containerStyle={styles.actionsContainer}
+      icon={() => <Ionicons name="add" size={28} color={materialColors.schemes.light.primary} />}
+      onPressActionButton={onAttachment}
+    />
+);
 
 export const chatStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F2F2F2' },
