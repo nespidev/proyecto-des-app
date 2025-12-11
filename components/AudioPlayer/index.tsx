@@ -1,56 +1,64 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Audio } from 'expo-av';
+import { useAudioPlayer } from 'expo-audio';
 import { Ionicons } from "@expo/vector-icons";
 
 interface Props {
   uri: string;
+  minimal?: boolean; // Para vista compacta en el chat
+  big?: boolean;     // Para vista grande en el modal
 }
 
-export default function AudioPlayer({ uri }: Props) {
-  const [sound, setSound] = useState<Audio.Sound>();
-  const [isPlaying, setIsPlaying] = useState(false);
+export default function AudioPlayer({ uri, minimal, big }: Props) {
+  // Hook de la nueva librería
+  const player = useAudioPlayer(uri);
 
-  async function playSound() {
-    if (sound) {
-        const status = await sound.getStatusAsync();
-        if (status.isLoaded && status.isPlaying) {
-            await sound.pauseAsync();
-            setIsPlaying(false);
-        } else {
-            await sound.playAsync();
-            setIsPlaying(true);
-        }
+  const togglePlay = () => {
+    if (player.playing) {
+      player.pause();
     } else {
-        const { sound: newSound } = await Audio.Sound.createAsync({ uri });
-        setSound(newSound);
-        await newSound.playAsync();
-        setIsPlaying(true);
-        
-        newSound.setOnPlaybackStatusUpdate((status) => {
-            if (status.isLoaded && status.didJustFinish) {
-                setIsPlaying(false);
-                newSound.setPositionAsync(0);
-            }
-        });
+      player.play();
     }
+  };
+
+  const iconName = player.playing ? "pause-circle" : "play-circle";
+
+  // Diseño Grande (Para el Modal)
+  if (big) {
+    return (
+      <TouchableOpacity onPress={togglePlay} style={{marginTop: 20, alignItems: 'center'}}>
+        <Ionicons name={iconName} size={80} color="#fff" />
+        <Text style={{color: '#fff', marginTop: 10}}>
+            {player.playing ? "Pausar" : "Reproducir Audio"}
+        </Text>
+      </TouchableOpacity>
+    );
   }
 
-  useEffect(() => {
-    return () => { sound?.unloadAsync(); };
-  }, [sound]);
-
+  // Diseño Compacto (Para la Burbuja)
   return (
     <View style={styles.audioContainer}>
-      <TouchableOpacity onPress={playSound}>
-        <Ionicons name={isPlaying ? "pause-circle" : "play-circle"} size={36} color="#444" />
+      <TouchableOpacity onPress={togglePlay}>
+        <Ionicons name={iconName} size={36} color="#444" />
       </TouchableOpacity>
-      <Text style={styles.audioText}>Mensaje de voz</Text>
+      {!minimal && (
+        <Text style={styles.audioText}>
+            {player.playing ? "Reproduciendo..." : "Mensaje de voz"}
+        </Text>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  audioContainer: { flexDirection: 'row', alignItems: 'center', padding: 10, minWidth: 150, backgroundColor: '#eee', borderRadius: 10, margin: 5 },
+  audioContainer: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    padding: 10, 
+    minWidth: 150, 
+    backgroundColor: '#eee', 
+    borderRadius: 10, 
+    margin: 5 
+  },
   audioText: { marginLeft: 10, fontSize: 14, color: '#333' }
 });

@@ -1,11 +1,27 @@
 import React from "react";
 import { View, Modal, Image, TouchableOpacity, Text, Dimensions, StyleSheet } from "react-native";
-import { Video, ResizeMode } from 'expo-av';
+import { useVideoPlayer, VideoView } from 'expo-video'; // Nueva librería
 import { Ionicons } from "@expo/vector-icons";
 import { IMessage } from "react-native-gifted-chat";
-import AudioPlayer from "../AudioPlayer"; // Reutilizamos el player existente
+import AudioPlayer from "../AudioPlayer"; // Reutilizamos tu componente
 
 const { width } = Dimensions.get('window');
+
+// SUB-COMPONENTE: Necesario para usar el hook useVideoPlayer
+const FullScreenVideo = ({ uri }: { uri: string }) => {
+  const player = useVideoPlayer(uri, player => {
+    player.play(); // Auto-play al abrir
+    player.loop = true;
+  });
+
+  return (
+    <VideoView 
+      style={styles.fullMedia} 
+      player={player} 
+      nativeControls={true} // Controles nativos (timeline, volumen, fullscreen)
+    />
+  );
+};
 
 interface Props {
   visible: boolean;
@@ -13,9 +29,9 @@ interface Props {
   onClose: () => void;
   onNext?: () => void;
   onPrev?: () => void;
-  hasNext: boolean;
-  hasPrev: boolean;
-  positionInfo: string; // Ej: "1 / 5"
+  hasNext?: boolean;
+  hasPrev?: boolean;
+  positionInfo?: string;
 }
 
 export default function MediaViewerModal({ 
@@ -37,25 +53,21 @@ export default function MediaViewerModal({
 
         {/* Contenido Central */}
         <View style={styles.mediaWrapper}>
+          
           {currentMessage.image && (
               <Image source={{ uri: currentMessage.image }} style={styles.fullMedia} resizeMode="contain" />
           )}
+          
           {currentMessage.video && (
-              <Video
-                  style={styles.fullMedia}
-                  source={{ uri: currentMessage.video }}
-                  useNativeControls
-                  resizeMode={ResizeMode.CONTAIN}
-                  shouldPlay
-                  isLooping
-              />
+              <FullScreenVideo uri={currentMessage.video} />
           )}
+          
           {currentMessage.audio && (
               <View style={styles.audioFullContainer}>
                   <Ionicons name="musical-note" size={80} color="#fff" />
-                  {/* Aquí podrías hacer una versión 'Big' de tu AudioPlayer o usar el mismo */}
                   <View style={{marginTop: 20}}>
-                     <AudioPlayer uri={currentMessage.audio} />
+                     {/* Pasamos 'big' para mostrar controles grandes */}
+                     <AudioPlayer uri={currentMessage.audio} big />
                   </View>
               </View>
           )}
@@ -83,9 +95,12 @@ const styles = StyleSheet.create({
   modalContainer: { flex: 1, backgroundColor: '#000', justifyContent: 'center' },
   modalHeader: { position: 'absolute', top: 50, left: 0, right: 0, zIndex: 20, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, alignItems: 'center' },
   modalBtn: { padding: 8, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 20 },
-  mediaWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  
+  mediaWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' },
   fullMedia: { width: width, height: '100%' },
+  
   audioFullContainer: { alignItems: 'center', justifyContent: 'center', padding: 20 },
+  
   navOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', pointerEvents: 'box-none' },
   navBtn: { position: 'absolute', padding: 10, backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: 30 },
 });

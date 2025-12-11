@@ -1,16 +1,20 @@
 import React from "react";
-import { View, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { StyleSheet, TouchableOpacity, Image, View } from "react-native";
 import { 
   Bubble, InputToolbar, Send, Actions, Time,
   BubbleProps, IMessage, InputToolbarProps, TimeProps,
   MessageImageProps, MessageVideoProps, MessageAudioProps
 } from "react-native-gifted-chat";
-import { Video, ResizeMode } from 'expo-av';
 import { Ionicons } from "@expo/vector-icons";
 import { materialColors } from "@/utils/colors";
-import AudioPlayer from "../components/AudioPlayer";
 
-// ... (Tus renderizadores estáticos: renderBubble, renderTime, etc. se mantienen igual) ...
+// --- IMPORTAMOS LOS COMPONENTES DE LA FASE 2 ---
+// Ajusta estas rutas si decidiste guardar los archivos en otra carpeta
+import AudioPlayer from "@/components/AudioPlayer";
+import VideoThumbnail from "@/components/VideoThumbnail";
+
+// --- Renderizadores Estáticos ---
+
 export const renderBubble = (props: BubbleProps<IMessage>) => (
   <Bubble
     {...props}
@@ -26,11 +30,21 @@ export const renderBubble = (props: BubbleProps<IMessage>) => (
 );
 
 export const renderTime = (props: TimeProps<IMessage>) => (
-  <Time {...props} timeTextStyle={{ right: { color: '#eee' }, left: { color: '#aaa' } }} />
+  <Time 
+    {...props} 
+    timeTextStyle={{ 
+      right: { color: '#eee' }, 
+      left: { color: '#aaa' } 
+    }} 
+  />
 );
 
 export const renderInputToolbar = (props: InputToolbarProps<IMessage>) => (
-  <InputToolbar {...props} containerStyle={styles.inputToolbar} primaryStyle={{ alignItems: 'center' }} />
+  <InputToolbar 
+    {...props} 
+    containerStyle={styles.inputToolbar} 
+    primaryStyle={{ alignItems: 'center' }} 
+  />
 );
 
 export const renderSend = (props: any) => (
@@ -41,20 +55,23 @@ export const renderSend = (props: any) => (
   </Send>
 );
 
-// --- MODIFICACIÓN AQUÍ: Audio con botón de expansión ---
-export const createRenderMessageAudio = (onExpand: (id: string) => void) => (props: MessageAudioProps<IMessage>) => {
+// Renderizador estático de Audio (sin expansión)
+export const renderMessageAudio = (props: MessageAudioProps<IMessage>) => {
     if (!props.currentMessage?.audio) return null;
-    return (
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <AudioPlayer uri={props.currentMessage.audio} />
-            <TouchableOpacity onPress={() => onExpand(props.currentMessage!._id as string)} style={{padding: 10}}>
-                <Ionicons name="expand-outline" size={20} color="#666" />
-            </TouchableOpacity>
-        </View>
-    );
+    return <AudioPlayer uri={props.currentMessage.audio} minimal />;
 };
 
-// --- MODIFICACIÓN AQUÍ: Pasamos el ID en lugar de la URI ---
+// --- Renderizadores Dinámicos ("Fábricas" con callbacks) ---
+
+export const createRenderActions = (onAttachment: () => void) => (props: any) => (
+  <Actions
+    {...props}
+    containerStyle={styles.actionsContainer}
+    icon={() => <Ionicons name="add" size={28} color={materialColors.schemes.light.primary} />}
+    onPressActionButton={onAttachment}
+  />
+);
+
 export const createRenderMessageImage = (onPress: (id: string) => void) => (props: MessageImageProps<IMessage>) => {
   if (!props.currentMessage?.image) return null;
   return (
@@ -67,32 +84,35 @@ export const createRenderMessageImage = (onPress: (id: string) => void) => (prop
   );
 };
 
+// VIDEO: Usamos VideoThumbnail (expo-video)
 export const createRenderMessageVideo = (onPress: (id: string) => void) => (props: MessageVideoProps<IMessage>) => {
   if (!props.currentMessage?.video) return null;
   return (
-    <TouchableOpacity style={{ position: 'relative', padding: 5 }} onPress={() => onPress(props.currentMessage!._id as string)}>
-      <Video
-        style={[styles.mediaThumb, { backgroundColor: '#000' }]}
-        source={{ uri: props.currentMessage.video }}
-        resizeMode={ResizeMode.COVER}
-        shouldPlay={false}
-        isMuted={true}
-      />
-      <View style={styles.playOverlay}>
-          <Ionicons name="play-circle" size={50} color="rgba(255,255,255,0.8)" />
-      </View>
-    </TouchableOpacity>
+    <VideoThumbnail 
+      uri={props.currentMessage.video} 
+      onPress={() => onPress(props.currentMessage!._id as string)}
+    />
   );
 };
 
-export const createRenderActions = (onAttachment: () => void) => (props: any) => (
-    <Actions
-      {...props}
-      containerStyle={styles.actionsContainer}
-      icon={() => <Ionicons name="add" size={28} color={materialColors.schemes.light.primary} />}
-      onPressActionButton={onAttachment}
-    />
-);
+// AUDIO: Usamos AudioPlayer (expo-audio) + Botón de expandir
+export const createRenderMessageAudio = (onExpand: (id: string) => void) => (props: MessageAudioProps<IMessage>) => {
+    if (!props.currentMessage?.audio) return null;
+    return (
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <AudioPlayer uri={props.currentMessage.audio} minimal />
+            
+            <TouchableOpacity 
+              onPress={() => onExpand(props.currentMessage!._id as string)} 
+              style={{padding: 10}}
+            >
+                <Ionicons name="expand-outline" size={20} color="#666" />
+            </TouchableOpacity>
+        </View>
+    );
+};
+
+// --- Estilos ---
 
 export const chatStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F2F2F2' },
@@ -107,4 +127,4 @@ export const chatStyles = StyleSheet.create({
   playOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: 1 }
 });
 
-const styles = chatStyles; // Alias interno
+const styles = chatStyles;
