@@ -7,9 +7,6 @@ import {
 } from "react-native-gifted-chat";
 import { Ionicons } from "@expo/vector-icons";
 import { materialColors } from "@/utils/colors";
-
-// --- IMPORTAMOS LOS COMPONENTES DE LA FASE 2 ---
-// Ajusta estas rutas si decidiste guardar los archivos en otra carpeta
 import AudioPlayer from "@/components/AudioPlayer";
 import VideoThumbnail from "@/components/VideoThumbnail";
 
@@ -55,7 +52,6 @@ export const renderSend = (props: any) => (
   </Send>
 );
 
-// Renderizador estático de Audio (sin expansión)
 export const renderMessageAudio = (props: MessageAudioProps<IMessage>) => {
     if (!props.currentMessage?.audio) return null;
     return <AudioPlayer uri={props.currentMessage.audio} minimal />;
@@ -84,7 +80,6 @@ export const createRenderMessageImage = (onPress: (id: string) => void) => (prop
   );
 };
 
-// VIDEO: Usamos VideoThumbnail (expo-video)
 export const createRenderMessageVideo = (onPress: (id: string) => void) => (props: MessageVideoProps<IMessage>) => {
   if (!props.currentMessage?.video) return null;
   return (
@@ -95,24 +90,27 @@ export const createRenderMessageVideo = (onPress: (id: string) => void) => (prop
   );
 };
 
-// AUDIO: Usamos AudioPlayer (expo-audio) + Botón de expandir
 export const createRenderMessageAudio = (onExpand: (id: string) => void) => (props: MessageAudioProps<IMessage>) => {
     if (!props.currentMessage?.audio) return null;
+    
     return (
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <AudioPlayer uri={props.currentMessage.audio} minimal />
+        <View style={{flexDirection: 'row', alignItems: 'center', minWidth: 180}}>
+            {/* Reproductor */}
+            <View style={{flex: 4}}>
+                <AudioPlayer uri={props.currentMessage.audio} minimal />
+            </View>
             
+            {/* Boton Expandir  */}
             <TouchableOpacity 
               onPress={() => onExpand(props.currentMessage!._id as string)} 
-              style={{padding: 10}}
+              style={{padding: 5, flex: 1, backgroundColor: materialColors.coreColors.tertiary, borderRadius: 8, marginRight: 3, justifyContent: 'center', alignItems: 'center'}}
+              hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
             >
-                <Ionicons name="expand-outline" size={20} color="#666" />
+                <Ionicons name="expand-outline" size={24} color="#666" />
             </TouchableOpacity>
         </View>
     );
 };
-
-// --- Estilos ---
 
 export const chatStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F2F2F2' },
