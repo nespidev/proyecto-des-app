@@ -58,17 +58,16 @@ export default function ChatRoom() {
 
   return (
     <SafeAreaView style={chatStyles.container} edges={['bottom', 'left', 'right']}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        enabled={Platform.OS === "ios"} 
-        keyboardVerticalOffset={Platform.OS === "ios" ? headerHeight : 0}
-      >
         <GiftedChat
           messages={messages}
           onSend={(messages) => onSend(messages)}
           user={{ _id: user.id }}
-          
+
+          keyboardAvoidingViewProps={{
+          keyboardVerticalOffset: Platform.OS === "ios" ? 0 : 100,
+          behavior: Platform.OS === "ios" ? "padding" : "height", 
+          style: { flex: 1 }
+        }}
           renderBubble={renderBubble}
           renderTime={renderTime}
           renderInputToolbar={renderInputToolbar}
@@ -89,7 +88,6 @@ export default function ChatRoom() {
           isScrollToBottomEnabled={true} 
           scrollToBottomComponent={() => <Ionicons name="chevron-down" size={24} color="#666" />}
         />
-      </KeyboardAvoidingView>
 
       <MediaViewerModal 
         visible={selectedMsgId !== null} 
