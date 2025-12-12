@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Dimensions } from "react-native";
 import { useAudioPlayer } from 'expo-audio';
 import { Ionicons } from "@expo/vector-icons";
-import { materialColors } from "@/utils/colors";
 import Slider from '@react-native-community/slider';
 
 const { width } = Dimensions.get('window');
@@ -13,12 +12,18 @@ interface Props {
   big?: boolean;
   backgroundColor?: string;
   textColor?: string;
+  activeTrackColor?: string;
+  inactiveTrackColor?: string;
 }
 
 export default function AudioPlayer({ 
-  uri, minimal, big, 
-  backgroundColor = 'transparent',
-  textColor = '#333' 
+  uri, 
+  minimal, 
+  big, 
+  backgroundColor = '#E0E0E0', 
+  textColor = '#1D1B20',
+  activeTrackColor, 
+  inactiveTrackColor
 }: Props) {
   const player = useAudioPlayer(uri);
   
@@ -26,6 +31,10 @@ export default function AudioPlayer({
   const [isReady, setIsReady] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+
+  // Definimos colores por defecto si no vienen por props
+  const trackActive = activeTrackColor || textColor;
+  const trackInactive = inactiveTrackColor || '#999999';
 
   const formatTime = (seconds: number) => {
     if (!seconds || seconds < 0) return "0:00";
@@ -37,19 +46,16 @@ export default function AudioPlayer({
   useEffect(() => {
     if (player) {
       setIsReady(true);
-      // Cargar duracion inicial
       if (player.duration > 0) setDuration(player.duration);
     }
 
     const subscription = player.addListener('playbackStatusUpdate', (status: any) => {
         setIsPlaying(status.playing);
         
-        // Solo actualizamos si la diferencia es significativa para evitar rebotes visuales
         if (Math.abs(player.currentTime - currentTime) > 0.1 || status.playing) {
              setCurrentTime(player.currentTime);
         }
         
-        // Actualizar duración si llega tarde
         if (player.duration > 0 && duration === 0) {
             setDuration(player.duration);
         }
@@ -62,9 +68,7 @@ export default function AudioPlayer({
         }
     });
 
-    return () => {
-        subscription.remove();
-    };
+    return () => { subscription.remove(); };
   }, [player]);
 
   const togglePlay = () => {
@@ -95,12 +99,10 @@ export default function AudioPlayer({
   if (big) {
     return (
       <View style={styles.bigLayoutContainer}>
-
         <TouchableOpacity onPress={togglePlay} style={{marginBottom: 30}}>
             <Ionicons name={iconName} size={80} color="#fff" />
         </TouchableOpacity>
         
-        {/* Contenedor Slider - ancho fijo relativo a la pantalla para estabilidad */}
         <View style={{width: width * 0.85}}>
             <Slider
                 style={{width: '100%', height: 40}}
@@ -108,7 +110,6 @@ export default function AudioPlayer({
                 maximumValue={duration > 0 ? duration : 1}
                 value={currentTime}
                 onSlidingComplete={onSeek}
-
                 minimumTrackTintColor="#FFFFFF"
                 maximumTrackTintColor="#555555"
                 thumbTintColor="#FFFFFF"
@@ -141,9 +142,10 @@ export default function AudioPlayer({
             maximumValue={duration > 0 ? duration : 1} 
             value={currentTime}
             onSlidingComplete={onSeek}
-            minimumTrackTintColor={textColor}
-            maximumTrackTintColor="#999" 
-            thumbTintColor={textColor}
+            // Usamos colores dinamicos
+            minimumTrackTintColor={trackActive}
+            maximumTrackTintColor={trackInactive} 
+            thumbTintColor={trackActive}
           />
           {!minimal && (
             <View style={styles.timeContainerSmall}>
@@ -157,15 +159,13 @@ export default function AudioPlayer({
 }
 
 const styles = StyleSheet.create({
-  // Estilos comunes
   audioContainer: { 
     flexDirection: 'row', 
     alignItems: 'center', 
     padding: 10, 
-    borderRadius: 10,
+    borderRadius: 12,
     margin: 2
   },
-  // Estilos modal (Big)
   bigContainer: {
     backgroundColor: 'transparent'
   },
@@ -185,12 +185,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
   },
-  // Estilos chat (Small)
   audioText: { marginLeft: 10, fontSize: 14 },
   timeContainerSmall: {
     flexDirection: 'row', 
     justifyContent: 'space-between', 
     paddingHorizontal: 5
   },
-  timeText: { fontSize: 10, opacity: 0.8 } 
+  timeText: { fontSize: 10, opacity: 0.9, fontWeight: '500' } 
 });
