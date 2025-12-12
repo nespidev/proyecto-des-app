@@ -8,12 +8,13 @@ import { Ionicons } from "@expo/vector-icons";
 
 // Hooks y Utils
 import { useChatRoom } from "./hooks/useChatRoom";
-import { selectMediaFromGallery, uploadFileToSupabase } from "@/utils/media-helper";
+import { selectMediaFromGallery, takeMediaFromCamera, pickDocument } from "@/utils/media-helper";
 import { materialColors } from "@/utils/colors";
 
 // Componentes
 import MediaViewerModal from "@/components/MediaViewerModal";
 import AudioRecorder from "@/components/AudioRecorder";
+import AttachmentModal from "@/components/AttachmentModal";
 
 // Configuración de Chat
 import { 
@@ -24,6 +25,7 @@ import {
   createRenderMessageImage, 
   createRenderMessageVideo, 
   createRenderMessageAudio,
+  renderCustomView, // <--- Asegúrate de que esto esté importado
   chatStyles 
 } from "@/utils/chatConfig";
 
@@ -33,9 +35,11 @@ export default function ChatRoom() {
   const headerHeight = useHeaderHeight();
   const { conversationId, userName } = route.params; 
   
-  const { messages, onSend, onSendMedia, onSendAudio, user } = useChatRoom(conversationId);
+  const { messages, onSend, onSendMedia, onSendAudio, onSendDocument, user } = useChatRoom(conversationId);
+  
   const [selectedMsgId, setSelectedMsgId] = useState<string | null>(null);
   const [inputText, setInputText] = useState("");
+  const [isAttachmentVisible, setAttachmentVisible] = useState(false);
 
   // --- GALERÍA ---
   const mediaPlaylist = useMemo(() => {
@@ -55,31 +59,53 @@ export default function ChatRoom() {
   };
   const openViewer = (id: string) => setSelectedMsgId(id);
 
-  // --- HANDLERS ---
   useLayoutEffect(() => {
     navigation.setOptions({ title: userName || "Chat" });
   }, [navigation, userName]);
 
-  // Memoizamos este handler para que no cambie la referencia de createRenderActions
-  const handleAttachment = useCallback(async () => {
-    const asset = await selectMediaFromGallery({ mediaType: 'All', quality: 0.5 });
-    if (asset) onSendMedia(asset);
-  }, [onSendMedia]);
+  const handleAttachmentPress = useCallback(() => {
+    setAttachmentVisible(true);
+  }, []);
 
+  const handleOptionSelect = async (option: 'camera_photo' | 'camera_video' | 'gallery' | 'document') => {
+    setAttachmentVisible(false);
 
-  const handleSendAudio = async (uri: string, duration: number) => {
-    // 2. Llamamos directamente a la función del hook que guarda en BD
-    await onSendAudio(uri, duration); 
+    try {
+        switch (option) {
+            case 'gallery':
+                const galleryAsset = await selectMediaFromGallery();
+                if (galleryAsset) onSendMedia(galleryAsset);
+                break;
+            case 'camera_photo':
+                const photoAsset = await takeMediaFromCamera(false); 
+                if (photoAsset) onSendMedia(photoAsset);
+                break;
+            case 'camera_video':
+                const videoAsset = await takeMediaFromCamera(true); 
+                if (videoAsset) onSendMedia(videoAsset);
+                break;
+            case 'document':
+                const doc = await pickDocument();
+                if (doc) {
+                    onSendDocument({
+                        uri: doc.uri,
+                        name: doc.fileName, 
+                        mimeType: doc.mimeType
+                    });
+                }
+                break;
+        }
+    } catch (e) {
+        console.log("Error seleccionando media:", e);
+    }
   };
 
-  // --- RENDERIZADORES OPTIMIZADOS (La clave del NO parpadeo) ---
+  const handleSendAudio = async (uri: string, duration: number) => {
+    await onSendAudio(uri, duration);
+  };
 
-  // 1. Usamos useCallback sin depender de 'inputText'
-  // GiftedChat inyecta el texto actual en 'props.text' automáticamente
   const renderSendOrRecord = useCallback((props: any) => {
-    // Leemos el texto desde las props que nos da la librería
     const text = props.text || '';
-    
     if (text.trim().length > 0) {
       return (
         <Send {...props} containerStyle={{justifyContent: 'center', marginRight: 10}}>
@@ -95,10 +121,9 @@ export default function ChatRoom() {
         </View>
       );
     }
-  }, [handleSendAudio]); // Solo depende de la función de audio (que ya es estable)
+  }, [handleSendAudio]);
 
-  // 2. Optimizamos las fábricas para que no se recreen en cada render
-  const renderActions = useMemo(() => createRenderActions(handleAttachment), [handleAttachment]);
+  const renderActions = useMemo(() => createRenderActions(handleAttachmentPress), [handleAttachmentPress]);
   const renderMsgImage = useMemo(() => createRenderMessageImage(openViewer), []);
   const renderMsgVideo = useMemo(() => createRenderMessageVideo(openViewer), []);
   const renderMsgAudio = useMemo(() => createRenderMessageAudio(openViewer), []);
@@ -112,7 +137,6 @@ export default function ChatRoom() {
         keyboardVerticalOffset={Platform.OS === "ios" ? headerHeight : 0}
       >
         <GiftedChat
-          // Layout
           keyboardAvoidingViewProps={{
             keyboardVerticalOffset: Platform.OS === "ios" ? 0 : 100,
             behavior: Platform.OS === "ios" ? "padding" : "height", 
@@ -123,28 +147,21 @@ export default function ChatRoom() {
           onSend={(messages) => onSend(messages)}
           user={{ _id: user.id }}
           
-          // Renderizadores
           renderBubble={renderBubble}
           renderTime={renderTime}
           renderInputToolbar={renderInputToolbar}
-          
-          // Renderizador ESTABLE (Magia del botón)
-          renderSend={renderSendOrRecord} 
+          renderSend={renderSendOrRecord}
           
           renderActions={renderActions}
           renderMessageImage={renderMsgImage}
           renderMessageVideo={renderMsgVideo}
           renderMessageAudio={renderMsgAudio}
+          renderCustomView={renderCustomView}
           
-          // Control del Input
-          // Pasamos el texto para que GiftedChat lo tenga en su estado interno
           text={inputText}
-          
-          // Configuración Visual del Input
           textInputProps={{
               style: chatStyles.textInput,
               placeholderTextColor: '#aaa',
-              // Actualizamos nuestro estado local, pero NO recreamos los renderizadores
               onChangeText: setInputText, 
               value: inputText,
               placeholder: "Escribe un mensaje...", 
@@ -156,6 +173,12 @@ export default function ChatRoom() {
           scrollToBottomComponent={() => <Ionicons name="chevron-down" size={24} color="#666" />}
         />
       </KeyboardAvoidingView>
+
+      <AttachmentModal 
+        visible={isAttachmentVisible} 
+        onClose={() => setAttachmentVisible(false)}
+        onOptionSelect={handleOptionSelect}
+      />
 
       <MediaViewerModal 
         visible={selectedMsgId !== null} 

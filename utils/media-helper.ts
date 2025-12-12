@@ -1,4 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import { Alert } from 'react-native';
 import { supabase } from './supabase';
 
@@ -10,7 +11,7 @@ interface PickOptions {
   quality?: number;
 }
 
- // Abre la galeria para seleccionar fotos o videos 
+// --- GALERÍA ---
 export const selectMediaFromGallery = async (options: PickOptions = {}) => {
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (status !== 'granted') {
@@ -26,58 +27,100 @@ export const selectMediaFromGallery = async (options: PickOptions = {}) => {
     mediaTypes = ['images', 'videos'];
   }
 
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: mediaTypes,
-    allowsEditing: options.allowsEditing ?? true,
-    quality: options.quality ?? 0.5,
-    // NO pedimos base64 aca para soportar videos grandes
-  });
+  try {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: mediaTypes,
+      allowsEditing: options.allowsEditing ?? true,
+      quality: options.quality ?? 0.5,
+    });
 
-  if (!result.canceled) {
-    return result.assets[0]; // Retornamos el asset completo uri, type, etc
+    if (!result.canceled) {
+      return result.assets[0];
+    }
+  } catch (e) {
+    console.error("[media-helper] Error en selectMediaFromGallery:", e);
   }
   return null;
 };
 
-// Sacar foto con camara
-export const takePhoto = async () => {
+// --- CÁMARA (Con Logs) ---
+export const takeMediaFromCamera = async (isVideo: boolean = false) => {
+  console.log(`[media-helper] Solicitando cámara. isVideo=${isVideo}`);
   const { status } = await ImagePicker.requestCameraPermissionsAsync();
+  
   if (status !== 'granted') {
     Alert.alert("Permiso denegado", "Necesitamos acceso a la cámara.");
     return null;
   }
 
-  const result = await ImagePicker.launchCameraAsync({
-    allowsEditing: true,
-    quality: 0.5,
-  });
+  const mediaTypes: ImagePicker.MediaType[] = isVideo ? ['videos'] : ['images'];
 
-  if (!result.canceled) {
-    return result.assets[0];
+  try {
+    console.log("[media-helper] Lanzando launchCameraAsync...");
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: mediaTypes,
+      allowsEditing: false, 
+      quality: 0.5,
+    });
+
+    console.log("[media-helper] Resultado cámara:", JSON.stringify(result, null, 2));
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      console.log("[media-helper] Asset válido encontrado:", result.assets[0].uri);
+      return result.assets[0];
+    } else {
+      console.log("[media-helper] Cámara cancelada o sin assets.");
+    }
+  } catch (error) {
+    console.error("[media-helper] Error crítico al abrir cámara:", error);
   }
   return null;
 };
 
+// --- DOCUMENTOS ---
+export const pickDocument = async () => {
+  try {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: ['application/pdf', 'audio/*'], 
+      copyToCacheDirectory: true,
+      multiple: false
+    });
 
- // Sube cualquier archivo (foto o video) a Supabase usando FormData
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const file = result.assets[0];
+      return {
+        uri: file.uri,
+        type: file.mimeType?.startsWith('audio') ? 'audio' : 'document', 
+        mimeType: file.mimeType || 'application/octet-stream',
+        fileName: file.name,
+        fileSize: file.size
+      };
+    }
+  } catch (error) {
+    console.error("[media-helper] Error seleccionando documento:", error);
+  }
+  return null;
+};
+
+// --- SUBIDA A SUPABASE (Con Logs) ---
 export const uploadFileToSupabase = async (
   bucketName: string,
   path: string,
   uri: string,
-  fileType: string = 'image/jpeg' // ej: 'video/mp4'
+  fileType: string = 'image/jpeg'
 ): Promise<string | null> => {
+  console.log(`[media-helper] Iniciando subida a Supabase. Path: ${path}, Type: ${fileType}`); // Para debuggear por que no funciona en el emulador
+  
   try {
-    // Crear un objeto FormData (como si fuera un formulario web)
     const formData = new FormData();
     
-    // @ts-ignore: React Native espera estos campos específicos para subir archivos
+    // @ts-ignore
     formData.append('file', {
       uri: uri,
-      name: path.split('/').pop() || 'file', // Nombre del archivo
+      name: path.split('/').pop() || 'file',
       type: fileType,
     });
 
-    // Subir usando el metodo estandar (mas eficiente para videos)
     const { data, error } = await supabase.storage
       .from(bucketName)
       .upload(path, formData, {
@@ -85,17 +128,20 @@ export const uploadFileToSupabase = async (
         upsert: true,
       });
 
-    if (error) throw error;
+    if (error) {
+        console.error("[media-helper] Error de Supabase al subir:", error);
+        throw error;
+    }
 
-    // Obtener url publica
     const { data: urlData } = supabase.storage
       .from(bucketName)
       .getPublicUrl(path);
 
+    console.log("[media-helper] Subida exitosa. URL Pública:", urlData.publicUrl);
     return urlData.publicUrl;
 
   } catch (error: any) {
-    console.error("Error subiendo archivo:", error.message);
+    console.error("[media-helper] Excepción subiendo archivo:", error.message);
     Alert.alert("Error", "No se pudo subir el archivo.");
     return null;
   }

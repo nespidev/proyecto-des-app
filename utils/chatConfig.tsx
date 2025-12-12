@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, TouchableOpacity, Image, View } from "react-native";
+import { StyleSheet, TouchableOpacity, Image, View, Linking, Text } from "react-native";
 import { 
   Bubble, InputToolbar, Send, Actions, Time,
   BubbleProps, IMessage, InputToolbarProps, TimeProps,
@@ -58,11 +58,6 @@ export const renderSend = (props: any) => (
   </Send>
 );
 
-export const renderMessageAudio = (props: MessageAudioProps<IMessage>) => {
-    if (!props.currentMessage?.audio) return null;
-    return <AudioPlayer uri={props.currentMessage.audio} minimal />;
-};
-
 // --- Renderizadores Dinámicos ---
 
 export const createRenderActions = (onAttachment: () => void) => (props: any) => (
@@ -96,15 +91,18 @@ export const createRenderMessageVideo = (onPress: (id: string) => void) => (prop
   );
 };
 
-// Definimos explicitamente que 'props' tiene 'position'
+// CORRECCIÓN AQUÍ: Usamos 'any' en el tipo de props para evitar el conflicto,
+// o simplemente extendemos la interfaz internamente.
 export const createRenderMessageAudio = (onExpand: (id: string) => void) => 
-  (props: MessageAudioProps<IMessage> & { position: 'left' | 'right' }) => {
+  (props: MessageAudioProps<IMessage>) => { // Firma estándar
     
     if (!props.currentMessage?.audio) return null;
     
-    const isMyMessage = props.position === 'right';
+    // Hacemos el cast aquí para acceder a 'position' sin que TS se queje en la definición
+    const { position } = props as any; 
+    const isMyMessage = position === 'right';
 
-    // CONFIGURACION DE COLORES
+    // CONFIGURACIÓN DE COLORES
     const playerBg = isMyMessage 
         ? materialColors.schemes.light.primaryContainer 
         : materialColors.schemes.light.surface;
@@ -160,6 +158,42 @@ export const createRenderMessageAudio = (onExpand: (id: string) => void) =>
     );
 };
 
+// --- RENDERIZADOR CUSTOM PARA ARCHIVOS (PDFs) ---
+export const renderCustomView = (props: any) => {
+    if (props.currentMessage.file) {
+        const { url, name } = props.currentMessage.file;
+        const isMyMessage = props.position === 'right';
+        const iconColor = isMyMessage ? '#fff' : '#333';
+        const textColor = isMyMessage ? '#fff' : '#333';
+
+        return (
+            <TouchableOpacity 
+                onPress={() => Linking.openURL(url)} 
+                style={{
+                    flexDirection: 'row', alignItems: 'center', padding: 10,
+                    minWidth: 150, maxWidth: 250
+                }}
+            >
+                <View style={{
+                    backgroundColor: isMyMessage ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.05)',
+                    padding: 8, borderRadius: 8, marginRight: 8
+                }}>
+                    <Ionicons name="document-text" size={30} color={iconColor} />
+                </View>
+                <View style={{flex: 1}}>
+                    <Text style={{color: textColor, fontWeight: 'bold'}} numberOfLines={1}>
+                        {name || "Documento"}
+                    </Text>
+                    <Text style={{color: textColor, fontSize: 10, opacity: 0.8}}>
+                        Toca para abrir
+                    </Text>
+                </View>
+            </TouchableOpacity>
+        );
+    }
+    return null;
+};
+
 export const chatStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: materialColors.schemes.light.background },
   inputToolbar: { 
@@ -176,8 +210,7 @@ export const chatStyles = StyleSheet.create({
     paddingTop: 8, 
     paddingBottom: 8,
     marginRight: 10, 
-    borderWidth: 1, // Se podria quitar el borde si hay suficiente contraste
-    borderColor: materialColors.schemes.light.outlineVariant,
+    borderWidth: 0,
     color: materialColors.schemes.light.onSurface, 
     flex: 1, 
     height: 40, 
