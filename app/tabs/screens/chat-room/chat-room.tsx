@@ -10,11 +10,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { useChatRoom } from "./hooks/useChatRoom";
 import { selectMediaFromGallery, takeMediaFromCamera, pickDocument } from "@/utils/media-helper";
 import { materialColors } from "@/utils/colors";
+import { ROOT_ROUTES } from "@/utils/constants";
 
 // Componentes
 import MediaViewerModal from "@/components/MediaViewerModal";
 import AudioRecorder from "@/components/AudioRecorder";
 import AttachmentModal from "@/components/AttachmentModal";
+import ChatHeader from "@/components/ChatHeader";
 
 // Configuración de Chat
 import { 
@@ -25,15 +27,15 @@ import {
   createRenderMessageImage, 
   createRenderMessageVideo, 
   createRenderMessageAudio,
-  renderCustomView, // <--- Asegúrate de que esto esté importado
+  renderCustomView,
   chatStyles 
 } from "@/utils/chatConfig";
 
 export default function ChatRoom() {
   const route = useRoute<any>();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const headerHeight = useHeaderHeight();
-  const { conversationId, userName } = route.params; 
+  const { conversationId, userName, otherUserId, avatarUrl } = route.params;
   
   const { messages, onSend, onSendMedia, onSendAudio, onSendDocument, user } = useChatRoom(conversationId);
   
@@ -60,8 +62,24 @@ export default function ChatRoom() {
   const openViewer = (id: string) => setSelectedMsgId(id);
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: userName || "Chat" });
-  }, [navigation, userName]);
+    navigation.setOptions({
+      headerTitle: () => (
+        <ChatHeader 
+          name={userName || "Chat"}
+          avatarUrl={avatarUrl}
+          onPress={() => {
+            // Si tenemos el ID del otro usuario, navegamos a su perfil
+            if (otherUserId) {
+              navigation.navigate(ROOT_ROUTES.PERFIL_PUBLICO, { 
+                userId: otherUserId // Reutilizamos la misma pantalla
+              });
+            }
+          }}
+        />
+      ),
+      headerTitleAlign: 'left', 
+    });
+  }, [navigation, userName, avatarUrl, otherUserId]);
 
   const handleAttachmentPress = useCallback(() => {
     setAttachmentVisible(true);

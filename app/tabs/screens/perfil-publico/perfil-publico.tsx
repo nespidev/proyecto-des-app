@@ -271,15 +271,16 @@ export default function PerfilPublico() {
   if (!profile) return <View style={[styles.container, styles.center]}><Text>Usuario no encontrado</Text></View>;
 
   const isProfessional = profile.rol === 'professional';
-  
-  // Filtros de servicios
+
+  // --- CORRECCIÓN 1: Definir estas variables antes del return ---
+  // Si no es profesional, estas listas estarán vacías o no se usarán, pero deben definirse para evitar el error.
   const hiredServices = services.filter(s => myContractIds.has(s.id));
   const availableServices = services.filter(s => !myContractIds.has(s.id));
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.card}>
-        {/* --- HEADER --- */}
+        {/* --- HEADER COMÚN --- */}
         <View style={styles.header}>
           <Image
             source={profile.avatar_url ? { uri: profile.avatar_url } : require("@/assets/user-predetermiando.png")}
@@ -287,7 +288,7 @@ export default function PerfilPublico() {
           />
           <Text style={styles.nombre}>{profile.nombre} {profile.apellido}</Text>
           <Text style={styles.rolLabel}>
-            {isProfessional && professionalData ? professionalData.titulo : "Usuario"}
+            {isProfessional && professionalData ? professionalData.titulo : "Cliente"}
           </Text>
         </View>
 
@@ -297,8 +298,10 @@ export default function PerfilPublico() {
             <Text style={styles.value}>{profile.direccion_legible || "No especificada"}</Text>
         </View>
 
-        {/* --- LÓGICA PROFESIONAL --- */}
-        {isProfessional && professionalData && (
+        {/* ==========================================================
+            RAMA 1: VISTA DE PROFESIONAL (Coach)
+           ========================================================== */}
+        {isProfessional && professionalData ? (
           <>
             <View style={styles.separator} />
             <Text style={styles.sectionTitle}>Información Profesional</Text>
@@ -312,7 +315,7 @@ export default function PerfilPublico() {
 
             <View style={styles.separator} />
 
-            {/* --- SECCIÓN 1: SERVICIOS CONTRATADOS (Permiten ir al Chat) --- */}
+            {/* Servicios Contratados */}
             {hiredServices.length > 0 && (
                 <View style={styles.servicesSection}>
                     <Text style={[styles.sectionTitle, { color: materialColors.schemes.light.primary }]}>
@@ -326,8 +329,6 @@ export default function PerfilPublico() {
                                     {service.total_sessions} sesiones • {service.validity_days} días vigencia
                                 </Text>
                             </View>
-                            
-                            {/* Botón Ir al Chat */}
                             <TouchableOpacity 
                                 style={styles.chatButton}
                                 onPress={getOrCreateConversation}
@@ -347,9 +348,8 @@ export default function PerfilPublico() {
                 </View>
             )}
 
-            {/* --- SECCIÓN 2: SERVICIOS DISPONIBLES (Para contratar) --- */}
+            {/* Servicios Disponibles */}
             <Text style={styles.sectionTitle}>Servicios Disponibles</Text>
-            
             {availableServices.length > 0 ? (
                 availableServices.map(service => (
                     <View key={service.id} style={styles.serviceCard}>
@@ -370,14 +370,50 @@ export default function PerfilPublico() {
                 ))
             ) : (
                 <Text style={{ fontStyle: 'italic', color: '#666', textAlign: 'center', marginVertical: 10 }}>
-                    {hiredServices.length > 0 
-                        ? "Ya has contratado todos los servicios disponibles." 
-                        : "Este profesional no tiene más servicios publicados."}
+                    No hay servicios disponibles para contratar.
                 </Text>
             )}
           </>
+        ) : (
+        /* ==========================================================
+            RAMA 2: VISTA DE CLIENTE (Alumno)
+           ========================================================== */
+          <>
+             <View style={styles.separator} />
+             <Text style={styles.sectionTitle}>Ficha del Cliente</Text>
+             
+             <View style={styles.infoRow}>
+                <Text style={styles.label}>Email:</Text>
+                <Text style={styles.value}>{profile.email}</Text>
+             </View>
+             <View style={styles.infoRow}>
+                <Text style={styles.label}>Teléfono:</Text>
+                <Text style={styles.value}>{profile.telefono || "No registrado"}</Text>
+             </View>
+
+             {/* Datos Físicos */}
+             <View style={{flexDirection: 'row', justifyContent: 'space-around', marginVertical: 20, backgroundColor: '#f9f9f9', padding: 15, borderRadius: 10}}>
+                <View style={{alignItems: 'center'}}>
+                    <Ionicons name="body-outline" size={24} color={materialColors.schemes.light.primary} />
+                    <Text style={{fontWeight: 'bold', marginTop: 5}}>Peso</Text>
+                    <Text>{profile.peso ? `${profile.peso} kg` : '--'}</Text>
+                </View>
+                <View style={{alignItems: 'center'}}>
+                    <Ionicons name="resize-outline" size={24} color={materialColors.schemes.light.primary} />
+                    <Text style={{fontWeight: 'bold', marginTop: 5}}>Altura</Text>
+                    <Text>{profile.altura ? `${profile.altura} cm` : '--'}</Text>
+                </View>
+                 <View style={{alignItems: 'center'}}>
+                    <Ionicons name="calendar-outline" size={24} color={materialColors.schemes.light.primary} />
+                    <Text style={{fontWeight: 'bold', marginTop: 5}}>Edad</Text>
+                    <Text>{profile.fecha_nacimiento ? "Calc..." : '--'}</Text>
+                </View>
+             </View>
+          </>
         )}
+
       </View>
+
       {/* MODAL DE AGENDAMIENTO */}
       {selectedService && (
         <BookingModal 

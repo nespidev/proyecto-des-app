@@ -19,7 +19,8 @@ export default function ChatList() {
       conversationId: chat.id,
       otherUserId: chat.other_user_id,
       userName: `${chat.other_user_nombre} ${chat.other_user_apellido}`,
-      isActive: chat.is_chat_active 
+      isActive: chat.is_chat_active,
+      avatarUrl: chat.other_user_avatar
     });
   };
 
