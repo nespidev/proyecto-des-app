@@ -7,6 +7,8 @@ import Button from "@/components/Button";
 import { AuthContext } from "@/shared/context/auth-context";
 import { ROOT_ROUTES } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
+import { addMinutes } from "date-fns";
+import BookingModal from "@/components/BookingModal";
 
 type ParamList = {
   PerfilPublico: {
@@ -43,6 +45,10 @@ export default function PerfilPublico() {
   // Estado para el chat
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [chatLoading, setChatLoading] = useState(false);
+
+  // Estados para el modal de reserva
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
   
   const [loading, setLoading] = useState(true);
 
@@ -118,53 +124,81 @@ export default function PerfilPublico() {
     }
   };
 
-  const handleBuyService = async (service: Service) => {
+  const handleBuyService = (service: Service) => {
     if (!currentUser) {
         Alert.alert("Error", "Debes iniciar sesión para contratar.");
         return;
     }
+    setSelectedService(service);
+    setShowBookingModal(true);
+  };
+  // 2 NUEVO: Lógica final al confirmar horarios
+  const handleConfirmBooking = async (selectedSlots: string[]) => {
+    setShowBookingModal(false);
+    
+    if (!selectedService || !currentUser) return;
 
-    Alert.alert(
-      "Confirmar Contratación",
-      `¿Deseas adquirir "${service.title}" por $${service.price}?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        { 
-          text: "Confirmar", 
-          onPress: async () => {
-            // Calcular fechas de vigencia
-            const startDate = new Date();
-            const endDate = new Date();
-            endDate.setDate(startDate.getDate() + (service.validity_days || 30));
+    try {
+        setLoading(true); // Bloquear UI
 
-            // Insertar contrato en Supabase
-            const { error } = await supabase
-              .from('contracts')
-              .insert({
+        // A. Calcular vigencia
+        const startDate = new Date();
+        const endDate = new Date();
+        endDate.setDate(startDate.getDate() + (selectedService.validity_days || 30));
+
+        // B. Crear Contrato
+        const { data: contractData, error: contractError } = await supabase
+          .from('contracts')
+          .insert({
+            client_id: currentUser.id,
+            professional_id: userId,
+            service_id: selectedService.id,
+            start_date: startDate.toISOString(),
+            end_date: endDate.toISOString(),
+            total_credits: selectedService.total_sessions,
+            used_credits: selectedSlots.length, // Ya consumimos créditos al agendar
+            status: 'active'
+          })
+          .select('id') // Necesitamos el ID para los turnos
+          .single();
+
+        if (contractError) throw contractError;
+
+        // C. Crear Turnos (Appointments) masivamente
+        const appointmentsToInsert = selectedSlots.map(slotTime => {
+            const start = new Date(slotTime);
+            const end = addMinutes(start, selectedService.duration_minutes);
+            
+            return {
+                contract_id: contractData.id,
                 client_id: currentUser.id,
                 professional_id: userId,
-                service_id: service.id,
-                start_date: startDate.toISOString(),
-                end_date: endDate.toISOString(),
-                total_credits: service.total_sessions,
-                used_credits: 0,
-                status: 'active'
-              });
+                start_time: start.toISOString(),
+                end_time: end.toISOString(),
+                status: 'scheduled'
+            };
+        });
 
-            if (error) {
-              console.error(error);
-              Alert.alert("Error", "No se pudo procesar la contratación.");
-            } else {
-              Alert.alert("¡Éxito!", "Servicio contratado correctamente.");
-              fetchProfileData(); // Recargar datos para actualizar la UI
-              
-              // Crear chat automaticamente al contratar
-              getOrCreateConversation(); 
-            }
-          }
-        }
-      ]
-    );
+        const { error: appError } = await supabase
+            .from('appointments')
+            .insert(appointmentsToInsert);
+
+        if (appError) throw appError;
+
+        Alert.alert("¡Todo listo!", "Servicio contratado y turnos agendados correctamente.");
+        
+        // Refrescar datos y quizás abrir chat automáticamente
+        fetchProfileData();
+        getOrCreateConversation(); 
+
+    } catch (error: any) {
+        console.error("Error booking:", error);
+        Alert.alert("Error", "Ocurrió un fallo al procesar la contratación: " + error.message);
+    } finally {
+        setLoading(false);
+        setSelectedService(null);
+    }
+
   };
 
   // --- LÓGICA CRÍTICA DEL CHAT ---
@@ -344,6 +378,16 @@ export default function PerfilPublico() {
           </>
         )}
       </View>
+      {/* MODAL DE AGENDAMIENTO */}
+      {selectedService && (
+        <BookingModal 
+          visible={showBookingModal}
+          onClose={() => setShowBookingModal(false)}
+          service={selectedService}
+          professionalId={userId}
+          onConfirm={handleConfirmBooking}
+        />
+      )}
     </ScrollView>
   );
 }
