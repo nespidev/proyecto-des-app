@@ -1,10 +1,12 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import React from "react";
+import React, { useContext } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native";
 import { materialColors } from "@/utils/colors";
 import { useNavigation } from "@react-navigation/native";
 import { ROOT_ROUTES, TAB_ROUTES } from "@/utils/constants";
+import AuthContext from "@/shared/context/auth-context/auth-context";
+import ClientsStack from "./screens/clients/clients-stack";
 
 import {HomeScreen, EntrenarScreen, BusquedaPerfilesScreen, ChatListScreen} from "./screens";
 
@@ -12,6 +14,9 @@ const Tab = createBottomTabNavigator();
 
 export default function TabsScreen() {
   const navigation = useNavigation();
+  const { state } = useContext(AuthContext); // Accedemos al estado global
+  
+  const isProfessionalView = state.viewMode === 'professional'
 
   return (
     <Tab.Navigator
@@ -55,11 +60,26 @@ export default function TabsScreen() {
         ),
       })}
     >
-      <Tab.Screen
-        name={TAB_ROUTES.ENTRENAR}
-        component={EntrenarScreen}
-        options={{ title: "Entrenar" }}
-      />
+      {/* Lógica Condicional para la 1ra Pestaña */}
+      {isProfessionalView ? (
+        <Tab.Screen
+          name="Clientes" // Nombre interno
+          component={ClientsStack} // Renderizamos el Stack, no una sola pantalla
+          options={{ 
+            title: "Mis Clientes",
+            tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />
+          }}
+        />
+      ) : (
+        <Tab.Screen
+          name={TAB_ROUTES.ENTRENAR}
+          component={EntrenarScreen}
+          options={{ 
+            title: "Entrenar",
+            tabBarIcon: ({ color, size }) => <Ionicons name="barbell" size={size} color={color} />
+          }}
+        />
+      )}
       <Tab.Screen
         name={TAB_ROUTES.HOME}
         component={HomeScreen}
