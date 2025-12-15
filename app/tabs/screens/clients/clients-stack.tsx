@@ -1,9 +1,9 @@
-// app/tabs/screens/clients/clients-stack.tsx
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ClientsListScreen from './clients-list';
 import ClientDashboardScreen from './client-dashboard';
-import PlanEditorScreen from './plan-editor'; // El que ya creamos
+import PlanEditorScreen from './plan-editor';
+import PlanHistoryScreen from '../plan-history';
 import { materialColors } from '@/utils/colors';
 
 // Definición de tipos para la navegación
@@ -11,6 +11,7 @@ export type ClientsStackParamList = {
   ClientsList: undefined;
   ClientDashboard: { clientId: string; clientName: string };
   PlanEditor: { clientId: string; planType: 'workout' | 'diet'; existingPlan?: any };
+  PlanHistory: { clientId: string };
 };
 
 const Stack = createNativeStackNavigator<ClientsStackParamList>();
@@ -46,6 +47,11 @@ export default function ClientsStack() {
           presentation: 'modal', 
           title: 'Gestión de Plan' 
         }} 
+      />
+      <Stack.Screen 
+        name="PlanHistory" 
+        component={PlanHistoryScreen} 
+        options={{ title: 'Historial' }} 
       />
     </Stack.Navigator>
   );

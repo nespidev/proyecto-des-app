@@ -8,7 +8,8 @@ import { ROOT_ROUTES } from '@/utils/constants';
 import { AuthContext } from "@/shared/context/auth-context";
 
 // --- REUTILIZACIÓN: Importamos tu componente de gráfico existente ---
-import WeightProgressChart from '@/components/WeightProgressChart'; 
+import WeightProgressChart from '@/components/WeightProgressChart';
+import PlanPreview from '@/components/PlanPreview';
 
 export default function ClientDashboardScreen() {
   const route = useRoute<any>();
@@ -144,6 +145,10 @@ export default function ClientDashboardScreen() {
     }
   };
 
+  const handleViewHistory = () => {
+    navigation.navigate('PlanHistory', { clientId });
+  };
+
   const navigateToEditor = (type: 'workout' | 'diet', existingPlan?: any) => {
     navigation.navigate('PlanEditor', {
       clientId,
@@ -156,7 +161,6 @@ export default function ClientDashboardScreen() {
     navigation.navigate(ROOT_ROUTES.PERFIL_PUBLICO, { userId: clientId });
   };
 
-  // --- RENDERIZADO (Componente PlanCard igual que antes) ---
   const PlanCard = ({ title, icon, plan, type }: { title: string, icon: any, plan: any, type: 'workout' | 'diet' }) => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -170,10 +174,19 @@ export default function ClientDashboardScreen() {
       {plan ? (
         <View>
           <Text style={styles.planName}>{plan.title}</Text>
-          <Text style={styles.planDate}>Actualizado: {new Date(plan.updated_at || plan.recorded_at).toLocaleDateString()}</Text>
+          <Text style={styles.planDate}>
+             Actualizado: {new Date(plan.updated_at || plan.created_at).toLocaleDateString()}
+          </Text>
+          
+          {/* --- AQUÍ INSERTAMOS LA VISTA PREVIA --- */}
+          <PlanPreview plan={plan} maxItemsPerDay={4} maxDays={3}  />
+          
           <View style={styles.buttonRow}>
-            <TouchableOpacity style={[styles.button, styles.editButton]} onPress={() => navigateToEditor(type, plan)}>
-              <Text style={styles.editButtonText}>Editar</Text>
+            <TouchableOpacity 
+              style={[styles.button, styles.editButton]} 
+              onPress={() => navigateToEditor(type, plan)}
+            >
+              <Text style={styles.editButtonText}>Editar / Ver Detalle</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -195,7 +208,12 @@ export default function ClientDashboardScreen() {
         refreshControl={<RefreshControl refreshing={loading} onRefresh={fetchActivePlans} />}
       >
         {/* Secciones de Planes */}
-        <Text style={styles.sectionTitle}>Gestión de Planes</Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Gestión de Planes</Text>
+          <TouchableOpacity onPress={handleViewHistory}>
+            <Text style={styles.linkText}>Ver Historial</Text>
+          </TouchableOpacity>
+        </View>
         <PlanCard title="Rutina de Entrenamiento" icon="barbell" plan={activeWorkout} type="workout" />
         <PlanCard title="Plan de Nutrición" icon="restaurant" plan={activeDiet} type="diet" />
 
@@ -286,5 +304,72 @@ const styles = StyleSheet.create({
   // Estilos del Modal
   modalContainer: { flex: 1, backgroundColor: '#fff' },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#eee' },
-  modalTitle: { fontSize: 20, fontWeight: 'bold' }
+  modalTitle: { fontSize: 20, fontWeight: 'bold' },
+
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 12,
+  },
+
+  linkText: {
+    color: materialColors.schemes.light.primary, // Usa tu color primario
+    fontSize: 14,
+    fontWeight: '600',
+  }
+});
+
+// Estilos específicos para la vista previa
+const previewStyles = StyleSheet.create({
+  container: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 8,
+    padding: 10,
+    marginVertical: 10,
+  },
+  dayTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#666',
+    marginBottom: 6,
+    textTransform: 'uppercase'
+  },
+  rowHeader: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#DDD',
+    paddingBottom: 4,
+    marginBottom: 4
+  },
+  row: {
+    flexDirection: 'row',
+    paddingVertical: 2
+  },
+  // Columnas Rutina
+  colName: { flex: 3 },
+  colSets: { flex: 1, textAlign: 'center' },
+  colReps: { flex: 1, textAlign: 'center' },
+  
+  // Columnas Dieta
+  colTime: { flex: 1.5 },
+  colFood: { flex: 3 },
+
+  colText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#888'
+  },
+  cellText: {
+    fontSize: 11,
+    color: '#333'
+  },
+  moreText: {
+    fontSize: 10,
+    color: '#999',
+    marginTop: 4,
+    fontStyle: 'italic',
+    textAlign: 'center'
+  }
 });
