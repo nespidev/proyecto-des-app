@@ -7,7 +7,7 @@ import { AuthContext } from "@/shared/context/auth-context";
 import AUTH_ACTIONS from "@/shared/context/auth-context/enums";
 import { supabase } from "@/utils/supabase";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { selectMediaFromGallery, takePhoto, uploadFileToSupabase } from "@/utils/media-helper";
+import { selectMediaFromGallery, takeMediaFromCamera, uploadFileToSupabase } from "@/utils/media-helper";
 import CircleIconButton from "@/components/CircleIconButton";
 
 const defaultImage = require("@/assets/user-predetermiando.png");
@@ -59,12 +59,12 @@ export default function PerfilUsuario() {
 
       // Obtener asset (camara o galeria)
       const asset = source === 'camera' 
-        ? await takePhoto() 
+        ? await takeMediaFromCamera() // <--- Antes decia takePhoto()
         : await selectMediaFromGallery({ mediaType: 'Images', quality: 0.4 });
 
       if (!asset) {
         setLoading(false);
-        return; // Usuario cancela
+        return; 
       }
 
       // Feedback visual inmediato
