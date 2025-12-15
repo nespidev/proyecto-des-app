@@ -9,6 +9,7 @@ export interface ProfesionalCard {
   puntuacion: number;
   modalidad: string;
   ubicacion: string;
+  ciudad: string;
   latitud?: number;
   longitud?: number;
 }

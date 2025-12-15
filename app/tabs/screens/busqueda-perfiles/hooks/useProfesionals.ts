@@ -76,6 +76,7 @@ export function useProfessionals() {
           puntuacion: item.puntuacion || 5.0,
           modalidad: item.modalidad || "Remoto",
           ubicacion: item.direccion_legible || "Sin ubicación",
+          ciudad: item.ciudad || "Sin ciudad",
           latitud: item.latitud,
           longitud: item.longitud,
         }));

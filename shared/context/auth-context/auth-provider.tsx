@@ -26,13 +26,12 @@ const initialState: State = {
 }
 
 const AuthProvider = (props: any) => {
-  const [state, dispatch] = useReducer((prevState: State, action: Action): State => { // <--- Tipamos explícitamente el retorno
+  const [state, dispatch] = useReducer((prevState: State, action: Action): State => { 
     switch (action.type) {
       case AUTH_ACTIONS.LOGIN:
         return {
           ...prevState,
           user: action.payload.user,
-          // SOLUCIÓN AQUÍ: Forzamos el tipo con 'as'
           viewMode: (action.payload.user.rol === 'professional' ? 'professional' : 'client') as 'client' | 'professional',
           token: action.payload.token,
           isLoading: false,
@@ -51,7 +50,6 @@ const AuthProvider = (props: any) => {
     }
   }, initialState);
 
-  // ... (El resto del useEffect queda igual)
   useEffect(() => {
     const handleSession = async (session: any) => {
       if (session) {
@@ -87,6 +85,7 @@ const AuthProvider = (props: any) => {
                   telefono: profile.telefono,
                   email: profile.email,
                   direccion_legible: profile.direccion_legible,
+                  ciudad: profile.ciudad,
                   peso: profile.peso,
                   altura: profile.altura,
                   fecha_actualizacion_peso: profile.fecha_actualizacion_peso,

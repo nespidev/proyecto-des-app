@@ -54,7 +54,7 @@ export default function ProfessionalCardItem({ item, onPress }: Props) {
       <View style={styles.cardFooter}>
         <View style={styles.footerItem}>
           <Ionicons name="location-outline" size={16} color="gray" />
-          <Text style={styles.footerText}>{item.ubicacion}</Text>
+          <Text style={styles.footerText}>{item.ciudad}</Text>
         </View>
         <View style={styles.footerItem}>
           <Text style={styles.priceText}>${item.precio}</Text>

@@ -147,8 +147,8 @@ export default function PerfilPublico() {
         </View>
 
         <View style={styles.infoRow}>
-            <Text style={styles.label}>Ubicación:</Text>
-            <Text style={styles.value}>{profile.direccion_legible || "No especificada"}</Text>
+            <Text style={styles.label}>Ciudad:</Text>
+            <Text style={styles.value}>{profile.ciudad || "No especificada"}</Text>
         </View>
 
         {/* Renderizado Condicional */}

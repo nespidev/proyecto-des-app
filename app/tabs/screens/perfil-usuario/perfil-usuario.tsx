@@ -9,6 +9,7 @@ import { supabase } from "@/utils/supabase";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { selectMediaFromGallery, takeMediaFromCamera, uploadFileToSupabase } from "@/utils/media-helper";
 import CircleIconButton from "@/components/CircleIconButton";
+import LocationPickerModal from "@/components/LocationPickerModal";
 
 const defaultImage = require("@/assets/user-predetermiando.png");
 
@@ -17,6 +18,7 @@ export default function PerfilUsuario() {
   const { state, dispatch } = useContext<any>(AuthContext);
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
 
   const user = state.user;
 
@@ -28,7 +30,6 @@ export default function PerfilUsuario() {
     Alert.alert("Modo cambiado", `Ahora estás viendo la app como ${currentMode === 'client' ? 'Profesional' : 'Usuario'}`);
   };
 
-  // --- CONFIGURACION DE HEADER ---
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -46,7 +47,7 @@ export default function PerfilUsuario() {
         ) : null
       ),
     });
-  }, [navigation, isProfessional, currentMode]); // Se actualiza si cambia el modo
+  }, [navigation, isProfessional, currentMode]);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -56,10 +57,8 @@ export default function PerfilUsuario() {
   const handleUpdateAvatar = async (source: 'camera' | 'gallery') => {
     try {
       setLoading(true);
-
-      // Obtener asset (camara o galeria)
       const asset = source === 'camera' 
-        ? await takeMediaFromCamera() // <--- Antes decia takePhoto()
+        ? await takeMediaFromCamera()
         : await selectMediaFromGallery({ mediaType: 'Images', quality: 0.4 });
 
       if (!asset) {
@@ -67,24 +66,15 @@ export default function PerfilUsuario() {
         return; 
       }
 
-      // Feedback visual inmediato
       setImage(asset.uri); 
 
-      // Preparar datos
       const fileExt = asset.uri.split('.').pop()?.toLowerCase() || 'jpg';
-      const path = `${user.id}/avatar.${fileExt}`; // Nombre fijo para sobrescribir
+      const path = `${user.id}/avatar.${fileExt}`;
       
-      // Subir usando el helper (FormData)
-      const publicUrl = await uploadFileToSupabase(
-        'profile-images', // Bucket
-        path,
-        asset.uri,
-        'image/jpeg' // jpg/png para perfil
-      );
+      const publicUrl = await uploadFileToSupabase('profile-images', path, asset.uri, 'image/jpeg');
 
       if (!publicUrl) throw new Error("Error al obtener URL de imagen");
-
-      // Actualizar base de datos
+      
       const urlWithTimestamp = `${publicUrl}?t=${Date.now()}`;
       
       const { error: updateError } = await supabase
@@ -94,7 +84,6 @@ export default function PerfilUsuario() {
 
       if (updateError) throw updateError;
 
-      // ACTUALIZAR EL ESTADO GLOBAL (AUTH CONTEXT)
       dispatch({
         type: AUTH_ACTIONS.LOGIN,
         payload: {
@@ -103,11 +92,50 @@ export default function PerfilUsuario() {
         }
       });
 
-      Alert.alert("EXITO", "Foto actualizada correctamente");
+      Alert.alert("ÉXITO", "Foto actualizada correctamente");
 
     } catch (error: any) {
       Alert.alert("Error", error.message);
-      setImage(null); // Revertir si falla
+      setImage(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateLocation = async (data: { latitud: number; longitud: number; direccion: string; ciudad: string }) => {
+    try {
+      setLoading(true);
+      
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          latitud: data.latitud,
+          longitud: data.longitud,
+          direccion_legible: data.direccion,
+          ciudad: data.ciudad
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      dispatch({
+        type: AUTH_ACTIONS.LOGIN,
+        payload: {
+          user: { 
+            ...user, 
+            latitud: data.latitud, 
+            longitud: data.longitud, 
+            direccion_legible: data.direccion,
+            ciudad: data.ciudad
+          },
+          token: state.token,
+        }
+      });
+
+      Alert.alert("Éxito", "Ubicación actualizada correctamente.");
+    } catch (error: any) {
+      Alert.alert("Error", "No se pudo actualizar la ubicación.");
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -185,12 +213,33 @@ export default function PerfilUsuario() {
             {user.telefono ? user.telefono : "No registrado"}
           </Text>
         </View>
+
+        {/* --- SECCIÓN DE UBICACIÓN --- */}
         <View style={styles.infoRow}>
-          <Text style={styles.label}>Ubicación:</Text>
+          <Text style={styles.label}>Dirección:</Text>
           <Text style={[styles.value, !user.direccion_legible && styles.placeholderText]}>
-            {user.direccion_legible ? user.direccion_legible : "No definida"}
+              {user.direccion_legible ? user.direccion_legible : "No definida"}
           </Text>
         </View>
+
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Ciudad:</Text>
+          <Text style={[styles.value, !user.ciudad && styles.placeholderText]}>
+              {user.ciudad ? user.ciudad : "No definida"}
+          </Text>
+        </View>
+        <TouchableOpacity 
+          style={styles.linkButton} 
+          onPress={() => setShowLocationModal(true)}
+          activeOpacity={0.6}
+        >
+          <Text style={styles.linkText}>Modificar ubicación en mapa</Text>
+          <MaterialCommunityIcons 
+            name="arrow-right" 
+            size={16} 
+            color={materialColors.schemes.light.primary} 
+          />
+        </TouchableOpacity>
 
       </View>
       
@@ -199,12 +248,23 @@ export default function PerfilUsuario() {
         style={styles.exitButton}
         onPress={handleLogout}
       />
+
+      <LocationPickerModal 
+        visible={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        onConfirm={handleUpdateLocation}
+        initialLocation={
+          user.latitud && user.longitud 
+            ? { lat: user.latitud, lng: user.longitud, address: user.direccion_legible }
+            : undefined
+        }
+      />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-container: {
+  container: {
     flex: 1,
     backgroundColor: materialColors.schemes.light.surface,
     padding: 16,
@@ -243,30 +303,10 @@ container: {
     alignItems: 'center',
     zIndex: 1
   },
-  editButton: {
-    position: 'absolute',
-    right: 20,
-    bottom: 10,
-  },
-  cameraButton: {
-    position: 'absolute',
-    left: 20,
-    bottom: 10,
-  },
-  nombre: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#333",
-    textAlign: "center"
-  },
-  rol: {
-    fontSize: 16,
-    color: materialColors.schemes.light.primary,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    marginTop: 6,
-    letterSpacing: 1
-  },
+  editButton: { position: 'absolute', right: 20, bottom: 10 },
+  cameraButton: { position: 'absolute', left: 20, bottom: 10 },
+  nombre: { fontSize: 22, fontWeight: "bold", color: "#333", textAlign: "center" },
+  rol: { fontSize: 16, color: materialColors.schemes.light.primary, fontWeight: "700", textTransform: "uppercase", marginTop: 6, letterSpacing: 1 },
   proSection: {
     backgroundColor: materialColors.schemes.light.surfaceContainer,
     borderRadius: 8,
@@ -283,21 +323,10 @@ container: {
     borderBottomWidth: 1,
     borderBottomColor: "#eee"
   },
-  label: {
-    fontWeight: "bold",
-    color: "#555",
-    fontSize: 16
-  },
-  value: {
-    color: "#333",
-    fontSize: 16,
-    maxWidth: '60%', 
-    textAlign: 'right'
-  },
-  placeholderText: {
-    color: "#999",
-    fontStyle: 'italic'
-  },
+  label: { fontWeight: "bold", color: "#555", fontSize: 16 },
+  value: { color: "#333", fontSize: 16, maxWidth: '60%', textAlign: 'right' },
+  placeholderText: { color: "#999", fontStyle: 'italic' },
+    
   exitButton: { 
     backgroundColor: materialColors.coreColors.error,
     marginTop: 10,
@@ -306,7 +335,6 @@ container: {
     alignSelf: "center",
     width: "100%"
   },
-  // ESTILOS NUEVOS PARA EL HEADER
   headerSwitchButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -324,15 +352,17 @@ container: {
     color: materialColors.schemes.light.primary,
     marginLeft: 6
   },
-  modeBadge: {
+  linkButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
     marginTop: 8,
-    backgroundColor: '#eee',
-    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 4
   },
-  modeText: {
-    fontSize: 12,
-    color: '#666'
-  }
+  linkText: {
+    color: materialColors.schemes.light.primary, 
+    fontSize: 14,
+    fontWeight: '600',
+    marginRight: 4 
+  },
 });

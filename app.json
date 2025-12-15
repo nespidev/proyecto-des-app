@@ -29,7 +29,13 @@
     "plugins": [
       "expo-font",
       "expo-video",
-      "expo-audio"
+      "expo-audio",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Permitir a FitConnect acceder a tu ubicación para encontrar profesionales cercanos."
+        }
+      ],
     ]
   }
 }

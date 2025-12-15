@@ -12,6 +12,7 @@ export interface IUser {
   latitud?: number | null;
   longitud?: number | null;
   direccion_legible?: string | null;
+  ciudad?: string | null;
 
   // --- Datos Físicos (Tabla profiles - Solo Alumnos) ---
   peso?: number | null;
@@ -40,6 +41,7 @@ export class User implements IUser {
   latitud?: number | null;
   longitud?: number | null;
   direccion_legible?: string | null;
+  ciudad?: string | null;
 
   peso?: number | null;
   altura?: number | null;
@@ -66,6 +68,7 @@ export class User implements IUser {
     this.latitud = data.latitud;
     this.longitud = data.longitud;
     this.direccion_legible = data.direccion_legible;
+    this.ciudad = data.ciudad;
 
     // Físicos
     this.peso = data.peso;
