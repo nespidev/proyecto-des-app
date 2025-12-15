@@ -14,7 +14,7 @@ const Tab = createBottomTabNavigator();
 
 export default function TabsScreen() {
   const navigation = useNavigation();
-  const { state } = useContext(AuthContext); // Accedemos al estado global
+  const { state } = useContext(AuthContext);
   
   const isProfessionalView = state.viewMode === 'professional'
 
@@ -66,7 +66,7 @@ export default function TabsScreen() {
           name="Clientes" // Nombre interno
           component={ClientsStack} // Renderizamos el Stack, no una sola pantalla
           options={{ 
-            title: "Mis Clientes",
+            title: "Gestion",
             tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />
           }}
         />

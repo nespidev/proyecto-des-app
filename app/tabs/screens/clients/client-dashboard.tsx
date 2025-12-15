@@ -54,16 +54,16 @@ export default function ClientDashboardScreen() {
 
     const { data, error } = await supabase
       .from('weight_logs')
-      .select('peso, created_at')
+      .select('weight, recorded_at')
       .eq('user_id', clientId) // Importante: ID del cliente, no el mío
-      .order('created_at', { ascending: true });
+      .order('recorded_at', { ascending: true });
 
     if (!error && data) {
       // Formateamos igual que en tu hook useWeightMetrics
       const formatted = data.map((log: any) => ({
-        value: log.peso,
-        date: new Date(log.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }),
-        label: new Date(log.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }),
+        value: log.weight,
+        date: new Date(log.recorded_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }),
+        label: new Date(log.recorded_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }),
       }));
       setWeightHistory(formatted);
     }
@@ -170,7 +170,7 @@ export default function ClientDashboardScreen() {
       {plan ? (
         <View>
           <Text style={styles.planName}>{plan.title}</Text>
-          <Text style={styles.planDate}>Actualizado: {new Date(plan.updated_at || plan.created_at).toLocaleDateString()}</Text>
+          <Text style={styles.planDate}>Actualizado: {new Date(plan.updated_at || plan.recorded_at).toLocaleDateString()}</Text>
           <View style={styles.buttonRow}>
             <TouchableOpacity style={[styles.button, styles.editButton]} onPress={() => navigateToEditor(type, plan)}>
               <Text style={styles.editButtonText}>Editar</Text>

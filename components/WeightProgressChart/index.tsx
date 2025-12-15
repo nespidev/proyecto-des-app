@@ -8,7 +8,7 @@ const screenWidth = Dimensions.get("window").width;
 interface Props {
   data: any[];
   loading: boolean;
-  chartKey: number; // Para forzar re-render
+  chartKey: number;
 }
 
 export default function WeightProgressChart({ data, loading, chartKey }: Props) {
@@ -49,9 +49,20 @@ export default function WeightProgressChart({ data, loading, chartKey }: Props) 
 }
 
 const styles = StyleSheet.create({
-  chartSection: { flex: 1, marginTop: 10 },
+  chartSection: { 
+    width: '100%', 
+    marginTop: 10 
+  },
   sectionTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 16, color: '#333' },
-  chartContainer: { alignItems: 'center', paddingVertical: 10, backgroundColor: '#fff', borderRadius: 16, padding: 10, overflow: 'hidden'},
+  
+  chartContainer: { 
+    alignItems: 'center', 
+    paddingVertical: 10, 
+    backgroundColor: '#fff', 
+    borderRadius: 16, 
+    padding: 10,
+    overflow: 'hidden'
+  },
   emptyChart: { alignItems: 'center', padding: 30, backgroundColor: '#f9f9f9', borderRadius: 12 },
   emptyText: { color: '#888' }
 });
