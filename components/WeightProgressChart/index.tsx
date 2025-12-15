@@ -18,7 +18,7 @@ export default function WeightProgressChart({ data, loading, chartKey }: Props) 
       {loading ? (
         <ActivityIndicator size="large" color={materialColors.schemes.light.primary} />
       ) : data.length > 1 ? (
-        <View style={styles.chartContainer}>
+        <View style={styles.card}>
           <LineChart
             key={chartKey}
             data={data}
@@ -40,7 +40,7 @@ export default function WeightProgressChart({ data, loading, chartKey }: Props) 
           />
         </View>
       ) : (
-        <View style={styles.emptyChart}>
+        <View style={[styles.card, styles.emptyChart]}>
           <Text style={styles.emptyText}>Registra más pesos para ver tu evolución.</Text>
         </View>
       )}
@@ -53,16 +53,34 @@ const styles = StyleSheet.create({
     width: '100%', 
     marginTop: 10 
   },
-  sectionTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 16, color: '#333' },
+  sectionTitle: { 
+    fontSize: 18, 
+    fontWeight: "bold", 
+    marginBottom: 16, 
+    color: '#333',
+    paddingHorizontal: 4
+  },
   
-  chartContainer: { 
-    alignItems: 'center', 
-    paddingVertical: 10, 
+  card: { 
     backgroundColor: '#fff', 
-    borderRadius: 16, 
-    padding: 10,
+    borderRadius: 20, 
+    padding: 20, 
+    shadowColor: "#000", 
+    shadowOpacity: 0.08, 
+    shadowRadius: 10, 
+    elevation: 4, 
+    marginBottom: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
     overflow: 'hidden'
   },
-  emptyChart: { alignItems: 'center', padding: 30, backgroundColor: '#f9f9f9', borderRadius: 12 },
-  emptyText: { color: '#888' }
+
+  emptyChart: { 
+    padding: 40,
+    alignItems: 'center' 
+  },
+  emptyText: { 
+    color: '#888',
+    fontStyle: 'italic'
+  }
 });

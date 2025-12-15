@@ -6,7 +6,7 @@ type CardProps = {
   titulo?: string;
   style?: StyleProp<ViewStyle>;
   children?: React.ReactNode;
-  imagePlaceholder?: boolean;
+  // imagePlaceholder?: boolean;
 };
 
 const colors = materialColors.schemes.light;
@@ -22,22 +22,23 @@ const Card = ({ titulo, style, children}: CardProps) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: 12,
-    padding: 16,
-    marginVertical: 8,
-    shadowColor: colors.shadow,
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 4,
+    marginTop: 8,
+    marginBottom: 8
   },
-  imagePlaceholder: {
-    width: "100%",
-    height: 150,
-    backgroundColor: colors.surfaceDim,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
+  // imagePlaceholder: {
+  //   width: "100%",
+  //   height: 150,
+  //   backgroundColor: colors.surfaceDim,
+  //   borderRadius: 8,
+  //   marginBottom: 12,
+  // },
   title: {
     fontSize: 16,
     fontWeight: "bold",

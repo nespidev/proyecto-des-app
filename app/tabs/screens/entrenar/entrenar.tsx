@@ -20,6 +20,7 @@ import { AuthContext } from "@/shared/context/auth-context";
 import MetricsCard from "@/components/MetricsCard"; //
 import WeightProgressChart from "@/components/WeightProgressChart"; //
 import PlanPreview from "@/components/PlanPreview"; //
+import Card from "@/components/Card";
 import { useWeightMetrics } from "./hooks/useWeightMetrics"; //
 
 export default function Entrenar() {
@@ -145,11 +146,13 @@ export default function Entrenar() {
                 {activeWorkout ? (
                   <>
                     <Text style={styles.planSubtitle}>{activeWorkout.title}</Text>
-                    <PlanPreview 
-                      plan={activeWorkout} 
-                      maxDays={7} 
-                      maxItemsPerDay={10} 
-                    />
+                    <Card>
+                      <PlanPreview 
+                        plan={activeWorkout} 
+                        maxDays={7} 
+                        maxItemsPerDay={10} 
+                      />
+                    </Card>
                   </>
                 ) : (
                   <EmptyPlanState 
@@ -171,11 +174,13 @@ export default function Entrenar() {
                 {activeDiet ? (
                   <>
                     <Text style={styles.planSubtitle}>{activeDiet.title}</Text>
-                    <PlanPreview 
-                      plan={activeDiet} 
-                      maxDays={7} 
-                      maxItemsPerDay={10} 
-                    />
+                    <Card>
+                      <PlanPreview 
+                        plan={activeDiet} 
+                        maxDays={7} 
+                        maxItemsPerDay={10} 
+                      />
+                    </Card>
                   </>
                 ) : (
                   <EmptyPlanState 
