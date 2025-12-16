@@ -1,14 +1,20 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
-import { Calendar as RNCalendar, LocaleConfig } from "react-native-calendars"; // Alias para evitar choque de nombres
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, Switch, Alert, Button } from "react-native";
+import { Calendar as RNCalendar, LocaleConfig } from "react-native-calendars";
+import AsyncStorage from '@react-native-async-storage/async-storage'; // <--- Importante
+import { MaterialIcons } from '@expo/vector-icons'; // Icono para configuración
+
 import { materialColors } from "@/utils/colors";
 import { globalStyles } from "@/utils/globalStyles";
 import { supabase } from "@/utils/supabase";
 import { AuthContext } from "@/shared/context/auth-context";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { NOTIFICATION_KEYS } from "@/utils/notification-helper";
 
-// Configuración de idioma
+import * as Notifications from 'expo-notifications';
+
+
 LocaleConfig.locales['es'] = {
   monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
   monthNamesShort: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
@@ -27,13 +33,84 @@ export default function Calendar() {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [markedDates, setMarkedDates] = useState<any>({});
 
+  // Estados para Configuracion local de notificaciones
+  const [showSettings, setShowSettings] = useState(false);
+  const [notifyEnabled, setNotifyEnabled] = useState(true);
+  const [notifyTime, setNotifyTime] = useState(60); // Minutos
+
   useEffect(() => {
     fetchMonthAvailability();
+    loadNotificationSettings();
   }, [user, viewMode]);
 
   useEffect(() => {
     fetchAppointmentsForDay(selectedDate);
   }, [selectedDate]);
+
+
+  // --- Lógica de Notificaciones Local ---
+  const loadNotificationSettings = async () => {
+    try {
+      const enabled = await AsyncStorage.getItem(NOTIFICATION_KEYS.ENABLED);
+      const time = await AsyncStorage.getItem(NOTIFICATION_KEYS.TIME);
+      
+      if (enabled !== null) setNotifyEnabled(enabled !== 'false');
+      if (time !== null) setNotifyTime(parseInt(time));
+    } catch (e) {
+      console.error("Error cargando settings", e);
+    }
+  };
+
+  const saveNotificationSettings = async (enabled: boolean, time: number) => {
+    try {
+      await AsyncStorage.setItem(NOTIFICATION_KEYS.ENABLED, String(enabled));
+      await AsyncStorage.setItem(NOTIFICATION_KEYS.TIME, String(time));
+      setNotifyEnabled(enabled);
+      setNotifyTime(time);
+    } catch (e) {
+      console.error("Error guardando settings", e);
+    }
+  };
+  // --------------------------------------
+
+  const handleTestNotification = async () => {
+    // Verificamos si hay turnos cargados en la fecha seleccionada
+    if (appointments.length === 0) {
+      Alert.alert("Sin turnos", "Selecciona un día que tenga turnos agendados para probar.");
+      return;
+    }
+
+    // Tomamos el primer turno de la lista (como ya vienen ordenados por hora, es el más temprano)
+    const nextAppointment = appointments[0];
+    
+    // Extraemos los datos reales
+    const serviceName = nextAppointment.contracts?.services?.title || "Sesión";
+    const professionalName = `${nextAppointment.other_user?.nombre || ''} ${nextAppointment.other_user?.apellido || ''}`.trim();
+    const time = format(new Date(nextAppointment.start_time), 'HH:mm');
+
+    // 3. Permisos
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Error', 'No tienes permisos de notificación');
+      return;
+    }
+
+    // Agendamos la notificación con datos reales
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `📅 Próximo turno: ${time} hs`,
+        body: `Recuerda tu ${serviceName} con ${professionalName}. Toca para ver detalles.`,
+        data: { appointmentId: nextAppointment.id }, // Pasamos el ID por si se quiere navegar al detalle
+        sound: true,
+      },
+      trigger: { 
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        seconds: 2 // Dispara en 2 segundos
+      },
+    });
+    
+    setShowSettings(false); // Cerramos el modal
+  };
 
   const fetchMonthAvailability = async () => {
     const column = viewMode === 'professional' ? 'professional_id' : 'client_id';
@@ -77,7 +154,15 @@ export default function Calendar() {
 
   return (
     <View style={styles.container}>
-      <Text style={[globalStyles.title, styles.headerTitle]}>Mi Calendario</Text>
+      <View style={styles.headerRow}>
+        <Text style={[globalStyles.title, { marginBottom: 0 }]}>Mi Calendario</Text>
+        <TouchableOpacity 
+          style={styles.settingsButton} 
+          onPress={() => setShowSettings(true)}
+        >
+          <MaterialIcons name="notifications-active" size={24} color={materialColors.coreColors.primary} />
+        </TouchableOpacity>
+      </View>
       
       <View style={styles.calendarContainer}>
         <RNCalendar
@@ -137,13 +222,80 @@ export default function Calendar() {
           )}
         />
       </View>
+
+      {/* MODAL DE CONFIGURACION */}
+      <Modal
+        visible={showSettings}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowSettings(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Configurar Alertas</Text>
+            
+            <View style={styles.settingRow}>
+              <Text style={styles.settingLabel}>Recibir notificaciones</Text>
+              <Switch 
+                value={notifyEnabled}
+                onValueChange={(val) => saveNotificationSettings(val, notifyTime)}
+                trackColor={{ false: "#767577", true: materialColors.schemes.light.primary }}
+              />
+            </View>
+
+            {notifyEnabled && (
+              <View style={styles.timeSelectorContainer}>
+                <Text style={styles.subLabel}>Avisarme antes de la sesión:</Text>
+                <View style={styles.chipsContainer}>
+                  {[
+                    { label: '30 min', val: 30 },
+                    { label: '1 hora', val: 60 },
+                    { label: '24 hs', val: 1440 }
+                  ].map((option) => (
+                    <TouchableOpacity
+                      key={option.val}
+                      style={[
+                        styles.chip,
+                        notifyTime === option.val && styles.chipSelected
+                      ]}
+                      onPress={() => saveNotificationSettings(true, option.val)}
+                    >
+                      <Text style={[
+                        styles.chipText,
+                        notifyTime === option.val && styles.chipTextSelected
+                      ]}>{option.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            <TouchableOpacity 
+              style={styles.closeButton} 
+              onPress={() => setShowSettings(false)}
+            >
+              <Text style={styles.closeButtonText}>Listo</Text>
+            </TouchableOpacity>
+            <View style={{ marginVertical: 20 }}>
+              <Button 
+                title="Probar con Próximo Turno" 
+                onPress={handleTestNotification} 
+                color={materialColors.coreColors.primary}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5', padding: 16 },
-  headerTitle: { marginBottom: 16, marginTop: 10 },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, marginTop: 10 },
+  settingsButton: { padding: 8, backgroundColor: '#fff', borderRadius: 20, elevation: 2 },
+  
   calendarContainer: {
     borderRadius: 16,
     overflow: 'hidden',
@@ -173,4 +325,54 @@ const styles = StyleSheet.create({
   infoColumn: { flex: 1 },
   serviceTitle: { fontSize: 16, fontWeight: 'bold', color: materialColors.schemes.light.primary },
   userName: { fontSize: 14, color: '#555', marginTop: 2 },
+
+  // Estilos del Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  modalContent: {
+    width: '85%',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    elevation: 5
+  },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 20, color: '#333' },
+  settingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 20
+  },
+  settingLabel: { fontSize: 16, color: '#444' },
+  timeSelectorContainer: { width: '100%', marginBottom: 20 },
+  subLabel: { fontSize: 14, color: '#666', marginBottom: 10 },
+  chipsContainer: { flexDirection: 'row', justifyContent: 'space-between' },
+  chip: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    backgroundColor: '#f9f9f9'
+  },
+  chipSelected: {
+    backgroundColor: materialColors.schemes.light.primary,
+    borderColor: materialColors.schemes.light.primary
+  },
+  chipText: { color: '#666', fontSize: 14 },
+  chipTextSelected: { color: '#fff', fontWeight: 'bold' },
+  closeButton: {
+    marginTop: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    backgroundColor: '#333',
+    borderRadius: 25
+  },
+  closeButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 }
 });
