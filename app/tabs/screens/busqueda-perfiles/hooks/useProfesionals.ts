@@ -46,10 +46,15 @@ export function useProfessionals() {
           modalityFilterToSend = filters.modalidad;
         }
       }
+      // LOGICA DE COORDENADAS PRIORITARIAS
+      // 1. Si el filtro tiene coordenadas (del mapa), usamos esas.
+      // 2. Si no, usamos las del perfil del usuario.
+      const targetLat = filters.searchLat ?? user?.latitud ?? null;
+      const targetLong = filters.searchLong ?? user?.longitud ?? null;
 
       const rpcParams = {
-        user_lat: user?.latitud || null,
-        user_long: user?.longitud || null,
+        user_lat: targetLat || null,
+        user_long: targetLong || null,
         max_dist_km: filters.maxDistancia ? parseFloat(filters.maxDistancia) : null,
         search_text: query.trim() !== "" ? query.trim() : null,
         modality_filter: modalityFilterToSend,
@@ -120,6 +125,9 @@ export function useProfessionals() {
     isInitialState,
     search,
     loadMore,
-    userLocationAvailable: !!(user?.latitud && user?.longitud)
+    userLocationAvailable: !!(user?.latitud && user?.longitud),
+    userLocation: (user?.latitud && user?.longitud) 
+      ? { lat: user.latitud, long: user.longitud } 
+      : undefined
   };
 }

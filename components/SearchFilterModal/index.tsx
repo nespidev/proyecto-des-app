@@ -1,9 +1,10 @@
-import React from "react";
-import { View, Text, StyleSheet, Modal, ScrollView, TouchableOpacity, TextInput } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
+import { View, Text, StyleSheet, Modal, ScrollView, TouchableOpacity, TextInput, Alert } from "react-native";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { materialColors } from "@/utils/colors";
 import { FilterState } from "@/app/tabs/screens/busqueda-perfiles/types";
+import RangeMapSelector from "@/components/RangeMapSelector";
 
 interface Props {
   visible: boolean;
@@ -13,23 +14,48 @@ interface Props {
   onApply: () => void;
   onClear: () => void;
   userLocationAvailable: boolean;
+  userLocation?: { lat: number; long: number }
 }
 
 export default function SearchFilterModal({ 
-  visible, onClose, filters, setFilters, onApply, onClear, userLocationAvailable 
+  visible, onClose, filters, setFilters, onApply, onClear, userLocationAvailable, userLocation 
 }: Props) {
   
-  // Función auxiliar para manejar la selección múltiple
+  const [showMapSelector, setShowMapSelector] = useState(false);
+
+  // Funcion auxiliar para manejar selección multiple
   const toggleModalidad = (option: string) => {
     const current = filters.modalidad;
     if (current.includes(option)) {
-      // Si ya está, lo sacamos
+      // Si ya esta lo sacamos
       setFilters({ ...filters, modalidad: current.filter(m => m !== option) });
     } else {
-      // Si no está, lo agregamos
+      // Si no esta lo agregamos
       setFilters({ ...filters, modalidad: [...current, option] });
     }
   };
+
+    const handleOpenMap = () => {
+    if (!userLocationAvailable || !userLocation) {
+        Alert.alert("Requerido", "Necesitas tener una ubicación en tu perfil o activar el GPS.");
+        return;
+    }
+    setShowMapSelector(true);
+  };
+
+  const handleMapConfirm = (newDistance: string, newLocation?: any) => {
+    // Actualizar distancia
+    const updatedFilters = { ...filters, maxDistancia: newDistance };
+    
+    //  Si el mapa devuelve una ubicacion modificada, guarda en el filtro
+    if (newLocation) {
+        updatedFilters.searchLat = newLocation.latitude;
+        updatedFilters.searchLong = newLocation.longitude;
+    }
+    
+    setFilters(updatedFilters);
+  };
+
 
   return (
     <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
@@ -47,7 +73,7 @@ export default function SearchFilterModal({
             contentContainerStyle={styles.modalScrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {/* Modalidad (Selección Múltiple) */}
+            {/* Modalidad seleccion multiple */}
             <Text style={styles.filterLabel}>Modalidad</Text>
             <View style={styles.filterChipsRow}>
                 {['Remoto', 'Presencial'].map((mod) => {
@@ -69,7 +95,6 @@ export default function SearchFilterModal({
               })}
             </View>
 
-            {/* Rating */}
             <Text style={styles.filterLabel}>Puntuación Mínima</Text>
             <View style={styles.starsRow}>
               {[1, 2, 3, 4, 5].map((star) => (
@@ -79,7 +104,6 @@ export default function SearchFilterModal({
               ))}
             </View>
 
-            {/* Precios */}
             <Text style={styles.filterLabel}>Precio Máximo</Text>
             <TextInput
               style={styles.filterInput}
@@ -89,23 +113,29 @@ export default function SearchFilterModal({
               onChangeText={(t) => setFilters({...filters, maxPrecio: t})}
             />
 
-            {/* Distancia */}
             <Text style={styles.filterLabel}>Distancia (km)</Text>
-            <View>
+            <View style={styles.distanceRowContainer}>
               <TextInput
-                style={styles.filterInput}
+                style={[styles.filterInput, { flex: 1 }]} // Flex 1 para ocupar espacio
                 keyboardType="numeric"
                 placeholder="Ej: 10"
                 value={filters.maxDistancia}
                 onChangeText={(t) => setFilters({...filters, maxDistancia: t})}
                 editable={userLocationAvailable}
               />
-              {!userLocationAvailable && (
-                <Text style={styles.warningText}>* Necesitas ubicación en perfil.</Text>
-              )}
-            </View>
 
-            {/* Profesión */}
+              <TouchableOpacity 
+                style={[styles.mapButton, !userLocationAvailable && styles.mapButtonDisabled]} 
+                onPress={handleOpenMap}
+                disabled={!userLocationAvailable}
+              >
+                 <MaterialCommunityIcons name="map-marker-radius" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
+            {!userLocationAvailable && (
+                <Text style={styles.warningText}>* Configura tu ubicación en el perfil para usar filtros de distancia.</Text>
+            )}
+
             <Text style={styles.filterLabel}>Profesión</Text>
             <TextInput
               style={styles.filterInput}
@@ -125,6 +155,20 @@ export default function SearchFilterModal({
           </View>
         </View>
       </View>
+
+      {/* RENDERIZADO DEL MAP SELECTOR */}
+      {userLocation && (
+          <RangeMapSelector 
+            visible={showMapSelector}
+            onClose={() => setShowMapSelector(false)}
+            onConfirm={handleMapConfirm}
+            initialDistancia={filters.maxDistancia || "10"}
+            initialLocation={{
+                latitude: userLocation.lat,
+                longitude: userLocation.long
+            }}
+          />
+      )}
     </Modal>
   );
 }
@@ -149,5 +193,27 @@ const styles = StyleSheet.create({
   clearButtonText: { color: '#666', fontWeight: '600' },
   applyButton: { flex: 2, backgroundColor: materialColors.schemes.light.primary, padding: 14, borderRadius: 12, alignItems: 'center' },
   applyButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  warningText: { color: materialColors.schemes.light.error, fontSize: 12, marginTop: 4 }
+  warningText: { color: materialColors.schemes.light.error, fontSize: 12, marginTop: 4 },
+
+  distanceRowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10
+  },
+  mapButton: {
+    backgroundColor: materialColors.schemes.light.primary,
+    width: 50,
+    height: 50,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2
+  },
+  mapButtonDisabled: {
+    backgroundColor: '#ccc'
+  },
 });

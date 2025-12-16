@@ -20,4 +20,6 @@ export interface FilterState {
   maxPrecio: string;
   minRating: number;
   profesion: string;
+  searchLat?: number | null; 
+  searchLong?: number | null;
 }

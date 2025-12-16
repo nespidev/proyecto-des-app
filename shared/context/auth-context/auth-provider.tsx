@@ -86,6 +86,8 @@ const AuthProvider = (props: any) => {
                   email: profile.email,
                   direccion_legible: profile.direccion_legible,
                   ciudad: profile.ciudad,
+                  latitud: profile.latitud,
+                  longitud: profile.longitud,
                   peso: profile.peso,
                   altura: profile.altura,
                   fecha_actualizacion_peso: profile.fecha_actualizacion_peso,

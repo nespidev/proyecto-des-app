@@ -11,7 +11,7 @@ import { FilterState } from "@/app/tabs/screens/busqueda-perfiles/types";
 import { ROOT_ROUTES } from "@/utils/constants";
 export default function BusquedaPerfiles() {
   // Destructuramos las funcionalidades del hook
-  const { list, loading, loadingMore, isInitialState, search, loadMore, userLocationAvailable } = useProfessionals();
+  const { list, loading, loadingMore, isInitialState, search, loadMore, userLocationAvailable, userLocation } = useProfessionals();
 
   const navigation = useNavigation<any>();
   
@@ -22,13 +22,15 @@ export default function BusquedaPerfiles() {
     maxDistancia: "",
     maxPrecio: "",
     minRating: 0,
-    profesion: ""
+    profesion: "",
+    searchLat: null, // Inicialmente null, usa la del usuario
+    searchLong: null
   });
 
   // Debounce: Esperamos 500ms después de que el usuario deja de escribir
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Disparamos la búsqueda (Reset de página a 0)
+      // Disparamos la busqueda, reset a pagina 0
       search(searchQuery, filters);
     }, 500);
 
@@ -39,7 +41,19 @@ export default function BusquedaPerfiles() {
     // Navegamos a la pantalla de Perfil Publico pasando el ID
     navigation.navigate(ROOT_ROUTES.PERFIL_PUBLICO, { 
         userId: id,
-        hideContactButton: false // Queremos ver el botón de contactar
+        hideContactButton: false // ver el boton de contactar
+    });
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      modalidad: [], 
+      maxDistancia: "", 
+      maxPrecio: "", 
+      minRating: 0, 
+      profesion: "",
+      searchLat: null,
+      searchLong: null
     });
   };
 
@@ -82,20 +96,21 @@ export default function BusquedaPerfiles() {
         filters={filters}
         setFilters={setFilters}
         onApply={() => setShowFilterModal(false)}
-        onClear={() => setFilters({modalidad: [], maxDistancia: "", maxPrecio: "", minRating: 0, profesion: ""})}
+        onClear={handleClearFilters}
         userLocationAvailable={userLocationAvailable}
+        userLocation={userLocation}
       />
 
       {/* CONTENIDO PRINCIPAL */}
       {isInitialState ? (
-        // 1. ESTADO INICIAL (Vacío)
+        //  ESTADO INICIAL VACIO
         <View style={styles.emptyState}>
           <Ionicons name="search-outline" size={64} color="#ddd" />
           <Text style={styles.emptyTitle}>Empieza a buscar</Text>
           <Text style={styles.emptyText}>Escribe una especialidad o usa los filtros para encontrar a tu profesional ideal.</Text>
         </View>
       ) : (
-        // 2. LISTA DE RESULTADOS
+        // LISTA DE RESULTADOS
         <FlatList
           data={list}
           keyExtractor={(item) => item.id}
@@ -112,7 +127,7 @@ export default function BusquedaPerfiles() {
           onEndReachedThreshold={0.5} 
           
           // Spinner inferior al cargar más
-          // Solo se muestra si estamos cargando mas y la lista YA tiene items
+          // Solo se muestra si estamos cargando mas y la lista ya tiene items
           ListFooterComponent={
             (loadingMore && list.length > 0) ? (
               <View style={{padding: 20}}>
@@ -150,7 +165,7 @@ const styles = StyleSheet.create({
   listContent: { padding: 16 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 50 },
   
-  // Estilos para el estado vacío inicial
+  // Estilos para el estado vacio inicial
   emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40, opacity: 0.7 },
   emptyTitle: { fontSize: 20, fontWeight: 'bold', color: '#888', marginTop: 16 },
   emptyText: { textAlign: 'center', color: '#999', marginTop: 8, lineHeight: 22 }
