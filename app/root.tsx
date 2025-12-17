@@ -11,30 +11,13 @@ import PerfilUsuario from "@/app/tabs/screens/perfil-usuario/perfil-usuario";
 import PerfilPublico from "@/app/tabs/screens/perfil-publico/perfil-publico";
 import CalendarScreen from "@/app/tabs/screens/calendar";
 import ChatRoomScreen from "@/app/tabs/screens/chat-room";
-import ContactsListScreen from "./tabs/screens/contacts-list"; // Ajusta ruta si es necesario
+import ContactsListScreen from "./tabs/screens/contacts-list";
 import { materialColors } from "@/utils/colors";
 
 const Stack = createNativeStackNavigator();
 
 export default function Root() {
   const { state } = useContext(AuthContext);
-
-  useEffect(() => {
-    // Solo intentamos registrar si ya dejó de cargar y hay un usuario
-    if (!state.isLoading && state.user) {
-      registerForPushNotificationsAsync();
-    }
-  }, [state.isLoading, state.user]); // Dependencias explícitas
-
-  // Pantalla de carga mientras Supabase verifica
-  if (state.isLoading) {
-    return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <ActivityIndicator size="large" color={materialColors.schemes.light.primary} />
-      </View>
-    );
-  }
-
   return (
     <NavigationContainer>
       <Stack.Navigator

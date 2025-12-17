@@ -3,6 +3,7 @@ import * as Device from 'expo-device';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 import { materialColors } from './colors';
+import { supabase } from '@/utils/supabase';
 
 // Configuracion global de como se ven las notificaciones cuando la app esta abierta
 Notifications.setNotificationHandler({
@@ -125,6 +126,104 @@ export async function scheduleAppointmentReminders(
       });
     }
   }
+}
+
+// AHORA RECIBIMOS 'viewMode' COMO ARGUMENTO 👇
+export async function syncAppointmentsNotifications(userId: string, viewMode: string) {
+  console.log(`🔄 Sincronizando notificaciones para modo: ${viewMode}...`);
+
+  const enabledStr = await AsyncStorage.getItem(NOTIFICATION_KEYS.ENABLED);
+  const timeStr = await AsyncStorage.getItem(NOTIFICATION_KEYS.TIME);
+  
+  if (enabledStr === 'false') {
+    await Notifications.cancelAllScheduledNotificationsAsync();
+    console.log("🔕 Notificaciones desactivadas.");
+    return;
+  }
+
+  const reminderMinutes = timeStr ? parseInt(timeStr) : 60;
+  const now = new Date();
+
+  // 1. LIMPIEZA TOTAL
+  // Esto es clave: Al cambiar de vista, borramos las alarmas de la vista anterior
+  await Notifications.cancelAllScheduledNotificationsAsync();
+
+  // 2. CONSTRUIR LA QUERY FILTRADA
+  // Preparamos la base de la consulta
+  let query = supabase
+    .from('appointments')
+    .select(`
+      id,
+      start_time,
+      client_id,        
+      professional_id,  
+      contracts ( services ( title ) ),
+      professional:profiles!professional_id ( nombre, apellido ),
+      client:profiles!client_id ( nombre, apellido )
+    `)
+    .eq('status', 'scheduled')
+    .gt('start_time', now.toISOString());
+
+  // APLICAMOS EL FILTRO SEGÚN LA VISTA
+  if (viewMode === 'professional') {
+    // Si estoy trabajando, solo quiero ver donde YO soy el profesional
+    query = query.eq('professional_id', userId);
+  } else {
+    // Si estoy como cliente, solo quiero ver donde YO soy el cliente
+    query = query.eq('client_id', userId);
+  }
+
+  const { data: appointments, error } = await query;
+
+  if (error || !appointments) {
+    console.log("Error sincronizando turnos:", error);
+    return;
+  }
+
+  console.log(`📅 Se encontraron ${appointments.length} turnos para modo ${viewMode}.`);
+
+  // 3. REPROGRAMAR
+  for (const item of appointments) {
+    const app = item as any;
+    
+    const appDate = new Date(app.start_time);
+    const triggerDate = new Date(appDate.getTime() - reminderMinutes * 60 * 1000);
+    const secondsUntil = Math.floor((triggerDate.getTime() - now.getTime()) / 1000);
+
+    // LÓGICA DE NOMBRE SIMPLIFICADA
+    // Como ya filtramos por viewMode, sabemos exactamente quién es la "otra persona"
+    let otherPersonName = "Usuario";
+    
+    if (viewMode === 'professional') {
+       // Si estoy en modo profesional, la otra persona es SIEMPRE el cliente
+       otherPersonName = `${app.client?.nombre || ''} ${app.client?.apellido || ''}`;
+    } else {
+       // Si estoy en modo cliente, la otra persona es SIEMPRE el profesional
+       otherPersonName = `${app.professional?.nombre || ''} ${app.professional?.apellido || ''}`;
+    }
+
+    const serviceName = app.contracts?.services?.title || 'Sesión';
+
+    // Usamos tu variable DEBUG si la tienes, o simplemente la lógica de tiempo
+    const DEBUG = false; 
+
+    if (secondsUntil > 0 || DEBUG) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '📅 Recordatorio de Turno',
+          body: `Tu ${serviceName} con ${otherPersonName.trim()} es en ${reminderMinutes} minutos.`,
+          data: { appointmentId: app.id },
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+          seconds: DEBUG ? 5 : secondsUntil, 
+          repeats: false,
+        },
+      });
+    }
+  }
+  
+  console.log("✅ Sincronización completada.");
 }
 
 // cancelar notificaciones si se cancela el turno

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { globalStyles } from "@/utils/globalStyles";
@@ -7,6 +7,8 @@ import { materialColors } from "@/utils/colors";
 import { TAB_ROUTES } from "@/utils/constants";
 import SearchEntryCard from "@/components/SearchEntryCard";
 import AppointmentWidget from "@/components/AppointmentWidget";
+import { AuthContext } from "@/shared/context/auth-context";
+import { syncAppointmentsNotifications } from '@/utils/notification-helper';
 
 const dataMockUp = [
   { id: "1", titulo: "Rutina de Fuerza" },
@@ -16,7 +18,15 @@ const dataMockUp = [
 
 export default function Home() {
   const navigation = useNavigation<any>();
+  const { state } = useContext(AuthContext);
 
+    useEffect(() => {
+      if (state.user?.id) {
+        // Sincronizamos cada vez que el usuario entra al Home
+        syncAppointmentsNotifications(state.user.id, state.viewMode);
+      }
+    }, [state.user, state.viewMode]);
+  
   const handleNavigateToSearch = () => {
     navigation.navigate(TAB_ROUTES.BUSQUEDA_PERFILES);
   };
