@@ -6,8 +6,6 @@ import { supabase } from '@/utils/supabase';
 import { materialColors } from '@/utils/colors';
 import { ROOT_ROUTES } from '@/utils/constants';
 import { AuthContext } from "@/shared/context/auth-context";
-
-// --- REUTILIZACIÓN: Importamos tu componente de gráfico existente ---
 import WeightProgressChart from '@/components/WeightProgressChart';
 import PlanPreview from '@/components/PlanPreview';
 
@@ -21,12 +19,11 @@ export default function ClientDashboardScreen() {
   const [activeDiet, setActiveDiet] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // --- ESTADOS NUEVOS PARA EL MODAL DE PESO ---
   const [showWeightModal, setShowWeightModal] = useState(false);
   const [weightHistory, setWeightHistory] = useState<any[]>([]);
   const [loadingWeight, setLoadingWeight] = useState(false);
 
-  // 1. Cargar Planes (Lógica existente)
+  // Cargar Planes (Lógica existente)
   const fetchActivePlans = async () => {
     setLoading(true);
     const { data } = await supabase
@@ -48,7 +45,7 @@ export default function ClientDashboardScreen() {
     }, [clientId])
   );
 
-  // --- 2. NUEVA LÓGICA: Cargar Historial de Peso del Cliente ---
+  // ---  Cargar Historial de Peso del Cliente ---
   const fetchClientWeightHistory = async () => {
     setLoadingWeight(true);
     setShowWeightModal(true); // Abrimos el modal
@@ -56,11 +53,11 @@ export default function ClientDashboardScreen() {
     const { data, error } = await supabase
       .from('weight_logs')
       .select('weight, recorded_at')
-      .eq('user_id', clientId) // Importante: ID del cliente, no el mío
+      .eq('user_id', clientId)
       .order('recorded_at', { ascending: true });
 
     if (!error && data) {
-      // Formateamos igual que en tu hook useWeightMetrics
+      // Formateamos igual que en useWeightMetrics
       const formatted = data.map((log: any) => ({
         value: log.weight,
         date: new Date(log.recorded_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }),
@@ -71,12 +68,12 @@ export default function ClientDashboardScreen() {
     setLoadingWeight(false);
   };
 
-// --- 3. LÓGICA CORREGIDA: Usando la VISTA para buscar ---
+// Usando la VISTA para buscar
   const handleMessageClient = async () => {
     if (!state.user) return;
     
     try {
-      // PASO 1: Buscar si ya existe el chat usando la VISTA (conversations_view)
+      // Buscar si ya existe el chat usando la VISTA (conversations_view)
       // Esto evita el error de columnas inexistentes en la tabla base.
       const { data: existingChatView, error: viewError } = await supabase
         .from('conversations_view')
@@ -104,28 +101,26 @@ export default function ClientDashboardScreen() {
          avatarToUse = profile?.avatar_url || null;
       }
 
-      // PASO 2: Si NO existe, intentamos crearlo
+      // Si no existe, intentamos crearlo
       if (!conversationId) {
-        // NOTA: Si la tabla 'conversations' no tiene professional_id/client_id,
-        // verifica cómo se crean los chats en tu DB. Asumimos este esquema por ahora:
+        // verificar que se crean los chats en la DB
         const { data: newChat, error: createError } = await supabase
           .from('conversations')
           .insert({
-            professional_id: state.user.id, // <--- Verifica que estos nombres sean correctos en tu DB
-            client_id: clientId
+            participant_a: clientId,
+            participant_b: state.user.id
           })
           .select()
           .single();
         
         if (createError) {
-           // Si falla aquí, es probable que debas usar una función RPC existente
+           // Si falla aca, es probable que deba usar una función RPC existente
            // ej: await supabase.rpc('get_or_create_conversation', { ... })
            throw createError;
         }
         conversationId = newChat.id;
       }
 
-      // PASO 3: Navegar
       navigation.navigate(ROOT_ROUTES.CHAT_ROOM, {
         conversationId: conversationId,
         otherUserId: clientId,
@@ -136,7 +131,6 @@ export default function ClientDashboardScreen() {
 
     } catch (err: any) {
       console.error("Error accediendo al chat:", err.message);
-      // Feedback más amigable si falla la creación por estructura de tabla
       if (err.code === '42703') {
         Alert.alert("Error de Configuración", "No se pudo crear el chat. Verifica las columnas de la tabla 'conversations'.");
       } else {
@@ -178,7 +172,6 @@ export default function ClientDashboardScreen() {
              Actualizado: {new Date(plan.updated_at || plan.created_at).toLocaleDateString()}
           </Text>
           
-          {/* --- AQUÍ INSERTAMOS LA VISTA PREVIA --- */}
           <PlanPreview plan={plan} maxItemsPerDay={4} maxDays={3}  />
           
           <View style={styles.buttonRow}>
@@ -207,6 +200,28 @@ export default function ClientDashboardScreen() {
         style={styles.container}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={fetchActivePlans} />}
       >
+        {/* Secciones Botones */}
+        <Text style={styles.sectionTitle}>Datos del Alumno</Text>
+        <View style={styles.quickActions}>
+           
+           {/* BOTON VER PROGRESO (Abre Modal) */}
+           <TouchableOpacity style={styles.actionItem} onPress={fetchClientWeightHistory}>
+              <Ionicons name="stats-chart" size={28} color="#555" />
+              <Text style={styles.actionText}>Ver Progreso</Text>
+           </TouchableOpacity>
+           
+           {/* BOTON VER FICHA (Perfil Publico) */}
+           <TouchableOpacity style={styles.actionItem} onPress={handleGoToProfile}>
+              <Ionicons name="person" size={28} color="#555" />
+              <Text style={styles.actionText}>Ver Ficha</Text>
+           </TouchableOpacity>
+
+           {/* BOTON MENSAJE (Redireccion Chat) */}
+           <TouchableOpacity style={styles.actionItem} onPress={handleMessageClient}>
+              <Ionicons name="chatbubble-ellipses" size={28} color="#555" />
+              <Text style={styles.actionText}>Mensaje</Text>
+           </TouchableOpacity>
+        </View>
         {/* Secciones de Planes */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Gestión de Planes</Text>
@@ -216,29 +231,6 @@ export default function ClientDashboardScreen() {
         </View>
         <PlanCard title="Rutina de Entrenamiento" icon="barbell" plan={activeWorkout} type="workout" />
         <PlanCard title="Plan de Nutrición" icon="restaurant" plan={activeDiet} type="diet" />
-
-        {/* Acciones Rápidas Actualizadas */}
-        <Text style={styles.sectionTitle}>Datos del Alumno</Text>
-        <View style={styles.quickActions}>
-           
-           {/* BOTÓN VER PROGRESO (Abre Modal) */}
-           <TouchableOpacity style={styles.actionItem} onPress={fetchClientWeightHistory}>
-              <Ionicons name="stats-chart" size={28} color="#555" />
-              <Text style={styles.actionText}>Ver Progreso</Text>
-           </TouchableOpacity>
-           
-           {/* BOTÓN VER FICHA (Perfil Público) */}
-           <TouchableOpacity style={styles.actionItem} onPress={handleGoToProfile}>
-              <Ionicons name="person" size={28} color="#555" />
-              <Text style={styles.actionText}>Ver Ficha</Text>
-           </TouchableOpacity>
-
-           {/* BOTÓN MENSAJE (Redirección Chat) */}
-           <TouchableOpacity style={styles.actionItem} onPress={handleMessageClient}>
-              <Ionicons name="chatbubble-ellipses" size={28} color="#555" />
-              <Text style={styles.actionText}>Mensaje</Text>
-           </TouchableOpacity>
-        </View>
       </ScrollView>
 
       {/* --- MODAL DE HISTORIAL DE PESO --- */}
@@ -260,11 +252,10 @@ export default function ClientDashboardScreen() {
              <ActivityIndicator size="large" color={materialColors.schemes.light.primary} style={{ marginTop: 50 }} />
           ) : (
              <View style={{ padding: 16 }}>
-                {/* REUTILIZACIÓN: Tu componente Chart */}
                 <WeightProgressChart 
                    data={weightHistory} 
                    loading={false} 
-                   chartKey={1} // Key única para evitar bugs de renderizado
+                   chartKey={1} // Key para evitar bugs de renderizado
                 />
                 {weightHistory.length === 0 && (
                    <Text style={{ textAlign: 'center', marginTop: 20, color: 'gray' }}>
@@ -301,7 +292,6 @@ const styles = StyleSheet.create({
   actionItem: { backgroundColor: 'white', flex: 1, marginHorizontal: 4, alignItems: 'center', padding: 16, borderRadius: 12, elevation: 1 },
   actionText: { marginTop: 8, fontSize: 12, color: '#555' },
   
-  // Estilos del Modal
   modalContainer: { flex: 1, backgroundColor: '#fff' },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#eee' },
   modalTitle: { fontSize: 20, fontWeight: 'bold' },
@@ -315,13 +305,13 @@ const styles = StyleSheet.create({
   },
 
   linkText: {
-    color: materialColors.schemes.light.primary, // Usa tu color primario
+    color: materialColors.schemes.light.primary,
     fontSize: 14,
     fontWeight: '600',
   }
 });
 
-// Estilos específicos para la vista previa
+
 const previewStyles = StyleSheet.create({
   container: {
     backgroundColor: '#F5F5F5',
