@@ -57,8 +57,8 @@ export default function ProfessionalCardItem({ item, onPress }: Props) {
           <Text style={styles.footerText}>{item.ciudad}</Text>
         </View>
         <View style={styles.footerItem}>
+          <Text style={styles.footerLabel}>desde</Text>
           <Text style={styles.priceText}>${item.precio}</Text>
-          <Text style={styles.footerText}> /mes</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -86,7 +86,8 @@ const styles = StyleSheet.create({
   textPresencial: { color: '#2E7D32' },
   divider: { height: 1, backgroundColor: '#f0f0f0', marginBottom: 12 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  footerItem: { flexDirection: 'row', alignItems: 'center' },
+  footerItem: { flexDirection: 'row', alignItems: 'center' }, // Para alinear "desde" y el precio
   footerText: { fontSize: 12, color: 'gray', marginLeft: 4 },
-  priceText: { fontSize: 16, fontWeight: 'bold', color: '#333' }
+  footerLabel: { fontSize: 12, color: '#888', marginRight: 4, fontStyle: 'italic' },
+  priceText: { fontSize: 18, fontWeight: 'bold', color: materialColors.coreColors.primary || '#4A90E2' }
 });
