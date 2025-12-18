@@ -3,6 +3,7 @@ import { View, ScrollView, Text, TextInput, StyleSheet, Alert, ActivityIndicator
 import { useNavigation } from "@react-navigation/native";
 import * as Yup from 'yup';
 import { Formik } from "formik";
+import { LinearGradient } from 'expo-linear-gradient'; 
 import Button from "@/components/Button";
 import Link from "@/components/Link";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -26,96 +27,133 @@ export default function Login() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-          <Image 
-            source={require("@/assets/imagotipo.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-
-          <Text style={globalStyles.title}>Ingresa a la App</Text>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent} 
+          keyboardShouldPersistTaps="handled"
+          bounces={false} 
+        >
           
-          <Formik
-            initialValues={{ email: '', password: '' }}
-            validationSchema={ValidationSchema}
-            onSubmit={async (values) => {
-              setLoading(true);
-              try {
-                const { error } = await supabase.auth.signInWithPassword({
-                  email: values.email,
-                  password: values.password,
-                });
-
-                if (error) throw error;
-              } catch (error: any) {
-                Alert.alert("Error", error.message || "Credenciales incorrectas");
-                setLoading(false);
-              }
-            }}
+          <LinearGradient
+            colors={['#EB8919', '#F2C54A']} 
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.headerGradient}
           >
-            {({ values, errors, touched, handleChange, handleBlur, handleSubmit }) => (
-              <View style={styles.formContainer}>
-                <Text style={styles.label}>Email</Text>
-                <TextInput
-                  style={styles.input}
-                  onChangeText={handleChange('email')}
-                  onBlur={handleBlur('email')}
-                  value={values.email}
-                  placeholder="Email"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-                {errors.email && touched.email && <Text style={styles.error}>{errors.email}</Text>}
+            <SafeAreaView edges={['top']} style={styles.safeAreaHeader}>
+              <Image 
+                source={require("@/assets/imagotipo.png")}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+            </SafeAreaView>
+          </LinearGradient>
 
-                <Text style={styles.label}>Password</Text>
-                <View style={styles.passwordContainer}>
+          <View style={styles.bodyContent}>
+            <Text style={[globalStyles.title, { marginTop: 10 }]}>Ingresa a la App</Text>
+            
+            <Formik
+              initialValues={{ email: '', password: '' }}
+              validationSchema={ValidationSchema}
+              onSubmit={async (values) => {
+                setLoading(true);
+                try {
+                  const { error } = await supabase.auth.signInWithPassword({
+                    email: values.email,
+                    password: values.password,
+                  });
+
+                  if (error) throw error;
+                } catch (error: any) {
+                  Alert.alert("Error", error.message || "Credenciales incorrectas");
+                  setLoading(false);
+                }
+              }}
+            >
+              {({ values, errors, touched, handleChange, handleBlur, handleSubmit }) => (
+                <View style={styles.formContainer}>
+                  <Text style={styles.label}>Email</Text>
                   <TextInput
-                    style={[styles.input, { flex: 1, marginBottom: 0 }]}
-                    onChangeText={handleChange('password')}
-                    onBlur={handleBlur('password')}
-                    value={values.password}
-                    placeholder="Password"
-                    secureTextEntry={!showPassword}
+                    style={styles.input}
+                    onChangeText={handleChange('email')}
+                    onBlur={handleBlur('email')}
+                    value={values.email}
+                    placeholder="Email"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
                   />
-                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
-                    <MaterialIcons name={showPassword ? "visibility" : "visibility-off"} size={24} color="gray" />
-                  </TouchableOpacity>
-                </View>
-                {errors.password && touched.password && <Text style={styles.error}>{errors.password}</Text>}
+                  {errors.email && touched.email && <Text style={styles.error}>{errors.email}</Text>}
 
-                <View style={{ marginTop: 20 , alignItems: 'center' }}>
-                  {loading ? (
-                    <ActivityIndicator size="large" color="#F87018" />
-                  ) : (
-                    <Button title="Ingresar" onPress={handleSubmit as any} />
-                  )}
+                  <Text style={styles.label}>Password</Text>
+                  <View style={styles.passwordContainer}>
+                    <TextInput
+                      style={[styles.input, { flex: 1, marginBottom: 0 }]}
+                      onChangeText={handleChange('password')}
+                      onBlur={handleBlur('password')}
+                      value={values.password}
+                      placeholder="Password"
+                      secureTextEntry={!showPassword}
+                    />
+                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
+                      <MaterialIcons name={showPassword ? "visibility" : "visibility-off"} size={24} color="gray" />
+                    </TouchableOpacity>
+                  </View>
+                  {errors.password && touched.password && <Text style={styles.error}>{errors.password}</Text>}
+
+                  <View style={{ marginTop: 20 , alignItems: 'center' }}>
+                    {loading ? (
+                      <ActivityIndicator size="large" color="#F87018" />
+                    ) : (
+                      <Button title="Ingresar" onPress={handleSubmit as any} />
+                    )}
+                  </View>
                 </View>
-              </View>
-            )}
-          </Formik>
-          
-          <View style={{ marginTop: 20 }}>
-            <Link link="Ir a Registro" onPress={handleGoToRegister}/>
+              )}
+            </Formik>
+            
+            <View style={{ marginTop: 20, marginBottom: 40 }}>
+              <Link link="Ir a Registro" onPress={handleGoToRegister}/>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 16,
+    padding: 0, 
+  },
+  headerGradient: {
+    width: '100%',
+    alignItems: 'center',
+    borderBottomLeftRadius: 40,  
+    borderBottomRightRadius: 40, 
+    paddingBottom: 60, 
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  safeAreaHeader: {
+    width: '100%',
+    alignItems: 'center',
   },
   logo: {
+    marginTop: 50,
     width: 300,
     height: 300,
-    marginBottom: 20,
+    marginBottom: 0, 
+  },
+  bodyContent: {
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    width: '100%',
   },
   formContainer: {
     width: "100%",
