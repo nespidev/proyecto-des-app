@@ -10,7 +10,6 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { materialColors } from '@/utils/colors';
-import { globalStyles } from '@/utils/globalStyles';
 
 export default function EntrenarList() {
   const navigation = useNavigation<any>();
@@ -29,36 +28,37 @@ export default function EntrenarList() {
     onPress: () => void;
   }) => (
     <TouchableOpacity 
-      style={styles.menuItem} 
+      style={styles.card} 
       onPress={onPress}
       activeOpacity={0.7}
     >
-      {/* Icono con fondo circular */}
+      {/* Icono con fondo circular (Estilo Management) */}
       <View style={[styles.iconContainer, { backgroundColor: color + '20' }]}> 
-        <Ionicons name={icon} size={24} color={color} />
+        <Ionicons name={icon} size={32} color={color} />
       </View>
 
       {/* Textos */}
       <View style={styles.textContainer}>
-        <Text style={styles.menuTitle}>{title}</Text>
-        <Text style={styles.menuSubtitle}>{subtitle}</Text>
+        <Text style={styles.cardTitle}>{title}</Text>
+        <Text style={styles.cardSubtitle}>{subtitle}</Text>
       </View>
 
       {/* Flecha indicadora */}
-      <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
+      <Ionicons name="chevron-forward" size={24} color="#ccc" />
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={materialColors.schemes.light.background} />
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       
+      {/* Header estilo Management */}
       <View style={styles.header}>
-        <Text style={globalStyles.title}>Zona de Entrenamiento</Text>
-        <Text style={globalStyles.subtitle}>Gestiona tu progreso y rutinas</Text>
+        <Text style={styles.title}>Zona de Entrenamiento</Text>
+        <Text style={styles.subtitle}>Gestiona tu progreso y rutinas</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.listContainer}>
+      <ScrollView contentContainerStyle={styles.menuContainer}>
         
         <MenuItem 
           title="Control de Peso"
@@ -84,36 +84,44 @@ export default function EntrenarList() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: materialColors.schemes.light.background,
-    paddingTop: 20,
+    backgroundColor: '#f5f5f5', // Igual a Management
   },
   header: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    padding: 24,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
-  listContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
   },
-  menuItem: {
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 4,
+  },
+  menuContainer: {
+    padding: 16,
+    gap: 16,
+  },
+  card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: materialColors.schemes.light.surface,
-    padding: 16,
+    backgroundColor: '#fff',
+    padding: 20,
     borderRadius: 16,
-    marginBottom: 16,
-  
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    borderWidth: 1,
-    borderColor: '#F0F0F0'
+    elevation: 2,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 60, // Aumentado a 60
+    height: 60,
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -121,14 +129,14 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
   },
-  menuTitle: {
-    fontSize: 16,
+  cardTitle: {
+    fontSize: 18,
     fontWeight: '600',
-    color: materialColors.schemes.light.onSurface,
+    color: '#333',
     marginBottom: 4,
   },
-  menuSubtitle: {
-    fontSize: 13,
-    color: '#666',
-  }
+  cardSubtitle: {
+    fontSize: 14,
+    color: '#888',
+  },
 });
