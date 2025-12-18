@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   textPresencial: { color: '#2E7D32' },
   divider: { height: 1, backgroundColor: '#f0f0f0', marginBottom: 12 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  footerItem: { flexDirection: 'row', alignItems: 'center' }, // Para alinear "desde" y el precio
+  footerItem: { flexDirection: 'row', alignItems: 'center' },
   footerText: { fontSize: 12, color: 'gray', marginLeft: 4 },
   footerLabel: { fontSize: 12, color: '#888', marginRight: 4, fontStyle: 'italic' },
   priceText: { fontSize: 18, fontWeight: 'bold', color: materialColors.coreColors.primary || '#4A90E2' }
