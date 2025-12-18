@@ -107,17 +107,16 @@ export default function PlanHistoryScreen() {
       options as any
     );
   };
-
-  const openPlanDetail = (planId: string) => {
-    // Si es Cliente, SIEMPRE es readOnly. Si es Profesional, es editable.
+const openPlanDetail = (item: HistoryItem) => {
     navigation.navigate('PlanEditor', {
-       planId: planId,
-       readOnly: !isProfessional // <--- Lógica inteligente aquí también
+       existingPlan: item, 
+       clientId: clientId,
+       readOnly: !isProfessional // Pasamos el flag, ahora hay que usarlo en el editor
     });
   };
 
   const renderItem = ({ item }: { item: HistoryItem }) => (
-    <TouchableOpacity style={styles.card} onPress={() => openPlanDetail(item.id)}>
+    <TouchableOpacity style={styles.card} onPress={() => openPlanDetail(item)}>
       <View style={styles.headerRow}>
         
         <View style={styles.iconAndTitle}>

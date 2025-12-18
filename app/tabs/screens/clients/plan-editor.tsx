@@ -1,12 +1,13 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Formik, FieldArray } from 'formik';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { materialColors } from '@/utils/colors';
 import { supabase } from '@/utils/supabase';
-import { IPlan, IWorkoutDay, IDietDay } from '@/shared/models'; // Asegúrate de exportar IDietDay
+import { IPlan, IWorkoutDay, IDietDay } from '@/shared/models';
 import { AuthContext } from "@/shared/context/auth-context";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 // --- PLANTILLAS INICIALES ---
 const INITIAL_WORKOUT: IPlan = {
@@ -36,23 +37,25 @@ const INITIAL_DIET: IPlan = {
       dayName: 'Menú Diario',
       meals: [{ time: '', foods: [{ name: '', quantity: '' }] }]
     }
-  ] as IDietDay[] // Tipado como dieta
+  ] as IDietDay[]
 };
 
 export default function PlanEditorScreen() {
   const navigation = useNavigation();
   const route = useRoute<any>();
   const { state } = useContext<any>(AuthContext);
-  const { clientId, existingPlan, planType } = route.params || {};
-
+  
+  // 'readOnly' viene del historial.
+  const { clientId, existingPlan, planType, readOnly } = route.params || {};
+  
   const [loading, setLoading] = useState(false);
 
-  // Determinamos qué tipo estamos editando
-  // Si existe plan, usamos su tipo. Si es nuevo, usamos el parámetro o default 'workout'
+  // Lógica de tipos
   const currentType = existingPlan?.type || planType || 'workout';
   const isWorkout = currentType === 'workout';
 
-  // Configuración inicial dinámica
+  // CARGA DE DATOS
+  // Si existingPlan llega desde el historial, Formik se llenará automáticamente.
   const initialValues = existingPlan || {
     ...(isWorkout ? INITIAL_WORKOUT : INITIAL_DIET),
     type: currentType,
@@ -61,9 +64,10 @@ export default function PlanEditorScreen() {
   };
 
   const handleSubmit = async (values: IPlan) => {
+    if (readOnly) return; // Seguridad extra
+
     setLoading(true);
     try {
-      // 1. Desactivar anteriores si este es nuevo y activo
       if (values.is_active && !values.id) {
         await supabase
           .from('plans')
@@ -72,7 +76,6 @@ export default function PlanEditorScreen() {
           .eq('type', values.type);
       }
 
-      // 2. Guardar
       const { error } = await supabase
         .from('plans')
         .upsert({
@@ -93,58 +96,81 @@ export default function PlanEditorScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Pasamos enableReinitialize para que si existingPlan cambia, el form se actualice */}
       <Formik initialValues={initialValues} onSubmit={handleSubmit} enableReinitialize>
         {({ handleChange, handleBlur, handleSubmit, values, setFieldValue }) => (
+          
           <View style={{ flex: 1 }}>
-            <ScrollView style={styles.scroll}>
+            <KeyboardAwareScrollView
+              style={{ flex: 1 }}
+              contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
+              enableOnAndroid={true}
+              enableAutomaticScroll={true} 
+              extraHeight={150} 
+              extraScrollHeight={50}
+              keyboardOpeningTime={Number.MAX_SAFE_INTEGER}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
               
-              {/* --- CABECERA GENERAL --- */}
+              {/* --- CABECERA --- */}
               <View style={styles.section}>
+                {/* indicador si es modo lectura */}
+                {readOnly && (
+                    <View style={{backgroundColor: '#FFF3E0', padding: 8, borderRadius: 8, marginBottom: 10}}>
+                        <Text style={{color: '#EF6C00', fontWeight: 'bold', textAlign: 'center'}}>
+                            Modo Lectura
+                        </Text>
+                    </View>
+                )}
+
                 <Text style={styles.label}>Título del Plan ({isWorkout ? 'Rutina' : 'Dieta'})</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, readOnly && styles.readOnlyInput]}
                   placeholder={isWorkout ? "Ej: Hipertrofia Fase 1" : "Ej: Dieta Keto"}
                   onChangeText={handleChange('title')}
                   onBlur={handleBlur('title')}
                   value={values.title}
+                  editable={!readOnly} // Bloqueamos input
                 />
                 
                 <Text style={styles.label}>Descripción / Notas</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, readOnly && styles.readOnlyInput]}
                   placeholder="Instrucciones generales..."
                   onChangeText={handleChange('description')}
                   value={values.description}
                   multiline
+                  editable={!readOnly}
                 />
               </View>
 
-              {/* --- DÍAS (FieldArray Nivel 1) --- */}
+              {/* --- DIAS --- */}
               <FieldArray name="content">
                 {({ push: addDay, remove: removeDay }) => (
                   <View>
                     {values.content.map((day: any, dayIndex: number) => (
                       <View key={dayIndex} style={styles.dayCard}>
                         
-                        {/* Header del Día */}
                         <View style={styles.rowBetween}>
                           <TextInput
-                            style={[styles.input, { flex: 1, fontWeight: 'bold', marginBottom: 0 }]}
-                            placeholder={isWorkout ? "Nombre del día (ej: Pierna)" : "Nombre (ej: Lunes a Viernes)"}
+                            style={[styles.input, { flex: 1, fontWeight: 'bold', marginBottom: 0 }, readOnly && styles.readOnlyInput]}
+                            placeholder="Nombre del día"
                             value={day.dayName}
                             onChangeText={handleChange(`content.${dayIndex}.dayName`)}
+                            editable={!readOnly}
                           />
-                          <TouchableOpacity onPress={() => removeDay(dayIndex)} style={{marginLeft: 10}}>
-                            <Ionicons name="trash-outline" size={24} color="red" />
-                          </TouchableOpacity>
+                          {/* Ocultamos boton borrar si es readOnly */}
+                          {!readOnly && (
+                              <TouchableOpacity onPress={() => removeDay(dayIndex)} style={{marginLeft: 10}}>
+                                <Ionicons name="trash-outline" size={24} color="red" />
+                              </TouchableOpacity>
+                          )}
                         </View>
 
-                        {/* Separador visual */}
                         <View style={{height: 1, backgroundColor: '#eee', marginVertical: 10}} />
 
-                        {/* === LÓGICA CONDICIONAL: WORKOUT vs DIET === */}
-                        
-                        {/* OPCIÓN A: RUTINA DE EJERCICIOS */}
+                        {/* WORKOUT */}
                         {isWorkout && (
                           <FieldArray name={`content.${dayIndex}.exercises`}>
                             {({ push: addEx, remove: removeEx }) => (
@@ -154,86 +180,94 @@ export default function PlanEditorScreen() {
                                     <View style={{ flex: 3, marginRight: 8 }}>
                                       <Text style={styles.subLabel}>Ejercicio</Text>
                                       <TextInput
-                                        style={styles.smallInput}
+                                        style={[styles.smallInput, readOnly && styles.readOnlyInput]}
                                         placeholder="Nombre"
                                         value={exercise.name}
                                         onChangeText={handleChange(`content.${dayIndex}.exercises.${exIndex}.name`)}
+                                        editable={!readOnly}
                                       />
                                     </View>
                                     <View style={{ flex: 1, marginRight: 8 }}>
                                       <Text style={styles.subLabel}>Series</Text>
                                       <TextInput
-                                        style={styles.smallInput}
+                                        style={[styles.smallInput, readOnly && styles.readOnlyInput]}
                                         placeholder="4"
                                         keyboardType="numeric"
                                         value={exercise.sets}
                                         onChangeText={handleChange(`content.${dayIndex}.exercises.${exIndex}.sets`)}
+                                        editable={!readOnly}
                                       />
                                     </View>
                                     <View style={{ flex: 1 }}>
                                       <Text style={styles.subLabel}>Reps</Text>
                                       <TextInput
-                                        style={styles.smallInput}
+                                        style={[styles.smallInput, readOnly && styles.readOnlyInput]}
                                         placeholder="12"
                                         value={exercise.reps}
                                         onChangeText={handleChange(`content.${dayIndex}.exercises.${exIndex}.reps`)}
+                                        editable={!readOnly}
                                       />
                                     </View>
-                                    <TouchableOpacity onPress={() => removeEx(exIndex)} style={styles.deleteItemIcon}>
-                                       <Ionicons name="close-circle" size={22} color="#999" />
-                                    </TouchableOpacity>
+                                    {!readOnly && (
+                                        <TouchableOpacity onPress={() => removeEx(exIndex)} style={styles.deleteItemIcon}>
+                                            <Ionicons name="close-circle" size={22} color="#999" />
+                                        </TouchableOpacity>
+                                    )}
                                   </View>
                                 ))}
-                                <TouchableOpacity style={styles.addItemButton} onPress={() => addEx({ name: '', sets: '', reps: '' })}>
-                                  <Text style={styles.addItemText}>+ Agregar Ejercicio</Text>
-                                </TouchableOpacity>
+                                {!readOnly && (
+                                    <TouchableOpacity style={styles.addItemButton} onPress={() => addEx({ name: '', sets: '', reps: '' })}>
+                                        <Text style={styles.addItemText}>+ Agregar Ejercicio</Text>
+                                    </TouchableOpacity>
+                                )}
                               </View>
                             )}
                           </FieldArray>
                         )}
 
-                        {/* OPCIÓN B: PLAN DE DIETA */}
+                        {/* DIET */}
                         {!isWorkout && (
                           <FieldArray name={`content.${dayIndex}.meals`}>
                             {({ push: addMeal, remove: removeMeal }) => (
                               <View>
                                 {day.meals?.map((meal: any, mealIndex: number) => (
                                   <View key={mealIndex} style={styles.itemRow}>
-                                    {/* Input de Hora */}
                                     <View style={{ flex: 1.5, marginRight: 8 }}>
-                                      <Text style={styles.subLabel}>Hora/Momento</Text>
+                                      <Text style={styles.subLabel}>Hora</Text>
                                       <TextInput
-                                        style={styles.smallInput}
+                                        style={[styles.smallInput, readOnly && styles.readOnlyInput]}
                                         placeholder="08:00"
                                         value={meal.time}
                                         onChangeText={handleChange(`content.${dayIndex}.meals.${mealIndex}.time`)}
+                                        editable={!readOnly}
                                       />
                                     </View>
                                     
-                                    {/* Input de Comida (Editamos el array 'foods' en la posición 0 simplificado) */}
                                     <View style={{ flex: 3 }}>
-                                      <Text style={styles.subLabel}>Comida Principal</Text>
+                                      <Text style={styles.subLabel}>Comida</Text>
                                       <TextInput
-                                        style={styles.smallInput}
-                                        placeholder="Ej: 2 Huevos + Tostada"
-                                        // Accedemos al primer alimento para simplificar la UI, 
-                                        // aunque el modelo soporta array.
+                                        style={[styles.smallInput, readOnly && styles.readOnlyInput]}
+                                        placeholder="Comida"
                                         value={meal.foods?.[0]?.name || ''} 
                                         onChangeText={(text) => {
-                                           // Truco para actualizar el nested array de foods sin complicar Formik
                                            setFieldValue(`content.${dayIndex}.meals.${mealIndex}.foods`, [{ name: text, quantity: '' }]);
                                         }}
+                                        editable={!readOnly}
                                       />
                                     </View>
                                     
-                                    <TouchableOpacity onPress={() => removeMeal(mealIndex)} style={styles.deleteItemIcon}>
-                                       <Ionicons name="close-circle" size={22} color="#999" />
-                                    </TouchableOpacity>
+                                    {!readOnly && (
+                                        <TouchableOpacity onPress={() => removeMeal(mealIndex)} style={styles.deleteItemIcon}>
+                                            <Ionicons name="close-circle" size={22} color="#999" />
+                                        </TouchableOpacity>
+                                    )}
                                   </View>
                                 ))}
-                                <TouchableOpacity style={styles.addItemButton} onPress={() => addMeal({ time: '', foods: [{ name: '', quantity: '' }] })}>
-                                  <Text style={styles.addItemText}>+ Agregar Comida</Text>
-                                </TouchableOpacity>
+                                {!readOnly && (
+                                    <TouchableOpacity style={styles.addItemButton} onPress={() => addMeal({ time: '', foods: [{ name: '', quantity: '' }] })}>
+                                        <Text style={styles.addItemText}>+ Agregar Comida</Text>
+                                    </TouchableOpacity>
+                                )}
                               </View>
                             )}
                           </FieldArray>
@@ -242,33 +276,37 @@ export default function PlanEditorScreen() {
                       </View>
                     ))}
 
-                    <TouchableOpacity 
-                      style={styles.addDayButton} 
-                      onPress={() => {
-                         if(isWorkout) {
-                            addDay({ dayName: `Día ${(values.content.length + 1)}`, exercises: [] });
-                         } else {
-                            addDay({ dayName: `Día ${(values.content.length + 1)}`, meals: [] });
-                         }
-                      }}
-                    >
-                      <Text style={styles.addDayText}>
-                        {isWorkout ? '+ AÑADIR DÍA DE ENTRENAMIENTO' : '+ AÑADIR DÍA DE DIETA'}
-                      </Text>
-                    </TouchableOpacity>
+                    {!readOnly && (
+                        <TouchableOpacity 
+                        style={styles.addDayButton} 
+                        onPress={() => {
+                            if(isWorkout) {
+                                addDay({ dayName: `Día ${(values.content.length + 1)}`, exercises: [] });
+                            } else {
+                                addDay({ dayName: `Día ${(values.content.length + 1)}`, meals: [] });
+                            }
+                        }}
+                        >
+                        <Text style={styles.addDayText}>
+                            {isWorkout ? '+ AÑADIR DÍA DE ENTRENAMIENTO' : '+ AÑADIR DÍA DE DIETA'}
+                        </Text>
+                        </TouchableOpacity>
+                    )}
                   </View>
                 )}
               </FieldArray>
+            </KeyboardAwareScrollView>
 
-            </ScrollView>
-
-            <View style={styles.footer}>
-              <TouchableOpacity style={styles.saveButton} onPress={() => handleSubmit()}>
-                <Text style={styles.saveButtonText}>
-                   {loading ? "Guardando..." : `GUARDAR ${isWorkout ? 'RUTINA' : 'DIETA'}`}
-                </Text>
-              </TouchableOpacity>
-            </View>
+            {/* Ocultamos el footer si es readOnly */}
+            {!readOnly && (
+                <View style={styles.footer}>
+                <TouchableOpacity style={styles.saveButton} onPress={() => handleSubmit()}>
+                    <Text style={styles.saveButtonText}>
+                    {loading ? "Guardando..." : `GUARDAR ${isWorkout ? 'RUTINA' : 'DIETA'}`}
+                    </Text>
+                </TouchableOpacity>
+                </View>
+            )}
           </View>
         )}
       </Formik>
@@ -278,21 +316,28 @@ export default function PlanEditorScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
-  scroll: { flex: 1, padding: 16 },
   section: { marginBottom: 20, backgroundColor: 'white', padding: 16, borderRadius: 12 },
   dayCard: { marginBottom: 20, backgroundColor: 'white', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#ddd' },
   label: { fontSize: 14, color: '#666', marginBottom: 6, fontWeight: '600' },
   subLabel: { fontSize: 11, color: '#888', marginBottom: 4 },
   input: { backgroundColor: '#f9f9f9', padding: 12, borderRadius: 8, fontSize: 16, marginBottom: 12, borderWidth: 1, borderColor: '#eee' },
   smallInput: { backgroundColor: '#f9f9f9', padding: 10, borderRadius: 8, fontSize: 14, borderWidth: 1, borderColor: '#eee' },
+  
+  readOnlyInput: { backgroundColor: '#f0f0f0', color: '#666', borderColor: 'transparent' },
+
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   itemRow: { flexDirection: 'row', marginBottom: 12, alignItems: 'flex-end' },
   deleteItemIcon: { paddingBottom: 8, paddingLeft: 8 },
   addItemButton: { alignItems: 'center', padding: 12, marginTop: 5, backgroundColor: '#F0F8FF', borderRadius: 8 },
   addItemText: { color: materialColors.schemes.light.primary, fontWeight: 'bold' },
-  addDayButton: { backgroundColor: '#e0e0e0', padding: 15, borderRadius: 12, alignItems: 'center', marginBottom: 100 },
+  addDayButton: { backgroundColor: '#e0e0e0', padding: 15, borderRadius: 12, alignItems: 'center', marginBottom: 20 },
   addDayText: { color: '#333', fontWeight: 'bold' },
-  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 20, backgroundColor: 'white', borderTopWidth: 1, borderColor: '#eee' },
+  footer: { 
+    padding: 20, 
+    backgroundColor: 'white', 
+    borderTopWidth: 1, 
+    borderColor: '#eee',
+  },
   saveButton: { backgroundColor: materialColors.schemes.light.primary, padding: 16, borderRadius: 12, alignItems: 'center' },
   saveButtonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
 });
