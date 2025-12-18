@@ -158,8 +158,13 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5' },
   searchHeader: { padding: 16, paddingTop: 10, backgroundColor: materialColors.schemes.light.surface, elevation: 2, zIndex: 10 },
   headerRow: { flexDirection: 'row', alignItems: 'center', marginTop: 10, gap: 10 },
-  searchBar: { flex: 1, flexDirection: 'row', backgroundColor: '#f0f0f0', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, alignItems: 'center' },
-  searchInput: { flex: 1, fontSize: 16, color: '#333' },
+  searchBar: { flex: 1, flexDirection: 'row', backgroundColor: '#f0f0f0', borderRadius: 12, paddingHorizontal: 12, alignItems: 'center',
+    height: 46, // 
+  },
+  searchInput: { flex: 1, fontSize: 16, color: '#333',
+    paddingVertical: 0, // 
+    height: '100%' // 
+  },
   filterButton: { padding: 10, backgroundColor: '#f0f0f0', borderRadius: 12 },
   filterButtonActive: { backgroundColor: materialColors.schemes.light.primaryContainer, borderWidth: 1, borderColor: materialColors.schemes.light.primary },
   listContent: { padding: 16 },

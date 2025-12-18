@@ -4,7 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import { globalStyles } from "@/utils/globalStyles";
 import MockCard from "@/components/MockCard";
 import { materialColors } from "@/utils/colors";
-import { TAB_ROUTES } from "@/utils/constants";
+import { ROOT_ROUTES } from "@/utils/constants";
 import SearchEntryCard from "@/components/SearchEntryCard";
 import AppointmentWidget from "@/components/AppointmentWidget";
 import { AuthContext } from "@/shared/context/auth-context";
@@ -28,7 +28,7 @@ export default function Home() {
     }, [state.user, state.viewMode]);
   
   const handleNavigateToSearch = () => {
-    navigation.navigate(TAB_ROUTES.BUSQUEDA_PERFILES);
+    navigation.navigate(ROOT_ROUTES.BUSQUEDA_PERFILES);
   };
 
   return (

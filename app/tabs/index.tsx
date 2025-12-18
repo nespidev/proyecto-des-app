@@ -28,7 +28,6 @@ export default function TabsScreen() {
           if (route.name === TAB_ROUTES.HOME) iconName = "home";
           else if (route.name === TAB_ROUTES.ENTRENAR) iconName = "barbell";
           else if (route.name === TAB_ROUTES.CHAT_LIST) iconName = "chatbubbles";
-          else if (route.name === TAB_ROUTES.BUSQUEDA_PERFILES) iconName = "search";
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarInactiveTintColor: "gray",
@@ -102,11 +101,11 @@ export default function TabsScreen() {
         component={ChatListScreen}
         options={{ title: "Chats" }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name={TAB_ROUTES.BUSQUEDA_PERFILES}
         component={BusquedaPerfilesScreen}
         options={{ title: "Buscar" }}
-      />
+      /> */}
     </Tab.Navigator>
   );
 }

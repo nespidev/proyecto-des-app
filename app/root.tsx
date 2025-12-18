@@ -12,6 +12,7 @@ import PerfilPublico from "@/app/tabs/screens/perfil-publico/perfil-publico";
 import CalendarScreen from "@/app/tabs/screens/calendar";
 import ChatRoomScreen from "@/app/tabs/screens/chat-room";
 import ContactsListScreen from "./tabs/screens/contacts-list";
+import BusquedaPerfilesScreen from "./tabs/screens/busqueda-perfiles/busqueda-perfiles";
 import { materialColors } from "@/utils/colors";
 
 const Stack = createNativeStackNavigator();
@@ -62,6 +63,11 @@ export default function Root() {
              <Stack.Screen 
               name={ROOT_ROUTES.CONTACTS_LIST} 
               component={ContactsListScreen} 
+              options={{ title: 'Contactos' }} 
+            />
+            <Stack.Screen 
+              name={ROOT_ROUTES.BUSQUEDA_PERFILES} 
+              component={BusquedaPerfilesScreen} 
               options={{ title: 'Contactos' }} 
             />
           </>
