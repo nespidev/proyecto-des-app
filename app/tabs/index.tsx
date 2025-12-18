@@ -7,6 +7,7 @@ import { useNavigation } from "@react-navigation/native";
 import { ROOT_ROUTES, TAB_ROUTES } from "@/utils/constants";
 import AuthContext from "@/shared/context/auth-context/auth-context";
 import ClientsStack from "./screens/clients/clients-stack";
+import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 
 import {HomeScreen, EntrenarScreen, BusquedaPerfilesScreen, ChatListScreen} from "./screens";
 
@@ -63,11 +64,27 @@ export default function TabsScreen() {
       {/* Lógica Condicional para la 1ra Pestaña */}
       {isProfessionalView ? (
         <Tab.Screen
-          name="Clientes" // Nombre interno
-          component={ClientsStack} // Renderizamos el Stack, no una sola pantalla
-          options={{ 
-            title: "Gestion",
-            tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />
+          name="Clientes"
+          component={ClientsStack}
+          options={({ route }) => {
+            // 1. Averiguamos en qué pantalla interna del stack estamos
+            // Si es undefined, significa que estamos en la inicial ('ClientsList')
+            const routeName = getFocusedRouteNameFromRoute(route) ?? 'ClientsList';
+
+            // 2. Decidimos si mostramos el Tab Header
+            // Solo lo mostramos si estamos en la lista principal
+            const showTabHeader = routeName === 'ClientsList';
+
+            return {
+              headerShown: showTabHeader, // <---
+              title: "Gestion",
+              tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
+              
+              tabBarStyle: { 
+                backgroundColor: materialColors.schemes.light.surfaceContainer,
+                display: showTabHeader ? 'flex' : 'none'
+              } 
+            };
           }}
         />
       ) : (

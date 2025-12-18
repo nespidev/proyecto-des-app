@@ -14,32 +14,36 @@ export type ClientsStackParamList = {
   PlanHistory: { clientId: string };
 };
 
+export default function ClientsStack() {
 const Stack = createNativeStackNavigator<ClientsStackParamList>();
 
-export default function ClientsStack() {
-  return (
+return (
     <Stack.Navigator
       initialRouteName="ClientsList"
       screenOptions={{
         headerStyle: { backgroundColor: materialColors.schemes.light.surfaceContainer },
-        headerTintColor: materialColors.schemes.light.onSurface,
-        headerTitleStyle: { fontWeight: 'bold' },
+        headerTitleStyle: { color: materialColors.schemes.light.onPrimaryContainer },
+        headerTintColor: materialColors.schemes.light.onPrimaryContainer,
         contentStyle: { backgroundColor: materialColors.schemes.light.background },
       }}
     >
       <Stack.Screen 
         name="ClientsList" 
         component={ClientsListScreen} 
-        options={{ title: 'Mis Alumnos' }} 
+        options={{ 
+          headerShown: false //  Ocultar el header del Stack
+        }} 
       />
       
       <Stack.Screen 
         name="ClientDashboard" 
-        component={ClientDashboardScreen} 
-        options={({ route }) => ({ title: route.params.clientName })} 
+        component={ClientDashboardScreen}
+        options={({ route }) => ({ 
+          headerShown: true, // que se vea la barra
+          title: route.params.clientName // Usamor el nombre que pasamos al navegar
+        })}
       />
 
-      {/* El Editor se abre como Modal para diferenciar el contexto de "Edición" */}
       <Stack.Screen 
         name="PlanEditor" 
         component={PlanEditorScreen} 
