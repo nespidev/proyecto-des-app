@@ -5,7 +5,6 @@ import { supabase } from '@/utils/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import { materialColors } from '@/utils/colors';
 import PlanPreview from '@/components/PlanPreview'; 
-// 1. Importamos el contexto
 import { AuthContext } from "@/shared/context/auth-context";
 
 interface HistoryItem {
@@ -21,12 +20,14 @@ export default function PlanHistoryScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   
-  // 2. Obtenemos el usuario actual
   const { state } = useContext<any>(AuthContext);
   const { clientId } = route.params;
 
-  // 3. Flag de seguridad visual
-  const isProfessional = state.user?.rol === 'professional';
+  // --- LÓGICA DE PERMISOS ---
+  // El usuario puede editar SOLO SI:
+  // 1. Su rol en base de datos es 'professional'
+  // 2. Y su modo de vista actual (viewMode) es 'professional'
+  const canEdit = state.user?.rol === 'professional' && state.viewMode === 'professional';
 
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,8 +49,7 @@ export default function PlanHistoryScreen() {
   };
 
   const deactivatePlan = async (planId: string) => {
-    // Protección extra: Si no es pro, no ejecuta
-    if (!isProfessional) return; 
+    if (!canEdit) return; // Protección
 
     const { error } = await supabase
       .from('plans')
@@ -61,7 +61,7 @@ export default function PlanHistoryScreen() {
   };
 
   const deletePlan = async (planId: string) => {
-    if (!isProfessional) return;
+    if (!canEdit) return; // Protección
 
     const { error } = await supabase
       .from('plans')
@@ -73,6 +73,9 @@ export default function PlanHistoryScreen() {
   };
 
   const handleOptionsPress = (item: HistoryItem) => {
+    // Protección extra por si se llama manualmente
+    if (!canEdit) return;
+
     const options = [];
 
     if (item.is_active) {
@@ -85,7 +88,7 @@ export default function PlanHistoryScreen() {
       options.push({
         text: "Reactivar Plan",
         onPress: async () => {
-            if (!isProfessional) return;
+            if (!canEdit) return;
             await supabase.from('plans').update({is_active: false}).eq('client_id', clientId).eq('type', item.type);
             await supabase.from('plans').update({is_active: true}).eq('id', item.id);
             fetchHistory();
@@ -107,11 +110,14 @@ export default function PlanHistoryScreen() {
       options as any
     );
   };
-const openPlanDetail = (item: HistoryItem) => {
+
+  const openPlanDetail = (item: HistoryItem) => {
     navigation.navigate('PlanEditor', {
        existingPlan: item, 
        clientId: clientId,
-       readOnly: !isProfessional // Pasamos el flag, ahora hay que usarlo en el editor
+       // Si canEdit es false, pasamos readOnly: true.
+       // Esto asegura que el editor no muestre botones de guardar/editar.
+       readOnly: !canEdit 
     });
   };
 
@@ -140,8 +146,8 @@ const openPlanDetail = (item: HistoryItem) => {
                 <View style={styles.inactiveBadge}><Text style={styles.inactiveText}>INACTIVO</Text></View>
             )}
             
-            {/* 4. CONDICIÓN: Solo mostramos los 3 puntos si es Profesional */}
-            {isProfessional && (
+            {/* CONDICIÓN VISUAL: Solo mostramos los 3 puntos si puede editar (canEdit) */}
+            {canEdit && (
               <TouchableOpacity 
                 style={styles.moreButton} 
                 onPress={() => handleOptionsPress(item)}

@@ -1,7 +1,7 @@
-import Entrenar from "./entrenar";
+import EntrenarStack from "./entrenar-stack";
 
-export default function EntrenarScreen() {
+export default function EntrenarStackScreen() {
   return (
-      <Entrenar />
+      <EntrenarStack />
   )
 }

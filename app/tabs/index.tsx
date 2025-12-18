@@ -7,9 +7,9 @@ import { useNavigation } from "@react-navigation/native";
 import { ROOT_ROUTES, TAB_ROUTES } from "@/utils/constants";
 import AuthContext from "@/shared/context/auth-context/auth-context";
 import ClientsStack from "./screens/clients/clients-stack";
-import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
+import { getFocusedRouteNameFromRoute } from "@react-navigation/native"; 
 
-import {HomeScreen, EntrenarScreen, BusquedaPerfilesScreen, ChatListScreen} from "./screens";
+import {HomeScreen, EntrenarStackScreen, BusquedaPerfilesScreen, ChatListScreen} from "./screens";
 
 const Tab = createBottomTabNavigator();
 
@@ -25,29 +25,16 @@ export default function TabsScreen() {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap = "home";
-
-          if (route.name === TAB_ROUTES.HOME) {
-            iconName = "home";
-          } else if (route.name === TAB_ROUTES.ENTRENAR) {
-            iconName = "barbell";
-          } else if (route.name === TAB_ROUTES.CHAT_LIST) {
-            iconName = "chatbubbles";
-          } else if (route.name === TAB_ROUTES.BUSQUEDA_PERFILES) {
-            iconName = "search";
-          }
-
+          if (route.name === TAB_ROUTES.HOME) iconName = "home";
+          else if (route.name === TAB_ROUTES.ENTRENAR) iconName = "barbell";
+          else if (route.name === TAB_ROUTES.CHAT_LIST) iconName = "chatbubbles";
+          else if (route.name === TAB_ROUTES.BUSQUEDA_PERFILES) iconName = "search";
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarInactiveTintColor: "gray",
-        headerTitleStyle: {
-          color: materialColors.schemes.light.onPrimaryContainer,
-        },
-        headerStyle: {
-          backgroundColor: materialColors.schemes.light.surfaceContainer,
-        },
-        tabBarStyle: {
-          backgroundColor: materialColors.schemes.light.surfaceContainer,
-        },
+        headerTitleStyle: { color: materialColors.schemes.light.onPrimaryContainer },
+        headerStyle: { backgroundColor: materialColors.schemes.light.surfaceContainer },
+        tabBarStyle: { backgroundColor: materialColors.schemes.light.surfaceContainer },
         tabBarActiveTintColor: materialColors.schemes.light.onPrimaryContainer,
         headerRight: () => (
           <TouchableOpacity onPress={() => navigation.navigate(ROOT_ROUTES.PERFIL as never)}>
@@ -61,25 +48,19 @@ export default function TabsScreen() {
         ),
       })}
     >
-      {/* Lógica Condicional para la 1ra Pestaña */}
+      {/* Lógica Condicional */}
       {isProfessionalView ? (
         <Tab.Screen
           name="Clientes"
           component={ClientsStack}
           options={({ route }) => {
-            // 1. Averiguamos en qué pantalla interna del stack estamos
-            // Si es undefined, significa que estamos en la inicial ('ClientsList')
             const routeName = getFocusedRouteNameFromRoute(route) ?? 'ClientsList';
-
-            // 2. Decidimos si mostramos el Tab Header
-            // Solo lo mostramos si estamos en la lista principal
             const showTabHeader = routeName === 'ClientsList';
 
             return {
-              headerShown: showTabHeader, // <---
+              headerShown: showTabHeader,
               title: "Gestion",
               tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
-              
               tabBarStyle: { 
                 backgroundColor: materialColors.schemes.light.surfaceContainer,
                 display: showTabHeader ? 'flex' : 'none'
@@ -90,13 +71,27 @@ export default function TabsScreen() {
       ) : (
         <Tab.Screen
           name={TAB_ROUTES.ENTRENAR}
-          component={EntrenarScreen}
-          options={{ 
-            title: "Entrenar",
-            tabBarIcon: ({ color, size }) => <Ionicons name="barbell" size={size} color={color} />
+          component={EntrenarStackScreen}
+          options={({ route }) => {
+            // Obtenemos la ruta actual, si es undefined, es la inicial ('EntrenarList')
+            const routeName = getFocusedRouteNameFromRoute(route) ?? 'EntrenarList';
+            
+            // Definimos si mostramos el header (solo en la lista principal)
+            const showTabUI = routeName === 'EntrenarList';
+
+            return { 
+              title: "Entrenar",
+              headerShown: showTabUI, //  Oculta el header del Tab si no es la lista
+              tabBarIcon: ({ color, size }) => <Ionicons name="barbell" size={size} color={color} />,
+              tabBarStyle: { 
+                backgroundColor: materialColors.schemes.light.surfaceContainer,
+                display: showTabUI ? 'flex' : 'none' //  Oculta el tab bar inferior si no es la lista
+              } 
+            }
           }}
         />
       )}
+
       <Tab.Screen
         name={TAB_ROUTES.HOME}
         component={HomeScreen}
