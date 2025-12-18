@@ -68,7 +68,7 @@ export async function scheduleAppointmentReminders(
   appointmentDate: Date,
   professionalName: string,
   serviceName: string,
-  // Ya no recibimos reminderMinutesTime como argumento obligatorio, lo leemos del storage
+  //no recibimos reminderMinutesTime como argumento obligatorio, lo leemos del storage
 ) {
   const now = new Date();
 
@@ -128,7 +128,6 @@ export async function scheduleAppointmentReminders(
   }
 }
 
-// AHORA RECIBIMOS 'viewMode' COMO ARGUMENTO 👇
 export async function syncAppointmentsNotifications(userId: string, viewMode: string) {
   console.log(`🔄 Sincronizando notificaciones para modo: ${viewMode}...`);
 
@@ -144,11 +143,11 @@ export async function syncAppointmentsNotifications(userId: string, viewMode: st
   const reminderMinutes = timeStr ? parseInt(timeStr) : 60;
   const now = new Date();
 
-  // 1. LIMPIEZA TOTAL
-  // Esto es clave: Al cambiar de vista, borramos las alarmas de la vista anterior
+  //  LIMPIEZA TOTAL
+  // Al cambiar de vista, borramos las alarmas de la vista anterior
   await Notifications.cancelAllScheduledNotificationsAsync();
 
-  // 2. CONSTRUIR LA QUERY FILTRADA
+  // CONSTRUIR LA QUERY FILTRADA
   // Preparamos la base de la consulta
   let query = supabase
     .from('appointments')
@@ -164,12 +163,12 @@ export async function syncAppointmentsNotifications(userId: string, viewMode: st
     .eq('status', 'scheduled')
     .gt('start_time', now.toISOString());
 
-  // APLICAMOS EL FILTRO SEGÚN LA VISTA
+  // APLICAMOS EL FILTRO SEGUN VISTA
   if (viewMode === 'professional') {
-    // Si estoy trabajando, solo quiero ver donde YO soy el profesional
+    // Si estoy trabajando, solo quiero ver donde soy el profesional
     query = query.eq('professional_id', userId);
   } else {
-    // Si estoy como cliente, solo quiero ver donde YO soy el cliente
+    // Si estoy como cliente, solo quiero ver donde soy el cliente
     query = query.eq('client_id', userId);
   }
 
@@ -190,7 +189,7 @@ export async function syncAppointmentsNotifications(userId: string, viewMode: st
     const triggerDate = new Date(appDate.getTime() - reminderMinutes * 60 * 1000);
     const secondsUntil = Math.floor((triggerDate.getTime() - now.getTime()) / 1000);
 
-    // LÓGICA DE NOMBRE SIMPLIFICADA
+    // LOGICA DE NOMBRE SIMPLIFICADA
     // Como ya filtramos por viewMode, sabemos exactamente quién es la "otra persona"
     let otherPersonName = "Usuario";
     
@@ -204,8 +203,8 @@ export async function syncAppointmentsNotifications(userId: string, viewMode: st
 
     const serviceName = app.contracts?.services?.title || 'Sesión';
 
-    // Usamos tu variable DEBUG si la tienes, o simplemente la lógica de tiempo
-    const DEBUG = false; 
+    // variable DEBUG para probar las notificaciones
+    const DEBUG = true; 
 
     if (secondsUntil > 0 || DEBUG) {
       await Notifications.scheduleNotificationAsync({
