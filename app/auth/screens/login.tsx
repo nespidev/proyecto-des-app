@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, ScrollView, Text, TextInput, StyleSheet, Alert, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
+import { View, ScrollView, Text, TextInput, StyleSheet, Alert, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Platform, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import * as Yup from 'yup';
 import { Formik } from "formik";
@@ -29,7 +29,13 @@ export default function Login() {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-          <Text style={globalStyles.title}>Ingreso de Usuario</Text>
+          <Image 
+            source={require("@/assets/imagotipo.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+
+          <Text style={globalStyles.title}>Ingresa a la App</Text>
           
           <Formik
             initialValues={{ email: '', password: '' }}
@@ -37,7 +43,6 @@ export default function Login() {
             onSubmit={async (values) => {
               setLoading(true);
               try {
-                // El AuthProvider escuchara el cambio de sesion
                 const { error } = await supabase.auth.signInWithPassword({
                   email: values.email,
                   password: values.password,
@@ -46,7 +51,7 @@ export default function Login() {
                 if (error) throw error;
               } catch (error: any) {
                 Alert.alert("Error", error.message || "Credenciales incorrectas");
-                setLoading(false); // Solo quitamos loading si hubo error
+                setLoading(false);
               }
             }}
           >
@@ -106,6 +111,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 16,
+  },
+  logo: {
+    width: 300,
+    height: 300,
+    marginBottom: 20,
   },
   formContainer: {
     width: "100%",
