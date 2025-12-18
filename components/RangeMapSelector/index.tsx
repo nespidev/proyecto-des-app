@@ -75,36 +75,80 @@ export default function RangeMapSelector({
     getAddress(newCoords.latitude, newCoords.longitude);
   };
 
-  const handleGoToMyLocation = async () => {
+const handleGoToMyLocation = async () => {
     setLoadingGPS(true);
     try {
+      // 1. Validar Permisos
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert("Permiso denegado", "Necesitamos acceso a tu ubicación.");
+        Alert.alert("Permiso denegado", "Se requiere permiso de ubicación.");
         return;
       }
 
-      const location = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = location.coords;
+      // 2. Verificar si el servicio está habilitado
+      const hasServices = await Location.hasServicesEnabledAsync();
+      // Si no tiene servicios, es probable que Android muestre el popup nativo al llamar al watcher.
+      
+      // 3. Obtener ubicación usando el patrón "One-Time Watcher"
+      // Esto espera pacientemente a que el GPS 'despierte' sin bucles ni sleeps.
+      const location = await getSingleLocation();
 
-      // Actualizar estado
-      setCoords({ latitude, longitude });
-      getAddress(latitude, longitude);
+      if (location) {
+        const { latitude, longitude } = location.coords;
+        setCoords({ latitude, longitude });
+        getAddress(latitude, longitude);
 
-      //  Mover camara del mapa
-      mapRef.current?.animateToRegion({
-        latitude,
-        longitude,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      }, 1000);
+        mapRef.current?.animateToRegion({
+          latitude,
+          longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        }, 1000);
+      }
 
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Error", "No pudimos obtener tu ubicación actual.");
+    } catch (error: any) {
+      console.log("Error GPS:", error);
+      Alert.alert("Ubicación no disponible", "Verifica que tu GPS esté activo.");
     } finally {
       setLoadingGPS(false);
     }
+  };
+
+  /**
+   * Función auxiliar PRO para obtener la ubicación una sola vez.
+   * Usa una suscripción temporal en lugar de 'getCurrentPositionAsync' para evitar
+   * timeouts cuando el GPS está "frío".
+   */
+  const getSingleLocation = async (): Promise<Location.LocationObject> => {
+    return new Promise(async (resolve, reject) => {
+      let subscription: Location.LocationSubscription | null = null;
+      
+      // A. Timeout de seguridad (ej. 10 segundos) por si el GPS nunca prende
+      const timer = setTimeout(() => {
+        if (subscription) subscription.remove();
+        reject(new Error("Tiempo de espera agotado obteniendo GPS"));
+      }, 10000);
+
+      try {
+        // B. Nos suscribimos a actualizaciones
+        subscription = await Location.watchPositionAsync(
+          { 
+            accuracy: Location.Accuracy.High,
+            // distanceInterval bajo asegura que reporte apenas tenga señal
+            distanceInterval: 1 
+          },
+          (location) => {
+            // C. ¡ÉXITO! Llegó la primera coordenada
+            clearTimeout(timer);       // Cancelamos el timeout de error
+            subscription?.remove();    // Nos desuscribimos inmediatamente
+            resolve(location);         // Devolvemos la ubicación
+          }
+        );
+      } catch (error) {
+        clearTimeout(timer);
+        reject(error);
+      }
+    });
   };
 
   const handleConfirm = () => {

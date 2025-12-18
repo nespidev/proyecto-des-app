@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Modal, View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { 
+  Modal, 
+  View, 
+  Text, 
+  StyleSheet, 
+  TextInput, 
+  TouchableOpacity, 
+  ActivityIndicator, 
+  Alert, 
+  KeyboardAvoidingView, 
+  Platform 
+} from 'react-native';
 import MapView, { Marker, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -9,8 +20,8 @@ import Button from '@/components/Button';
 interface LocationData {
   latitud: number;
   longitud: number;
-  direccion: string; // Calle y numero
-  ciudad: string;    // la ciudad/barrio
+  direccion: string; 
+  ciudad: string;    
 }
 
 interface Props {
@@ -32,53 +43,87 @@ export default function LocationPickerModal({ visible, onClose, onConfirm, initi
   });
   
   const [address, setAddress] = useState(initialLocation?.address || '');
-  const [loading, setLoading] = useState(false); // Busqueda global
-  const [gpsLoading, setGpsLoading] = useState(false); // Especifico para boton GPS
+  const [loading, setLoading] = useState(false);
+  const [gpsLoading, setGpsLoading] = useState(false);
   
   const [markerCoords, setMarkerCoords] = useState({
     latitude: initialLocation?.lat || -34.6037,
     longitude: initialLocation?.lng || -58.3816,
   });
 
-  // Al abrir si no hay ubicacion inicial, buscar la actual
+  // Al abrir, si no hay ubicación inicial, buscamos la actual
   useEffect(() => {
     if (visible && !initialLocation) {
-      getCurrentLocation();
+      handleGoToMyLocation();
     }
   }, [visible]);
 
-  const getCurrentLocation = async () => {
+  // LOGICA DE GEOLOCALIZACION
+  const handleGoToMyLocation = async () => {
     setGpsLoading(true);
     try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      // Validar Permisos
+      const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permiso denegado', 'No podemos acceder a tu ubicación');
-        setGpsLoading(false);
+        Alert.alert("Permiso denegado", "Se requiere permiso de ubicación.");
         return;
       }
 
-      let location = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = location.coords;
-      
-      const newRegion = {
-        latitude,
-        longitude,
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.005,
-      };
+      // Obtener ubicación con patrón seguro (evita timeouts en Android)
+      const location = await getSingleLocation();
 
-      // Actualizar estado
-      updateLocationState(latitude, longitude);
-      setRegion(newRegion);
-      
-      // Animar mapa
-      mapRef.current?.animateToRegion(newRegion, 1000);
+      if (location) {
+        const { latitude, longitude } = location.coords;
+        
+        const newRegion = {
+            latitude,
+            longitude,
+            latitudeDelta: 0.005,
+            longitudeDelta: 0.005,
+        };
 
-    } catch (error) {
-      console.error(error);
+        // Actualizar UI
+        updateLocationState(latitude, longitude);
+        setRegion(newRegion);
+        mapRef.current?.animateToRegion(newRegion, 1000);
+      }
+
+    } catch (error: any) {
+      console.log("Error GPS:", error);
+      Alert.alert("Ubicación no disponible", "Verifica que tu GPS esté activo e inténtalo de nuevo.");
     } finally {
       setGpsLoading(false);
     }
+  };
+
+
+  // Helper para esperar la señal GPS sin timeouts agresivos
+  const getSingleLocation = async (): Promise<Location.LocationObject> => {
+    return new Promise(async (resolve, reject) => {
+      let subscription: Location.LocationSubscription | null = null;
+      
+      const timer = setTimeout(() => {
+        if (subscription) subscription.remove();
+        reject(new Error("Tiempo de espera agotado obteniendo GPS"));
+      }, 10000); // 10 seg de paciencia máxima
+
+      try {
+        subscription = await Location.watchPositionAsync(
+          { 
+            accuracy: Location.Accuracy.High,
+            distanceInterval: 1 
+          },
+          (location) => {
+            clearTimeout(timer);
+            subscription?.remove();
+            resolve(location);
+          }
+        );
+      } catch (error) {
+        clearTimeout(timer);
+        reject(error);
+      }
+    });
   };
 
   const updateLocationState = async (lat: number, lng: number) => {
@@ -88,7 +133,7 @@ export default function LocationPickerModal({ visible, onClose, onConfirm, initi
       if (reverseGeocode.length > 0) {
         const item = reverseGeocode[0];
         
-        // --- FORMATEO (ciudad/provincia) ---
+        // FORMATEO (ciudad/provincia)
         const cityName = item.city || item.subregion || item.district || ''; 
         const regionName = item.region || ''; 
 
@@ -109,17 +154,18 @@ export default function LocationPickerModal({ visible, onClose, onConfirm, initi
         } else {
             fullAddress = item.name || ''; 
         }
-        // ------------------------------------------------
 
-        setAddress(fullAddress.trim());
+        const finalAddress = fullAddress.trim() || "Ubicación seleccionada";
+        setAddress(finalAddress);
         
         return { 
-            direccion: fullAddress.trim(), 
+            direccion: finalAddress, 
             ciudad: ciudadFormatted        
         };
       }
     } catch (error) {
       console.log("Error reverse geocoding", error);
+      setAddress("Ubicación seleccionada");
     }
     return null;
   };
@@ -147,12 +193,14 @@ export default function LocationPickerModal({ visible, onClose, onConfirm, initi
       }
     } catch (error) {
       console.error(error);
+      Alert.alert("Error", "Ocurrió un error al buscar.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleConfirm = async () => {
+    // Aseguramos tener el dato geocodificado más reciente
     const locationData = await updateLocationState(markerCoords.latitude, markerCoords.longitude);
     onConfirm({
       latitud: markerCoords.latitude,
@@ -174,9 +222,8 @@ export default function LocationPickerModal({ visible, onClose, onConfirm, initi
             style={StyleSheet.absoluteFill}
             region={region}
             showsUserLocation={true}
-            showsMyLocationButton={false} // boton custom
+            showsMyLocationButton={false} 
             onPress={(e) => {
-                // Mover marcador al tocar mapa
                 updateLocationState(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude);
             }}
           >
@@ -197,7 +244,7 @@ export default function LocationPickerModal({ visible, onClose, onConfirm, initi
                 <View style={{width: 24}} /> 
             </View>
 
-            {/* Input Row con Buscador y GPS integrados */}
+            {/* Input Row Unificado */}
             <View style={styles.inputRow}>
                 <TouchableOpacity onPress={handleSearchAddress}>
                     <Ionicons name="search" size={20} color={materialColors.schemes.light.primary} />
@@ -205,7 +252,7 @@ export default function LocationPickerModal({ visible, onClose, onConfirm, initi
                 
                 <TextInput
                     style={styles.input}
-                    placeholder="Buscar dirección..."
+                    placeholder="Buscar dirección (ej. Calle 123)"
                     value={address}
                     onChangeText={setAddress}
                     onSubmitEditing={handleSearchAddress}
@@ -218,7 +265,7 @@ export default function LocationPickerModal({ visible, onClose, onConfirm, initi
 
                 <TouchableOpacity 
                     style={styles.gpsButton} 
-                    onPress={getCurrentLocation}
+                    onPress={handleGoToMyLocation}
                     disabled={gpsLoading}
                 >
                     {gpsLoading ? (
@@ -261,6 +308,7 @@ const styles = StyleSheet.create({
     shadowColor: "#000", 
     shadowOpacity: 0.15, 
     shadowRadius: 8, 
+    shadowOffset: {width: 0, height: 4},
     elevation: 5,
     zIndex: 10
   },
@@ -295,7 +343,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 8
   },
   gpsButton: {
-    padding: 4
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
 
   bottomCard: {
@@ -309,19 +359,22 @@ const styles = StyleSheet.create({
     shadowColor: "#000", 
     shadowOpacity: 0.15, 
     shadowRadius: 8, 
+    shadowOffset: {width: 0, height: 4},
     elevation: 5
   },
   addressContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4
+    marginBottom: 4,
+    paddingHorizontal: 8
   },
   addressLabel: { 
     fontSize: 15, 
     color: '#333', 
-    fontWeight: '500', 
+    fontWeight: '600', 
     flex: 1,
-    textAlign: 'center'
+    textAlign: 'center',
+    marginLeft: 4
   }
 });
