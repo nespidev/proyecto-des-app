@@ -1,15 +1,33 @@
-// app/tabs/screens/perfil-publico/perfil-publico-cliente.tsx
 import React from 'react';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { materialColors } from '@/utils/colors';
-import { styles } from './styles'; // Importamos desde el archivo local
+import { styles } from './styles';
 
 interface Props {
   profile: any;
 }
 
 export default function PerfilPublicoCliente({ profile }: Props) {
+  
+  const calcularEdad = (fechaNacimiento: string) => {
+    if (!fechaNacimiento) return null;
+    
+    const hoy = new Date();
+    const cumpleanos = new Date(fechaNacimiento);
+    
+    let edad = hoy.getFullYear() - cumpleanos.getFullYear();
+    const m = hoy.getMonth() - cumpleanos.getMonth();
+
+    if (m < 0 || (m === 0 && hoy.getDate() < cumpleanos.getDate())) {
+      edad--;
+    }
+
+    return edad;
+  };
+
+  const edad = calcularEdad(profile.fecha_nacimiento);
+
   return (
     <>
       <View style={styles.separator} />
@@ -38,7 +56,7 @@ export default function PerfilPublicoCliente({ profile }: Props) {
         <View style={styles.statItem}>
           <Ionicons name="calendar-outline" size={24} color={materialColors.schemes.light.primary} />
           <Text style={styles.statLabel}>Edad</Text>
-          <Text>{profile.fecha_nacimiento ? "Calc..." : '--'}</Text>
+          <Text>{edad ? `${edad} años` : '--'}</Text>
         </View>
       </View>
     </>
