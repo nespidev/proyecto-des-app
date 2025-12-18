@@ -2,7 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ClientsListScreen from './clients-list';
 import ClientDashboardScreen from './client-dashboard';
-import PlanEditorScreen from './plan-editor';
+import PlanEditorScreen from '@/components/PlanEditorScreen';
 import PlanHistoryScreen from '../plan-history';
 import { materialColors } from '@/utils/colors';
 
