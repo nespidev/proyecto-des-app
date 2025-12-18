@@ -276,13 +276,12 @@ export default function Calendar() {
             >
               <Text style={styles.closeButtonText}>Listo</Text>
             </TouchableOpacity>
-            <View style={{ marginVertical: 20 }}>
-              <Button 
-                title="Probar con Próximo Turno" 
-                onPress={handleTestNotification} 
-                color={materialColors.coreColors.primary}
-              />
-            </View>
+            <TouchableOpacity 
+              style={[styles.closeButton, {backgroundColor: materialColors.coreColors.primary}]} 
+              onPress={handleTestNotification}
+            >
+              <Text style={styles.closeButtonText}>Probar con Próximo Turno</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
