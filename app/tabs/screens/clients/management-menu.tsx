@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ClientsStackParamList } from './clients-stack'; // Asumimos que exportarás esto
+import { ClientsStackParamList } from './clients-stack';
 import { materialColors } from '@/utils/colors'
 
 type NavigationProp = NativeStackNavigationProp<ClientsStackParamList>;
@@ -14,7 +14,7 @@ export default function ManagementMenu() {
 
   const menuItems = [
     {
-      title: 'Mis Alumnos',
+      title: 'Mis Clientes',
       subtitle: 'Gestionar rutinas, dietas y progreso',
       icon: 'account-group',
       route: 'ClientsList',
@@ -24,7 +24,7 @@ export default function ManagementMenu() {
       title: 'Mis Servicios',
       subtitle: 'Editar precios, duración y catálogo',
       icon: 'dumbbell',
-      route: 'ServicesList', // Esta la crearemos en la Etapa 2
+      route: 'ServicesList',
       color: materialColors.coreColors.secondary || '#50E3C2',
     },
   ];

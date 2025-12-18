@@ -46,7 +46,7 @@ export default function ClientsStack() {
       <Stack.Screen 
         name="ClientsList" 
         component={ClientsList} 
-        options={{ headerTitle: 'Mis Alumnos' }}
+        options={{ headerTitle: 'Mis Clientes' }}
       />
       
       <Stack.Screen 
@@ -59,7 +59,7 @@ export default function ClientsStack() {
       <Stack.Screen 
         name="ClientDashboard" 
         component={ClientDashboard} 
-        options={{ headerTitle: 'Panel del Alumno' }}
+        options={{ headerTitle: 'Panel del Cliente' }}
       />
       
       <Stack.Screen 

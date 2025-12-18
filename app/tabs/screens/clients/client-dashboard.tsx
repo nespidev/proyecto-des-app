@@ -201,7 +201,7 @@ export default function ClientDashboardScreen() {
         refreshControl={<RefreshControl refreshing={loading} onRefresh={fetchActivePlans} />}
       >
         {/* Secciones Botones */}
-        <Text style={styles.sectionTitle}>Datos del Alumno</Text>
+        <Text style={styles.sectionTitle}>Datos del Cliente</Text>
         <View style={styles.quickActions}>
            
            {/* BOTON VER PROGRESO (Abre Modal) */}
