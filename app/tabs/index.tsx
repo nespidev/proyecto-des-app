@@ -50,23 +50,23 @@ export default function TabsScreen() {
       {/* Lógica Condicional */}
       {isProfessionalView ? (
         <Tab.Screen
-          name="Clientes"
-          component={ClientsStack}
-          options={({ route }) => {
-            const routeName = getFocusedRouteNameFromRoute(route) ?? 'ClientsList';
-            const showTabHeader = routeName === 'ClientsList';
+            name="Clientes"
+            component={ClientsStack}
+            options={({ route }) => {
+              const routeName = getFocusedRouteNameFromRoute(route) ?? 'ManagementMenu';
+              const isRootMenu = routeName === 'ManagementMenu';
 
-            return {
-              headerShown: showTabHeader,
-              title: "Gestion",
-              tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
-              tabBarStyle: { 
-                backgroundColor: materialColors.schemes.light.surfaceContainer,
-                display: showTabHeader ? 'flex' : 'none'
-              } 
-            };
-          }}
-        />
+              return {
+                headerShown: isRootMenu, // Muestra "Gestión" solo en el menú
+                title: "Gestión",
+                tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
+                tabBarStyle: { 
+                  backgroundColor: materialColors.schemes.light.surfaceContainer,
+                  display: isRootMenu ? 'flex' : 'none'
+                } 
+              };
+            }}
+          />
       ) : (
         <Tab.Screen
           name={TAB_ROUTES.ENTRENAR}
@@ -101,11 +101,7 @@ export default function TabsScreen() {
         component={ChatListScreen}
         options={{ title: "Chats" }}
       />
-      {/* <Tab.Screen
-        name={TAB_ROUTES.BUSQUEDA_PERFILES}
-        component={BusquedaPerfilesScreen}
-        options={{ title: "Buscar" }}
-      /> */}
+
     </Tab.Navigator>
   );
 }

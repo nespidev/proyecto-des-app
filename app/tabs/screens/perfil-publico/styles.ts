@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 import { materialColors } from "@/utils/colors";
 
 export const styles = StyleSheet.create({
-  // --- LAYOUT ---
+  // --- LAYOUT GENERAL ---
   container: {
     flex: 1,
     backgroundColor: materialColors.schemes.light.surface,
@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
     marginBottom: 40
   },
   
-  // --- HEADER COMÚN ---
+  // --- HEADER DE PERFIL ---
   header: {
     alignItems: "center",
     marginBottom: 20,
@@ -81,7 +81,7 @@ export const styles = StyleSheet.create({
     textAlign: 'right'
   },
 
-  // --- ESPECÍFICOS DE CLIENTE (STATS) ---
+  // --- CLIENTE (STATS) ---
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -98,7 +98,7 @@ export const styles = StyleSheet.create({
     marginTop: 5
   },
 
-  // --- ESPECÍFICOS DE PROFESIONAL (SERVICIOS) ---
+  // --- PROFESIONAL (BIO) ---
   bioContainer: {
     marginTop: 10
   },
@@ -111,53 +111,146 @@ export const styles = StyleSheet.create({
   servicesSection: {
     marginBottom: 25,
   },
+
+  // --- TARJETAS DE SERVICIOS (NUEVOS ESTILOS) ---
+  
+  // Tarjeta de Servicio Disponible
   serviceCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 14,
+    padding: 16, // Más padding para aire
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: '#f0f0f0', // Borde sutil
     shadowColor: "#000",
-    shadowOpacity: 0.03,
-    shadowRadius: 3,
-    elevation: 1
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2
   },
+  serviceHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
+
+  // Tarjeta de Servicio Activo (Contratado)
   serviceCardActive: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: materialColors.schemes.light.secondaryContainer,
+    backgroundColor: materialColors.schemes.light.secondaryContainer, // Fondo tintado
     borderRadius: 12,
     padding: 14,
     marginBottom: 12,
     borderWidth: 1,
     borderColor: materialColors.schemes.light.outlineVariant
   },
+
+  // Textos del Servicio
   serviceTitle: {
     fontWeight: 'bold',
     fontSize: 16,
     color: '#333',
-    marginBottom: 4
+    marginBottom: 4,
+    flexWrap: 'wrap'
   },
   serviceDesc: {
     fontSize: 13,
-    color: '#555',
-    marginBottom: 4
+    color: '#666',
+    marginBottom: 8,
+    lineHeight: 18
   },
   servicePrice: {
     fontWeight: 'bold',
-    fontSize: 15,
+    fontSize: 16,
     color: materialColors.schemes.light.primary,
-    marginBottom: 2
+    marginBottom: 6
   },
+  
+  // Metadatos (Iconos pequeños debajo del precio)
+  metaContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 4,
+  },
+  metaBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  metaBadgeText: {
+    fontSize: 11,
+    color: '#555',
+    marginLeft: 4,
+    fontWeight: '500',
+  },
+
+  // Metadatos simples (usados en la tarjeta activa)
   serviceMeta: {
     fontSize: 12,
     color: '#888',
     marginTop: 4
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  serviceMetaText: {
+    fontSize: 12,
+    color: '#666',
+    marginLeft: 4,
+  },
+
+  // --- BADGES DE MODALIDAD (NUEVOS) ---
+  badgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginBottom: 8
+  },
+  badgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  
+  // Variantes de color para Badge
+  badgePresencial: {
+    backgroundColor: '#E3F2FD', // Azul muy claro
+    borderWidth: 1,
+    borderColor: '#BBDEFB',
+  },
+  badgeTextPresencial: {
+    color: '#1565C0',
+  },
+  badgeRemoto: {
+    backgroundColor: '#F3E5F5', // Violeta muy claro
+    borderWidth: 1,
+    borderColor: '#E1BEE7',
+  },
+  badgeTextRemoto: {
+    color: '#7B1FA2',
+  },
+
+  // --- BOTONES ---
+  hireButton: {
+    minWidth: 90,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginVertical: 0,
+    borderRadius: 8,
   },
   chatButton: {
     backgroundColor: materialColors.schemes.light.primary,
@@ -167,5 +260,13 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 25,
     marginLeft: 8
+  },
+  
+  // --- ESTADOS ---
+  emptyStateText: {
+    fontStyle: 'italic',
+    color: '#666',
+    textAlign: 'center',
+    marginVertical: 20,
   }
 });

@@ -1,62 +1,86 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import ClientsListScreen from './clients-list';
-import ClientDashboardScreen from './client-dashboard';
-import PlanEditorScreen from '@/app/tabs/screens/plan-editor';
-import PlanHistoryScreen from '../plan-history';
+import ClientsList from './clients-list';
+import ClientDashboard from './client-dashboard';
+import PlanEditor from '../plan-editor'; // Asumiendo que está fuera de la carpeta clients
+import PlanHistoryScreen from '../plan-history'; // Asumiendo que está fuera de la carpeta clients
+import ManagementMenu from './management-menu';
+import ServicesList from './services-list';
+import ServiceEditor from '../service-editor/service-editor';
 import { materialColors } from '@/utils/colors';
 
-// Definición de tipos para la navegación
+// Definimos los tipos de navegación
 export type ClientsStackParamList = {
+  ManagementMenu: undefined;
   ClientsList: undefined;
-  ClientDashboard: { clientId: string; clientName: string };
-  PlanEditor: { clientId: string; planType: 'workout' | 'diet'; existingPlan?: any };
+  ClientDashboard: { clientId: string };
+  PlanEditor: { planId?: string; clientId: string; type: 'workout' | 'diet' };
   PlanHistory: { clientId: string };
+  ServicesList: undefined;
+  ServiceEditor: { serviceId?: string };
 };
 
-export default function ClientsStack() {
 const Stack = createNativeStackNavigator<ClientsStackParamList>();
 
-return (
+export default function ClientsStack() {
+  return (
     <Stack.Navigator
-      initialRouteName="ClientsList"
+      initialRouteName="ManagementMenu"
       screenOptions={{
+        // Estilos Globales para todos los headers del stack
         headerStyle: { backgroundColor: materialColors.schemes.light.surfaceContainer },
         headerTitleStyle: { color: materialColors.schemes.light.onPrimaryContainer },
-        headerTintColor: materialColors.schemes.light.onPrimaryContainer,
+        headerTintColor: materialColors.schemes.light.onPrimaryContainer, // Color de la flecha y texto
         contentStyle: { backgroundColor: materialColors.schemes.light.background },
+        headerShown: true, // Por defecto visible para todos
       }}
     >
+      {/* MENU: Sin Header (porque ya tiene el Tab bar abajo y es la raiz) */}
+      <Stack.Screen 
+        name="ManagementMenu" 
+        component={ManagementMenu} 
+        options={{ headerShown: false }} 
+      />
+      
+      {/* LISTAS: Con Header y Flecha (automática al navegar desde Menu) */}
       <Stack.Screen 
         name="ClientsList" 
-        component={ClientsListScreen} 
-        options={{ 
-          headerShown: false //  Ocultar el header del Stack
-        }} 
+        component={ClientsList} 
+        options={{ headerTitle: 'Mis Alumnos' }}
       />
       
       <Stack.Screen 
-        name="ClientDashboard" 
-        component={ClientDashboardScreen}
-        options={({ route }) => ({ 
-          headerShown: true, // que se vea la barra
-          title: route.params.clientName // Usamor el nombre que pasamos al navegar
-        })}
+        name="ServicesList" 
+        component={ServicesList} 
+        options={{ headerTitle: 'Mis Servicios' }} 
       />
 
+      {/* PANTALLAS DE DETALLE: Heredan el estilo por defecto (Header visible) */}
+      <Stack.Screen 
+        name="ClientDashboard" 
+        component={ClientDashboard} 
+        options={{ headerTitle: 'Panel del Alumno' }}
+      />
+      
       <Stack.Screen 
         name="PlanEditor" 
-        component={PlanEditorScreen} 
-        options={{ 
-          presentation: 'modal', 
-          title: 'Gestión de Plan' 
-        }} 
+        component={PlanEditor} 
+        options={{ headerTitle: 'Editor de Plan' }}
       />
+      
       <Stack.Screen 
         name="PlanHistory" 
-        component={PlanHistoryScreen} 
-        options={{ title: 'Historial' }} 
+        component={PlanHistoryScreen}
+        options={{ headerTitle: 'Historial' }}
       />
+
+      {/* EDITORES CON HEADER PERSONALIZADO: Ocultamos el del stack */}
+      <Stack.Screen 
+        name="ServiceEditor" 
+        component={ServiceEditor} 
+        options={{ headerShown: false }} // ServiceEditor tiene su propio header custom
+      />
+      
     </Stack.Navigator>
   );
 }

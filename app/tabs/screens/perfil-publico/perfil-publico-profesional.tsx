@@ -1,18 +1,17 @@
-// app/tabs/screens/perfil-publico/perfil-publico-profesional.tsx
 import React from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { materialColors } from '@/utils/colors';
 import Button from "@/components/Button";
-import { styles } from './styles';
-import { Service } from './types';
+import { styles } from './styles'; 
+import { IService } from '@/shared/models';
 
 interface Props {
   professionalData: any;
-  hiredServices: Service[];
-  availableServices: Service[];
+  hiredServices: IService[];
+  availableServices: IService[];
   onOpenChat: () => void;
-  onBuyService: (service: Service) => void;
+  onBuyService: (service: IService) => void;
   chatLoading: boolean;
 }
 
@@ -24,6 +23,41 @@ export default function PerfilPublicoProfesional({
   onBuyService, 
   chatLoading 
 }: Props) {
+
+  // Helper para renderizar el Badge
+  const renderModalityBadge = (modality?: string) => {
+    const isPresencial = modality === 'Presencial';
+    
+    // Configuración visual según tipo
+    const config = isPresencial ? {
+      text: 'PRESENCIAL',
+      icon: 'map-marker-radius' as const,
+      style: styles.badgePresencial,
+      textStyle: styles.badgeTextPresencial,
+      iconColor: '#1565C0'
+    } : {
+      text: 'REMOTO',
+      icon: 'laptop' as const,
+      style: styles.badgeRemoto,
+      textStyle: styles.badgeTextRemoto,
+      iconColor: '#7B1FA2'
+    };
+
+    return (
+      <View style={[styles.badgeContainer, config.style, { marginBottom: 0 }]}> 
+        <MaterialCommunityIcons 
+          name={config.icon} 
+          size={14} 
+          color={config.iconColor} 
+          style={{ marginRight: 4 }} 
+        />
+        <Text style={[styles.badgeText, config.textStyle]}>
+          {config.text}
+        </Text>
+      </View>
+    );
+  };
+
   return (
     <>
       <View style={styles.separator} />
@@ -54,7 +88,20 @@ export default function PerfilPublicoProfesional({
             <View key={service.id} style={styles.serviceCardActive}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.serviceTitle}>{service.title}</Text>
-                <Text style={styles.serviceDesc}>{service.total_sessions} sesiones • {service.validity_days} días vigencia</Text>
+                
+                {/* Info Metadatos */}
+                <View style={[styles.metaRow, { marginBottom: 6 }]}>
+                   <MaterialCommunityIcons name="calendar-clock" size={14} color="#666" />
+                   <Text style={styles.serviceMetaText}>
+                      {service.total_sessions} sesiones • {service.validity_days} días
+                   </Text>
+                </View>
+
+                {/* Badge de Modalidad REUTILIZADO */}
+                <View style={{ flexDirection: 'row' }}>
+                  {renderModalityBadge(service.modality)}
+                </View>
+
               </View>
               <TouchableOpacity style={styles.chatButton} onPress={onOpenChat} disabled={chatLoading}>
                 {chatLoading ? <ActivityIndicator color="#fff" size="small" /> : (
@@ -75,20 +122,41 @@ export default function PerfilPublicoProfesional({
         availableServices.map(service => (
           <View key={service.id} style={styles.serviceCard}>
             <View style={{ flex: 1, paddingRight: 10 }}>
-              <Text style={styles.serviceTitle}>{service.title}</Text>
+              
+              {/* Header: Título y Badge */}
+              <View style={styles.serviceHeader}>
+                <Text style={[styles.serviceTitle, { flex: 1 }]}>{service.title}</Text>
+              </View>
+              
+              {/* Badge usando el helper */}
+              <View style={{ marginBottom: 8, flexDirection: 'row' }}>
+                 {renderModalityBadge(service.modality)}
+              </View>
+
               <Text style={styles.serviceDesc}>{service.description}</Text>
               <Text style={styles.servicePrice}>${service.price}</Text>
-              <Text style={styles.serviceMeta}>⏱ {service.duration_minutes} min | 🔄 {service.total_sessions} sesiones</Text>
+              
+              <View style={styles.metaContainer}>
+                <View style={styles.metaBadge}>
+                    <MaterialCommunityIcons name="clock-outline" size={14} color="#555" />
+                    <Text style={styles.metaBadgeText}>{service.duration_minutes} min</Text>
+                </View>
+                <View style={styles.metaBadge}>
+                    <MaterialCommunityIcons name="refresh" size={14} color="#555" />
+                    <Text style={styles.metaBadgeText}>{service.total_sessions} sesiones</Text>
+                </View>
+              </View>
+
             </View>
             <Button
               title="Contratar"
               onPress={() => onBuyService(service)}
-              style={{ minWidth: 100, paddingVertical: 10, paddingHorizontal: 10, marginVertical: 0 }}
+              style={styles.hireButton}
             />
           </View>
         ))
       ) : (
-        <Text style={{ fontStyle: 'italic', color: '#666', textAlign: 'center', marginVertical: 10 }}>
+        <Text style={styles.emptyStateText}>
           No hay servicios disponibles para contratar.
         </Text>
       )}
